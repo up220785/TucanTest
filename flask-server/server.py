@@ -15,6 +15,25 @@ def create_app(config_name='development'):
     CORS(app)
     db.init_app(app)
     
+    # Register blueprints
+    from routes.users import users_bp
+    from routes.courses import courses_bp
+    from routes.quizzes import quizzes_bp
+    from routes.questions import questions_bp
+    from routes.answers import answers_bp
+    from routes.notifications import notifications_bp
+    from routes.invitations import invitations_bp
+    from routes.statistics import statistics_bp
+    
+    app.register_blueprint(users_bp)
+    app.register_blueprint(courses_bp)
+    app.register_blueprint(quizzes_bp)
+    app.register_blueprint(questions_bp)
+    app.register_blueprint(answers_bp)
+    app.register_blueprint(notifications_bp)
+    app.register_blueprint(invitations_bp)
+    app.register_blueprint(statistics_bp)
+    
     return app
 
 # Create app instance

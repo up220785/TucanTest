@@ -14,12 +14,16 @@ class User(db.Model):
     last_login = db.Column(db.DateTime)
     
     # Relationships
-    courses_taught = db.relationship('Course', backref='teacher', lazy=True)
-    enrollments = db.relationship('Enrollment', foreign_keys='Enrollment.student_id', backref='student', lazy=True)
-    quiz_submissions = db.relationship('QuizSubmission', backref='student', lazy=True)
-    answers = db.relationship('Answer', foreign_keys='Answer.student_id', backref='student', lazy=True)
-    notifications = db.relationship('Notification', backref='user', lazy=True)
-    course_invitations = db.relationship('CourseInvitation', backref='invited_student', lazy=True)
+    courses_taught = db.relationship('Course', foreign_keys='Course.teacher_id', back_populates='teacher', lazy=True)
+    enrollments = db.relationship('Enrollment', foreign_keys='Enrollment.student_id', back_populates='student', lazy=True)
+    quiz_submissions = db.relationship('QuizSubmission', foreign_keys='QuizSubmission.student_id', back_populates='student', lazy=True)
+    answers = db.relationship('Answer', foreign_keys='Answer.student_id', back_populates='student', lazy=True)
+    notifications = db.relationship('Notification', foreign_keys='Notification.user_id', back_populates='user', lazy=True)
+    course_invitations = db.relationship('CourseInvitation', foreign_keys='CourseInvitation.student_id', back_populates='invited_student', lazy=True)
+    
+    # Additional relationships for grading
+    graded_submissions = db.relationship('QuizSubmission', foreign_keys='QuizSubmission.graded_by', back_populates='grader', lazy=True)
+    graded_answers = db.relationship('Answer', foreign_keys='Answer.graded_by', back_populates='grader', lazy=True)
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -42,9 +46,10 @@ class Course(db.Model):
     is_published = db.Column(db.Boolean, default=False)
     
     # Relationships
-    quizzes = db.relationship('Quiz', backref='course', lazy=True, cascade='all, delete-orphan')
-    enrollments = db.relationship('Enrollment', backref='course', lazy=True, cascade='all, delete-orphan')
-    invitations = db.relationship('CourseInvitation', backref='course', lazy=True, cascade='all, delete-orphan')
+    teacher = db.relationship('User', foreign_keys=[teacher_id], back_populates='courses_taught')
+    quizzes = db.relationship('Quiz', back_populates='course', lazy=True, cascade='all, delete-orphan')
+    enrollments = db.relationship('Enrollment', back_populates='course', lazy=True, cascade='all, delete-orphan')
+    invitations = db.relationship('CourseInvitation', back_populates='course', lazy=True, cascade='all, delete-orphan')
     
     def get_enrolled_count(self):
         return Enrollment.query.filter_by(course_id=self.id, status='accepted').count()
@@ -66,6 +71,10 @@ class CourseInvitation(db.Model):
     responded_at = db.Column(db.DateTime, nullable=True)
     expires_at = db.Column(db.DateTime, nullable=True)  # Optional expiration
     
+    # Relationships
+    course = db.relationship('Course', foreign_keys=[course_id], back_populates='invitations')
+    invited_student = db.relationship('User', foreign_keys=[student_id], back_populates='course_invitations')
+    
     def __repr__(self):
         return f'<CourseInvitation {self.course_id}-{self.student_id}>'
 
@@ -81,6 +90,10 @@ class Enrollment(db.Model):
     # Unique constraint to prevent duplicate enrollments
     __table_args__ = (db.UniqueConstraint('course_id', 'student_id'),)
     
+    # Relationships
+    course = db.relationship('Course', foreign_keys=[course_id], back_populates='enrollments')
+    student = db.relationship('User', foreign_keys=[student_id], back_populates='enrollments')
+    
     def __repr__(self):
         return f'<Enrollment {self.course_id}-{self.student_id}>'
 
@@ -94,8 +107,9 @@ class Quiz(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships
-    questions = db.relationship('Question', backref='quiz', lazy=True, cascade='all, delete-orphan')
-    submissions = db.relationship('QuizSubmission', backref='quiz', lazy=True, cascade='all, delete-orphan')
+    course = db.relationship('Course', foreign_keys=[course_id], back_populates='quizzes')
+    questions = db.relationship('Question', back_populates='quiz', lazy=True, cascade='all, delete-orphan')
+    submissions = db.relationship('QuizSubmission', back_populates='quiz', lazy=True, cascade='all, delete-orphan')
     
     def get_total_points(self):
         return sum(question.points for question in self.questions)
@@ -117,8 +131,9 @@ class Question(db.Model):
     order = db.Column(db.Integer, nullable=False, default=1)  # Question order in quiz
     
     # Relationships
-    options = db.relationship('Option', backref='question', lazy=True, cascade='all, delete-orphan')
-    answers = db.relationship('Answer', backref='question', lazy=True, cascade='all, delete-orphan')
+    quiz = db.relationship('Quiz', foreign_keys=[quiz_id], back_populates='questions')
+    options = db.relationship('Option', back_populates='question', lazy=True, cascade='all, delete-orphan')
+    answers = db.relationship('Answer', back_populates='question', lazy=True, cascade='all, delete-orphan')
     
     def __repr__(self):
         return f'<Question {self.id}>'
@@ -129,6 +144,9 @@ class Option(db.Model):
     text = db.Column(db.Text, nullable=False)
     is_correct = db.Column(db.Boolean, default=False)
     order = db.Column(db.Integer, nullable=False, default=1)  # Option order
+    
+    # Relationships
+    question = db.relationship('Question', foreign_keys=[question_id], back_populates='options')
     
     def __repr__(self):
         return f'<Option {self.id}>'
@@ -146,11 +164,14 @@ class QuizSubmission(db.Model):
     graded_at = db.Column(db.DateTime, nullable=True)
     graded_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     
-    # Unique constraint to prevent duplicate submissions
-    __table_args__ = (db.UniqueConstraint('quiz_id', 'student_id'),)
-    
     # Relationships
-    answers = db.relationship('Answer', backref='submission', lazy=True)
+    quiz = db.relationship('Quiz', foreign_keys=[quiz_id], back_populates='submissions')
+    student = db.relationship('User', foreign_keys=[student_id], back_populates='quiz_submissions')
+    grader = db.relationship('User', foreign_keys=[graded_by], back_populates='graded_submissions')
+    answers = db.relationship('Answer', back_populates='submission', lazy=True)
+    
+    # Define foreign key relationships explicitly
+    __table_args__ = (db.UniqueConstraint('quiz_id', 'student_id'),)
     
     def calculate_auto_grade(self):
         """Calculate score for multiple choice questions"""
@@ -201,6 +222,13 @@ class Answer(db.Model):
     # Unique constraint to prevent duplicate answers
     __table_args__ = (db.UniqueConstraint('question_id', 'student_id', 'submission_id'),)
     
+    # Relationships
+    question = db.relationship('Question', foreign_keys=[question_id], back_populates='answers')
+    student = db.relationship('User', foreign_keys=[student_id], back_populates='answers')
+    grader = db.relationship('User', foreign_keys=[graded_by], back_populates='graded_answers')
+    submission = db.relationship('QuizSubmission', foreign_keys=[submission_id], back_populates='answers')
+    option = db.relationship('Option', foreign_keys=[option_id])
+    
     def __repr__(self):
         return f'<Answer {self.question_id}-{self.student_id}>'
 
@@ -219,6 +247,9 @@ class Notification(db.Model):
     action_url = db.Column(db.String(500), nullable=True)  # URL for clickable notifications
     expires_at = db.Column(db.DateTime, nullable=True)  # For time-sensitive notifications
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    user = db.relationship('User', foreign_keys=[user_id], back_populates='notifications')
     
     def is_expired(self):
         if not self.expires_at:
