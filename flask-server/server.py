@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+from flask_restx import Api
 from models import db, User, Course, Quiz, Question, Option, Answer, Enrollment, QuizSubmission, Notification, CourseInvitation, GradeThreshold
 from config import config
 import os
@@ -15,7 +16,32 @@ def create_app(config_name='development'):
     CORS(app)
     db.init_app(app)
     
-    # Register blueprints
+    # Initialize Flask-RESTX for Swagger documentation
+    api = Api(
+        app,
+        title='TucanTest Quiz API',
+        version='1.0',
+        description='A comprehensive quiz management system for students and teachers',
+        doc='/api/docs/',  # Swagger UI will be available at /api/docs/
+        prefix='/api'
+    )
+    
+    # Import and add Swagger namespaces
+    from routes.users_swagger import users_ns
+    from routes.notifications_swagger import notifications_ns
+    from routes.courses_swagger import courses_ns
+    from routes.quizzes_swagger import quizzes_ns
+    from routes.questions_swagger import questions_ns
+    from routes.answers_swagger import answers_ns
+    
+    api.add_namespace(users_ns)
+    api.add_namespace(notifications_ns)
+    api.add_namespace(courses_ns)
+    api.add_namespace(quizzes_ns)
+    api.add_namespace(questions_ns)
+    api.add_namespace(answers_ns)
+    
+    # Register original blueprints (for backward compatibility)
     from routes.users import users_bp
     from routes.courses import courses_bp
     from routes.quizzes import quizzes_bp
