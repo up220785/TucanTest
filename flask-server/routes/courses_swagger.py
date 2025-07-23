@@ -49,7 +49,7 @@ enrollment_model = courses_ns.model('Enrollment', {
     'grade': fields.Float(description='Final grade')
 })
 
-@courses_ns.route('/api/courses')
+@courses_ns.route('/')
 class CourseListAPI(Resource):
     @courses_ns.doc('get_all_courses')
     @courses_ns.marshal_list_with(course_model)
@@ -146,7 +146,7 @@ class CourseListAPI(Resource):
             db.session.rollback()
             courses_ns.abort(500, str(e))
 
-@courses_ns.route('/api/courses/<int:course_id>')
+@courses_ns.route('/<int:course_id>')
 class CourseAPI(Resource):
     @courses_ns.doc('get_course')
     @courses_ns.marshal_with(course_model)
@@ -240,7 +240,7 @@ class CourseAPI(Resource):
             db.session.rollback()
             courses_ns.abort(500, str(e))
 
-@courses_ns.route('/api/courses/<int:course_id>/students')
+@courses_ns.route('/<int:course_id>/students')
 class CourseStudentsAPI(Resource):
     @courses_ns.doc('get_course_students')
     @courses_ns.marshal_list_with(enrollment_model)
@@ -279,7 +279,7 @@ class CourseStudentsAPI(Resource):
         except Exception as e:
             courses_ns.abort(500, str(e))
 
-@courses_ns.route('/api/courses/<int:course_id>/enroll')
+@courses_ns.route('/<int:course_id>/enroll')
 class CourseEnrollAPI(Resource):
     @courses_ns.doc('enroll_student')
     @courses_ns.expect(courses_ns.model('EnrollStudent', {
@@ -345,7 +345,7 @@ class CourseEnrollAPI(Resource):
             db.session.rollback()
             courses_ns.abort(500, str(e))
 
-@courses_ns.route('/api/users/<int:user_id>/courses')
+@courses_ns.route('/users/<int:user_id>/courses')
 class UserCoursesAPI(Resource):
     @courses_ns.doc('get_user_courses')
     @courses_ns.marshal_list_with(course_model)

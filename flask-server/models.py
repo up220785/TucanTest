@@ -13,17 +13,17 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime)
     
-    # Relationships
-    courses_taught = db.relationship('Course', foreign_keys='Course.teacher_id', back_populates='teacher', lazy=True)
-    enrollments = db.relationship('Enrollment', foreign_keys='Enrollment.student_id', back_populates='student', lazy=True)
-    quiz_submissions = db.relationship('QuizSubmission', foreign_keys='QuizSubmission.student_id', back_populates='student', lazy=True)
-    answers = db.relationship('Answer', foreign_keys='Answer.student_id', back_populates='student', lazy=True)
-    notifications = db.relationship('Notification', foreign_keys='Notification.user_id', back_populates='user', lazy=True)
-    course_invitations = db.relationship('CourseInvitation', foreign_keys='CourseInvitation.student_id', back_populates='invited_student', lazy=True)
+    # Relationships - Use passive_deletes to handle foreign key constraints properly
+    courses_taught = db.relationship('Course', foreign_keys='Course.teacher_id', back_populates='teacher', lazy=True, passive_deletes=True)
+    enrollments = db.relationship('Enrollment', foreign_keys='Enrollment.student_id', back_populates='student', lazy=True, cascade='all, delete-orphan')
+    quiz_submissions = db.relationship('QuizSubmission', foreign_keys='QuizSubmission.student_id', back_populates='student', lazy=True, cascade='all, delete-orphan')
+    answers = db.relationship('Answer', foreign_keys='Answer.student_id', back_populates='student', lazy=True, cascade='all, delete-orphan')
+    notifications = db.relationship('Notification', foreign_keys='Notification.user_id', back_populates='user', lazy=True, cascade='all, delete-orphan')
+    course_invitations = db.relationship('CourseInvitation', foreign_keys='CourseInvitation.student_id', back_populates='invited_student', lazy=True, cascade='all, delete-orphan')
     
-    # Additional relationships for grading
-    graded_submissions = db.relationship('QuizSubmission', foreign_keys='QuizSubmission.graded_by', back_populates='grader', lazy=True)
-    graded_answers = db.relationship('Answer', foreign_keys='Answer.graded_by', back_populates='grader', lazy=True)
+    # Additional relationships for grading - these should allow NULL when grader is deleted
+    graded_submissions = db.relationship('QuizSubmission', foreign_keys='QuizSubmission.graded_by', back_populates='grader', lazy=True, passive_deletes=True)
+    graded_answers = db.relationship('Answer', foreign_keys='Answer.graded_by', back_populates='grader', lazy=True, passive_deletes=True)
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -41,7 +41,7 @@ class Course(db.Model):
     description = db.Column(db.Text)
     is_public = db.Column(db.Boolean, default=True)
     max_capacity = db.Column(db.Integer, nullable=True)  # Only for public courses
-    teacher_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    teacher_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='SET NULL'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_published = db.Column(db.Boolean, default=False)
     

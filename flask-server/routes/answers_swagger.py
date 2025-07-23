@@ -25,7 +25,7 @@ answer_create = answers_ns.model('AnswerCreate', {
     'text_answer': fields.String(description='Text answer (for short answer questions)', example='Python is a programming language')
 })
 
-@answers_ns.route('/api/answers')
+@answers_ns.route('/')
 class AnswerListAPI(Resource):
     @answers_ns.doc('submit_answer')
     @answers_ns.expect(answer_create)
@@ -88,7 +88,7 @@ class AnswerListAPI(Resource):
             db.session.rollback()
             answers_ns.abort(500, str(e))
 
-@answers_ns.route('/api/answers/<int:answer_id>')
+@answers_ns.route('/<int:answer_id>')
 class AnswerAPI(Resource):
     @answers_ns.doc('get_answer')
     @answers_ns.marshal_with(answer_model)
@@ -112,7 +112,7 @@ class AnswerAPI(Resource):
         except Exception as e:
             answers_ns.abort(404, 'Answer not found')
 
-@answers_ns.route('/api/submissions/<int:submission_id>/answers')
+@answers_ns.route('/submissions/<int:submission_id>/answers')
 class SubmissionAnswersAPI(Resource):
     @answers_ns.doc('get_submission_answers')
     @answers_ns.marshal_list_with(answer_model)
@@ -143,7 +143,7 @@ class SubmissionAnswersAPI(Resource):
         except Exception as e:
             answers_ns.abort(500, str(e))
 
-@answers_ns.route('/api/submissions/<int:submission_id>/complete')
+@answers_ns.route('/submissions/<int:submission_id>/complete')
 class CompleteSubmissionAPI(Resource):
     @answers_ns.doc('complete_submission')
     @answers_ns.response(200, 'Submission completed and graded')

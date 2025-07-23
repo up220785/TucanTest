@@ -58,7 +58,7 @@ submission_model = quizzes_ns.model('QuizSubmission', {
     'graded_at': fields.DateTime(description='Grading completion time')
 })
 
-@quizzes_ns.route('/api/quizzes')
+@quizzes_ns.route('/')
 class QuizListAPI(Resource):
     @quizzes_ns.doc('get_all_quizzes')
     @quizzes_ns.marshal_list_with(quiz_model)
@@ -164,7 +164,7 @@ class QuizListAPI(Resource):
             db.session.rollback()
             quizzes_ns.abort(500, str(e))
 
-@quizzes_ns.route('/api/quizzes/<int:quiz_id>')
+@quizzes_ns.route('/<int:quiz_id>')
 class QuizAPI(Resource):
     @quizzes_ns.doc('get_quiz')
     @quizzes_ns.marshal_with(quiz_model)
@@ -268,7 +268,7 @@ class QuizAPI(Resource):
             db.session.rollback()
             quizzes_ns.abort(500, str(e))
 
-@quizzes_ns.route('/api/quizzes/<int:quiz_id>/start')
+@quizzes_ns.route('/<int:quiz_id>/start')
 class QuizStartAPI(Resource):
     @quizzes_ns.doc('start_quiz')
     @quizzes_ns.expect(quizzes_ns.model('StartQuiz', {
@@ -345,7 +345,7 @@ class QuizStartAPI(Resource):
             db.session.rollback()
             quizzes_ns.abort(500, str(e))
 
-@quizzes_ns.route('/api/quizzes/<int:quiz_id>/submissions')
+@quizzes_ns.route('/<int:quiz_id>/submissions')
 class QuizSubmissionsAPI(Resource):
     @quizzes_ns.doc('get_quiz_submissions')
     @quizzes_ns.marshal_list_with(submission_model)
@@ -396,7 +396,7 @@ class QuizSubmissionsAPI(Resource):
         except Exception as e:
             quizzes_ns.abort(500, str(e))
 
-@quizzes_ns.route('/api/courses/<int:course_id>/quizzes')
+@quizzes_ns.route('/courses/<int:course_id>/quizzes')
 class CourseQuizzesAPI(Resource):
     @quizzes_ns.doc('get_course_quizzes')
     @quizzes_ns.marshal_list_with(quiz_model)

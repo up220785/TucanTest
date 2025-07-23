@@ -49,7 +49,7 @@ def validate_email(email):
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(pattern, email) is not None
 
-@users_ns.route('/api/users')
+@users_ns.route('/')
 class UserListAPI(Resource):
     @users_ns.doc('get_all_users')
     @users_ns.marshal_list_with(user_model)
@@ -68,7 +68,7 @@ class UserListAPI(Resource):
         except Exception as e:
             users_ns.abort(500, str(e))
 
-@users_ns.route('/api/users/<int:user_id>')
+@users_ns.route('/<int:user_id>')
 class UserAPI(Resource):
     @users_ns.doc('get_user')
     @users_ns.marshal_with(user_model)
@@ -144,7 +144,33 @@ class UserAPI(Resource):
         try:
             user = User.query.get_or_404(user_id)
             
-            # SQLAlchemy will handle cascade deletes for related records
+            # Handle user deletion based on role
+            if user.role == 'teacher':
+                # For teachers, we need to handle courses they teach
+                # Option 1: Prevent deletion if they have courses
+                if user.courses_taught:
+                    users_ns.abort(400, 'Cannot delete teacher with active courses. Please transfer or delete courses first.')
+                
+            elif user.role == 'student':
+                # For students, delete related records in proper order
+                from models import Enrollment, QuizSubmission, Answer, Notification, CourseInvitation
+                
+                # Delete answers first
+                Answer.query.filter_by(student_id=user_id).delete()
+                
+                # Delete quiz submissions
+                QuizSubmission.query.filter_by(student_id=user_id).delete()
+                
+                # Delete enrollments
+                Enrollment.query.filter_by(student_id=user_id).delete()
+                
+                # Delete course invitations
+                CourseInvitation.query.filter_by(student_id=user_id).delete()
+                
+                # Delete notifications
+                Notification.query.filter_by(user_id=user_id).delete()
+            
+            # Now delete the user
             db.session.delete(user)
             db.session.commit()
             
@@ -154,7 +180,7 @@ class UserAPI(Resource):
             db.session.rollback()
             users_ns.abort(500, str(e))
 
-@users_ns.route('/api/users/register')
+@users_ns.route('/register')
 class UserRegisterAPI(Resource):
     @users_ns.doc('register_user')
     @users_ns.expect(user_register)
@@ -211,7 +237,7 @@ class UserRegisterAPI(Resource):
             db.session.rollback()
             users_ns.abort(500, str(e))
 
-@users_ns.route('/api/users/login')
+@users_ns.route('/login')
 class UserLoginAPI(Resource):
     @users_ns.doc('login_user')
     @users_ns.expect(user_login)
@@ -248,7 +274,7 @@ class UserLoginAPI(Resource):
         except Exception as e:
             users_ns.abort(500, str(e))
 
-@users_ns.route('/api/users/<int:user_id>/stats')
+@users_ns.route('/<int:user_id>/stats')
 class UserStatsAPI(Resource):
     @users_ns.doc('get_user_stats')
     @users_ns.marshal_with(user_stats)

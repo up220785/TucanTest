@@ -34,7 +34,7 @@ question_create = questions_ns.model('QuestionCreate', {
     })), description='Answer options')
 })
 
-@questions_ns.route('/api/questions')
+@questions_ns.route('/')
 class QuestionListAPI(Resource):
     @questions_ns.doc('create_question')
     @questions_ns.expect(question_create)
@@ -100,7 +100,7 @@ class QuestionListAPI(Resource):
             db.session.rollback()
             questions_ns.abort(500, str(e))
 
-@questions_ns.route('/api/questions/<int:question_id>')
+@questions_ns.route('/<int:question_id>')
 class QuestionAPI(Resource):
     @questions_ns.doc('get_question')
     @questions_ns.marshal_with(question_model)
@@ -148,7 +148,7 @@ class QuestionAPI(Resource):
             db.session.rollback()
             questions_ns.abort(500, str(e))
 
-@questions_ns.route('/api/quizzes/<int:quiz_id>/questions')
+@questions_ns.route('/quizzes/<int:quiz_id>/questions')
 class QuizQuestionsAPI(Resource):
     @questions_ns.doc('get_quiz_questions')
     @questions_ns.marshal_list_with(question_model)

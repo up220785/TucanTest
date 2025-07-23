@@ -181,7 +181,33 @@ def delete_user(user_id):
     try:
         user = User.query.get_or_404(user_id)
         
-        # Note: SQLAlchemy will handle cascade deletes for related records
+        # Handle user deletion based on role
+        if user.role == 'teacher':
+            # For teachers, we need to handle courses they teach
+            # Option 1: Prevent deletion if they have courses
+            if user.courses_taught:
+                return jsonify({'error': 'Cannot delete teacher with active courses. Please transfer or delete courses first.'}), 400
+            
+        elif user.role == 'student':
+            # For students, delete related records in proper order
+            from models import Enrollment, QuizSubmission, Answer, Notification, CourseInvitation
+            
+            # Delete answers first
+            Answer.query.filter_by(student_id=user_id).delete()
+            
+            # Delete quiz submissions
+            QuizSubmission.query.filter_by(student_id=user_id).delete()
+            
+            # Delete enrollments
+            Enrollment.query.filter_by(student_id=user_id).delete()
+            
+            # Delete course invitations
+            CourseInvitation.query.filter_by(student_id=user_id).delete()
+            
+            # Delete notifications
+            Notification.query.filter_by(user_id=user_id).delete()
+        
+        # Now delete the user
         db.session.delete(user)
         db.session.commit()
         

@@ -41,7 +41,7 @@ notification_list = notifications_ns.model('NotificationList', {
     'notifications': fields.List(fields.Nested(notification_model))
 })
 
-@notifications_ns.route('/api/users/<int:user_id>/notifications')
+@notifications_ns.route('/users/<int:user_id>/notifications')
 class UserNotificationsAPI(Resource):
     @notifications_ns.doc('get_user_notifications')
     @notifications_ns.marshal_with(notification_list)
@@ -105,7 +105,7 @@ class UserNotificationsAPI(Resource):
         except Exception as e:
             notifications_ns.abort(500, str(e))
 
-@notifications_ns.route('/api/notifications/<int:notification_id>')
+@notifications_ns.route('/<int:notification_id>')
 class NotificationAPI(Resource):
     @notifications_ns.doc('get_notification')
     @notifications_ns.marshal_with(notification_model)
@@ -150,7 +150,7 @@ class NotificationAPI(Resource):
             db.session.rollback()
             notifications_ns.abort(500, str(e))
 
-@notifications_ns.route('/api/notifications/<int:notification_id>/read')
+@notifications_ns.route('/<int:notification_id>/read')
 class NotificationReadAPI(Resource):
     @notifications_ns.doc('mark_notification_read')
     @notifications_ns.response(200, 'Notification marked as read')
@@ -172,7 +172,7 @@ class NotificationReadAPI(Resource):
             db.session.rollback()
             notifications_ns.abort(500, str(e))
 
-@notifications_ns.route('/api/users/<int:user_id>/notifications/mark-all-read')
+@notifications_ns.route('/users/<int:user_id>/notifications/mark-all-read')
 class MarkAllNotificationsReadAPI(Resource):
     @notifications_ns.doc('mark_all_notifications_read')
     @notifications_ns.response(200, 'All notifications marked as read')
@@ -199,7 +199,7 @@ class MarkAllNotificationsReadAPI(Resource):
             db.session.rollback()
             notifications_ns.abort(500, str(e))
 
-@notifications_ns.route('/api/notifications')
+@notifications_ns.route('/')
 class NotificationCreateAPI(Resource):
     @notifications_ns.doc('create_notification')
     @notifications_ns.expect(notification_create)
@@ -262,7 +262,7 @@ class NotificationCreateAPI(Resource):
             notifications_ns.abort(500, str(e))
 
 # Helper endpoints for notification automation
-@notifications_ns.route('/api/invitations/<int:invitation_id>/notify')
+@notifications_ns.route('/invitations/<int:invitation_id>/notify')
 class InvitationNotifyAPI(Resource):
     @notifications_ns.doc('notify_course_invitation')
     @notifications_ns.response(200, 'Invitation notification sent')
@@ -294,7 +294,7 @@ class InvitationNotifyAPI(Resource):
             db.session.rollback()
             notifications_ns.abort(500, 'Failed to send notification')
 
-@notifications_ns.route('/api/quizzes/<int:quiz_id>/notify-published')
+@notifications_ns.route('/quizzes/<int:quiz_id>/notify-published')
 class QuizPublishedNotifyAPI(Resource):
     @notifications_ns.doc('notify_quiz_published')
     @notifications_ns.response(200, 'Quiz published notifications sent')
