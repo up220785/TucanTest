@@ -43,6 +43,7 @@ class Course(db.Model):
     max_capacity = db.Column(db.Integer, nullable=True)  # Only for public courses
     teacher_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='SET NULL'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     is_published = db.Column(db.Boolean, default=False)
     
     # Relationships
@@ -86,6 +87,7 @@ class Enrollment(db.Model):
     enrollment_type = db.Column(db.String(20), default='direct')  # 'direct', 'invitation'
     enrolled_at = db.Column(db.DateTime, default=datetime.utcnow)
     dropped_at = db.Column(db.DateTime, nullable=True)
+    grade = db.Column(db.Float, default=0.0)  # Student's final grade for the course
     
     # Unique constraint to prevent duplicate enrollments
     __table_args__ = (db.UniqueConstraint('course_id', 'student_id'),)
@@ -93,6 +95,42 @@ class Enrollment(db.Model):
     # Relationships
     course = db.relationship('Course', foreign_keys=[course_id], back_populates='enrollments')
     student = db.relationship('User', foreign_keys=[student_id], back_populates='enrollments')
+    
+    def calculate_grade(self):
+        """Calculate the student's grade based on quiz submissions for this course"""
+        from models import QuizSubmission, Quiz
+        
+        # Get all quizzes for this course
+        quizzes = Quiz.query.filter_by(course_id=self.course_id, is_published=True).all()
+        if not quizzes:
+            return 0.0
+        
+        # Get all graded submissions for this student in this course
+        total_score = 0
+        total_possible = 0
+        
+        for quiz in quizzes:
+            submission = QuizSubmission.query.filter_by(
+                quiz_id=quiz.id,
+                student_id=self.student_id,
+                is_graded=True
+            ).first()
+            
+            if submission:
+                total_score += submission.score or 0
+                total_possible += submission.total_possible or 0
+        
+        if total_possible == 0:
+            return 0.0
+        
+        # Calculate percentage grade
+        grade_percentage = (total_score / total_possible) * 100
+        return round(grade_percentage, 2)
+    
+    def update_grade(self):
+        """Update the stored grade based on current quiz performance"""
+        self.grade = self.calculate_grade()
+        return self.grade
     
     def __repr__(self):
         return f'<Enrollment {self.course_id}-{self.student_id}>'

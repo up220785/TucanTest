@@ -15,7 +15,7 @@ course_model = courses_ns.model('Course', {
     'teacher_name': fields.String(description='Teacher name'),
     'is_public': fields.Boolean(description='Whether course is public'),
     'is_published': fields.Boolean(description='Whether course is published'),
-    'enrollment_limit': fields.Integer(description='Maximum number of students'),
+    'max_capacity': fields.Integer(description='Maximum number of students'),
     'created_at': fields.DateTime(description='Course creation date'),
     'updated_at': fields.DateTime(description='Last update date'),
     'enrolled_count': fields.Integer(description='Number of enrolled students'),
@@ -27,7 +27,7 @@ course_create = courses_ns.model('CourseCreate', {
     'description': fields.String(required=True, description='Course description', example='Learn the basics of programming'),
     'teacher_id': fields.Integer(required=True, description='Teacher ID', example=1),
     'is_public': fields.Boolean(description='Whether course is public', default=True),
-    'enrollment_limit': fields.Integer(description='Maximum number of students', example=50)
+    'max_capacity': fields.Integer(description='Maximum number of students', example=50)
 })
 
 course_update = courses_ns.model('CourseUpdate', {
@@ -35,7 +35,7 @@ course_update = courses_ns.model('CourseUpdate', {
     'description': fields.String(description='Course description'),
     'is_public': fields.Boolean(description='Whether course is public'),
     'is_published': fields.Boolean(description='Whether course is published'),
-    'enrollment_limit': fields.Integer(description='Maximum number of students')
+    'max_capacity': fields.Integer(description='Maximum number of students')
 })
 
 enrollment_model = courses_ns.model('Enrollment', {
@@ -82,7 +82,7 @@ class CourseListAPI(Resource):
                     'teacher_name': course.teacher.name,
                     'is_public': course.is_public,
                     'is_published': course.is_published,
-                    'enrollment_limit': course.enrollment_limit,
+                    'max_capacity': course.max_capacity,
                     'created_at': course.created_at.isoformat() if course.created_at else None,
                     'updated_at': course.updated_at.isoformat() if course.updated_at else None,
                     'enrolled_count': len(course.enrollments),
@@ -116,12 +116,15 @@ class CourseListAPI(Resource):
                 courses_ns.abort(400, 'Only teachers can create courses')
             
             # Create course
+            current_time = datetime.utcnow()
             course = Course(
                 name=data['name'],
                 description=data['description'],
                 teacher_id=data['teacher_id'],
                 is_public=data.get('is_public', True),
-                enrollment_limit=data.get('enrollment_limit')
+                max_capacity=data.get('max_capacity'),
+                created_at=current_time,
+                updated_at=current_time
             )
             
             db.session.add(course)
@@ -135,7 +138,7 @@ class CourseListAPI(Resource):
                 'teacher_name': course.teacher.name,
                 'is_public': course.is_public,
                 'is_published': course.is_published,
-                'enrollment_limit': course.enrollment_limit,
+                'max_capacity': course.max_capacity,
                 'created_at': course.created_at.isoformat() if course.created_at else None,
                 'updated_at': course.updated_at.isoformat() if course.updated_at else None,
                 'enrolled_count': 0,
@@ -164,7 +167,7 @@ class CourseAPI(Resource):
                 'teacher_name': course.teacher.name,
                 'is_public': course.is_public,
                 'is_published': course.is_published,
-                'enrollment_limit': course.enrollment_limit,
+                'max_capacity': course.max_capacity,
                 'created_at': course.created_at.isoformat() if course.created_at else None,
                 'updated_at': course.updated_at.isoformat() if course.updated_at else None,
                 'enrolled_count': len(course.enrollments),
@@ -198,8 +201,8 @@ class CourseAPI(Resource):
             if 'is_published' in data:
                 course.is_published = data['is_published']
             
-            if 'enrollment_limit' in data:
-                course.enrollment_limit = data['enrollment_limit']
+            if 'max_capacity' in data:
+                course.max_capacity = data['max_capacity']
             
             course.updated_at = datetime.utcnow()
             db.session.commit()
@@ -212,7 +215,7 @@ class CourseAPI(Resource):
                 'teacher_name': course.teacher.name,
                 'is_public': course.is_public,
                 'is_published': course.is_published,
-                'enrollment_limit': course.enrollment_limit,
+                'max_capacity': course.max_capacity,
                 'created_at': course.created_at.isoformat() if course.created_at else None,
                 'updated_at': course.updated_at.isoformat() if course.updated_at else None,
                 'enrolled_count': len(course.enrollments),
@@ -262,6 +265,9 @@ class CourseStudentsAPI(Resource):
             
             enrollment_list = []
             for enrollment in enrollments:
+                # Calculate current grade based on quiz performance
+                current_grade = enrollment.calculate_grade()
+                
                 enrollment_data = {
                     'id': enrollment.id,
                     'course_id': enrollment.course_id,
@@ -270,7 +276,7 @@ class CourseStudentsAPI(Resource):
                     'student_email': enrollment.student.email,
                     'status': enrollment.status,
                     'enrolled_at': enrollment.enrolled_at.isoformat() if enrollment.enrolled_at else None,
-                    'grade': enrollment.grade
+                    'grade': current_grade
                 }
                 enrollment_list.append(enrollment_data)
             
@@ -311,20 +317,21 @@ class CourseEnrollAPI(Resource):
                 courses_ns.abort(400, 'Student is already enrolled in this course')
             
             # Check enrollment limit
-            if course.enrollment_limit:
+            if course.max_capacity:
                 current_count = Enrollment.query.filter_by(
                     course_id=course_id,
                     status='accepted'
                 ).count()
                 
-                if current_count >= course.enrollment_limit:
+                if current_count >= course.max_capacity:
                     courses_ns.abort(400, 'Course enrollment limit reached')
             
             # Create enrollment
             enrollment = Enrollment(
                 course_id=course_id,
                 student_id=data['student_id'],
-                status='accepted' if course.is_public else 'pending'
+                status='accepted' if course.is_public else 'pending',
+                grade=0.0  # Start with grade 0, will be updated based on quiz performance
             )
             
             db.session.add(enrollment)
@@ -338,7 +345,7 @@ class CourseEnrollAPI(Resource):
                 'student_email': enrollment.student.email,
                 'status': enrollment.status,
                 'enrolled_at': enrollment.enrolled_at.isoformat() if enrollment.enrolled_at else None,
-                'grade': enrollment.grade
+                'grade': enrollment.grade  # Will be 0.0 initially
             }, 201
             
         except Exception as e:
@@ -377,7 +384,7 @@ class UserCoursesAPI(Resource):
                     'teacher_name': course.teacher.name,
                     'is_public': course.is_public,
                     'is_published': course.is_published,
-                    'enrollment_limit': course.enrollment_limit,
+                    'max_capacity': course.max_capacity,
                     'created_at': course.created_at.isoformat() if course.created_at else None,
                     'updated_at': course.updated_at.isoformat() if course.updated_at else None,
                     'enrolled_count': len(course.enrollments),
