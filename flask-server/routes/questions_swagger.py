@@ -19,7 +19,7 @@ question_model = questions_ns.model('Question', {
     'text': fields.String(description='Question text'),
     'question_type': fields.String(description='Question type', enum=['multiple_choice', 'true_false', 'short_answer']),
     'points': fields.Float(description='Points for this question'),
-    'order_num': fields.Integer(description='Question order in quiz'),
+    'order': fields.Integer(description='Question order in quiz'),
     'options': fields.List(fields.Nested(option_model), description='Answer options')
 })
 
@@ -55,7 +55,7 @@ class QuestionListAPI(Resource):
             quiz = Quiz.query.get_or_404(data['quiz_id'])
             
             # Determine next order number
-            max_order = db.session.query(db.func.max(Question.order_num)).filter_by(quiz_id=data['quiz_id']).scalar() or 0
+            max_order = db.session.query(db.func.max(Question.order)).filter_by(quiz_id=data['quiz_id']).scalar() or 0
             
             # Create question
             question = Question(
@@ -63,7 +63,7 @@ class QuestionListAPI(Resource):
                 text=data['text'],
                 question_type=data['question_type'],
                 points=data.get('points', 1.0),
-                order_num=max_order + 1
+                order=max_order + 1
             )
             
             db.session.add(question)
@@ -92,7 +92,7 @@ class QuestionListAPI(Resource):
                 'text': question.text,
                 'question_type': question.question_type,
                 'points': question.points,
-                'order_num': question.order_num,
+                'order': question.order,
                 'options': options_data
             }, 201
             
@@ -124,7 +124,7 @@ class QuestionAPI(Resource):
                 'text': question.text,
                 'question_type': question.question_type,
                 'points': question.points,
-                'order_num': question.order_num,
+                'order': question.order,
                 'options': options_data
             }
             
@@ -158,7 +158,7 @@ class QuizQuestionsAPI(Resource):
         try:
             quiz = Quiz.query.get_or_404(quiz_id)
             
-            questions = Question.query.filter_by(quiz_id=quiz_id).order_by(Question.order_num).all()
+            questions = Question.query.filter_by(quiz_id=quiz_id).order_by(Question.order).all()
             
             question_list = []
             for question in questions:
@@ -176,7 +176,7 @@ class QuizQuestionsAPI(Resource):
                     'text': question.text,
                     'question_type': question.question_type,
                     'points': question.points,
-                    'order_num': question.order_num,
+                    'order': question.order,
                     'options': options_data
                 }
                 question_list.append(question_data)
