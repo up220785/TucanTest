@@ -1,6 +1,6 @@
 from flask import request
 from flask_restx import Namespace, Resource, fields
-from models import db, Course, User, Enrollment, Quiz
+from models import db, Course, User, Enrollment, Quiz, CourseInvitation
 from datetime import datetime
 
 # Create namespace for courses
@@ -44,9 +44,48 @@ enrollment_model = courses_ns.model('Enrollment', {
     'student_id': fields.Integer(description='Student ID'),
     'student_name': fields.String(description='Student name'),
     'student_email': fields.String(description='Student email'),
-    'status': fields.String(description='Enrollment status', enum=['pending', 'accepted', 'rejected']),
+    'status': fields.String(description='Enrollment status', enum=['accepted', 'rejected']),
     'enrolled_at': fields.DateTime(description='Enrollment date'),
     'grade': fields.Float(description='Final grade')
+})
+
+invitation_model = courses_ns.model('CourseInvitation', {
+    'id': fields.Integer(description='Invitation ID'),
+    'course_id': fields.Integer(description='Course ID'),
+    'student_id': fields.Integer(description='Student ID'),
+    'student_name': fields.String(description='Student name'),
+    'student_email': fields.String(description='Student email'),
+    'status': fields.String(description='Invitation status', enum=['pending', 'accepted', 'rejected', 'expired']),
+    'invited_at': fields.DateTime(description='Invitation date'),
+    'responded_at': fields.DateTime(description='Response date'),
+    'expires_at': fields.DateTime(description='Expiration date')
+})
+
+invite_student_model = courses_ns.model('InviteStudent', {
+    'student_email': fields.String(required=True, description='Student email address', example='student@example.com'),
+    'expires_in_days': fields.Integer(description='Days until invitation expires', default=7, example=7)
+})
+
+# Quiz models for course-specific operations
+course_quiz_model = courses_ns.model('CourseQuiz', {
+    'id': fields.Integer(description='Quiz ID'),
+    'title': fields.String(description='Quiz title'),
+    'description': fields.String(description='Quiz description'),
+    'course_id': fields.Integer(description='Course ID'),
+    'course_name': fields.String(description='Course name'),
+    'is_published': fields.Boolean(description='Whether quiz is published'),
+    'due_date': fields.DateTime(description='Quiz due date'),
+    'created_at': fields.DateTime(description='Quiz creation date'),
+    'updated_at': fields.DateTime(description='Last update date'),
+    'question_count': fields.Integer(description='Number of questions'),
+    'total_points': fields.Float(description='Total possible points')
+})
+
+course_quiz_create = courses_ns.model('CourseQuizCreate', {
+    'title': fields.String(required=True, description='Quiz title', example='Python Basics Quiz'),
+    'description': fields.String(required=True, description='Quiz description', example='Test your knowledge of Python fundamentals'),
+    'due_date': fields.String(description='Due date (ISO format)', example='2025-12-31T23:59:59'),
+    'is_published': fields.Boolean(description='Whether quiz is published', default=False)
 })
 
 @courses_ns.route('/')
@@ -248,7 +287,7 @@ class CourseStudentsAPI(Resource):
     @courses_ns.doc('get_course_students')
     @courses_ns.marshal_list_with(enrollment_model)
     @courses_ns.response(404, 'Course not found')
-    @courses_ns.param('status', 'Filter by enrollment status', enum=['pending', 'accepted', 'rejected'])
+    @courses_ns.param('status', 'Filter by enrollment status', enum=['accepted', 'rejected'])
     def get(self, course_id):
         """Get all students enrolled in a course"""
         try:
@@ -326,11 +365,14 @@ class CourseEnrollAPI(Resource):
                 if current_count >= course.max_capacity:
                     courses_ns.abort(400, 'Course enrollment limit reached')
             
-            # Create enrollment
+            # Create enrollment - public courses auto-accept, private courses use invitation system
+            if not course.is_public:
+                courses_ns.abort(400, 'Private courses require an invitation to enroll')
+            
             enrollment = Enrollment(
                 course_id=course_id,
                 student_id=data['student_id'],
-                status='accepted' if course.is_public else 'pending',
+                status='accepted',  # Public courses always auto-accept
                 grade=0.0  # Start with grade 0, will be updated based on quiz performance
             )
             
@@ -352,6 +394,84 @@ class CourseEnrollAPI(Resource):
             db.session.rollback()
             courses_ns.abort(500, str(e))
 
+@courses_ns.route('/<int:course_id>/invite')
+class CourseInviteAPI(Resource):
+    @courses_ns.doc('invite_student_to_course')
+    @courses_ns.expect(invite_student_model)
+    @courses_ns.marshal_with(invitation_model, code=201)
+    @courses_ns.response(400, 'Validation error')
+    @courses_ns.response(404, 'Course or student not found')
+    def post(self, course_id):
+        """Invite a student to a course by email (for private courses)"""
+        course = Course.query.get_or_404(course_id)
+        data = request.get_json()
+        
+        if 'student_email' not in data:
+            courses_ns.abort(400, 'student_email is required')
+        
+        # Find student by email
+        student = User.query.filter_by(email=data['student_email']).first()
+        if not student:
+            courses_ns.abort(404, f'No student found with email: {data["student_email"]}')
+        
+        if student.role != 'student':
+            courses_ns.abort(400, 'Only students can be invited to courses')
+        
+        # Check if already enrolled
+        existing_enrollment = Enrollment.query.filter_by(
+            course_id=course_id,
+            student_id=student.id
+        ).first()
+        
+        if existing_enrollment:
+            courses_ns.abort(400, 'Student is already enrolled in this course')
+        
+        # Check if already invited
+        existing_invitation = CourseInvitation.query.filter_by(
+            course_id=course_id,
+            student_id=student.id,
+            status='pending'
+        ).first()
+        
+        if existing_invitation:
+            courses_ns.abort(400, 'Student has already been invited to this course')
+        
+        try:
+            # Calculate expiration date
+            from datetime import timedelta
+            expires_in_days = data.get('expires_in_days', 7)
+            expires_at = datetime.utcnow() + timedelta(days=expires_in_days) if expires_in_days else None
+            
+            # Create invitation
+            invitation = CourseInvitation(
+                course_id=course_id,
+                student_id=student.id,
+                expires_at=expires_at
+            )
+            
+            db.session.add(invitation)
+            db.session.commit()
+            
+            # Automatically create notification for the student
+            from routes.notifications import create_course_invitation_notification
+            create_course_invitation_notification(invitation.id)
+            
+            return {
+                'id': invitation.id,
+                'course_id': invitation.course_id,
+                'student_id': invitation.student_id,
+                'student_name': invitation.invited_student.name,
+                'student_email': invitation.invited_student.email,
+                'status': invitation.status,
+                'invited_at': invitation.invited_at.isoformat() if invitation.invited_at else None,
+                'responded_at': invitation.responded_at.isoformat() if invitation.responded_at else None,
+                'expires_at': invitation.expires_at.isoformat() if invitation.expires_at else None
+            }, 201
+            
+        except Exception as e:
+            db.session.rollback()
+            courses_ns.abort(500, f'Failed to create invitation: {str(e)}')
+
 @courses_ns.route('/users/<int:user_id>/courses')
 class UserCoursesAPI(Resource):
     @courses_ns.doc('get_user_courses')
@@ -362,12 +482,34 @@ class UserCoursesAPI(Resource):
         """Get courses for a user (as teacher or student)"""
         try:
             user = User.query.get_or_404(user_id)
+            role_filter = request.args.get('role')
             
-            if user.role == 'teacher':
+            courses = []
+            
+            # If no role specified, return all courses for the user
+            if not role_filter:
+                # Get courses taught by this user (if they're a teacher)
+                if user.role == 'teacher':
+                    taught_courses = Course.query.filter_by(teacher_id=user_id).all()
+                    courses.extend(taught_courses)
+                
+                # Get courses where this user is enrolled as student
+                enrollments = Enrollment.query.filter_by(
+                    student_id=user_id,
+                    status='accepted'
+                ).all()
+                enrolled_courses = [enrollment.course for enrollment in enrollments]
+                courses.extend(enrolled_courses)
+                
+                # Remove duplicates (in case someone is both teacher and enrolled)
+                courses = list({course.id: course for course in courses}.values())
+                
+            elif role_filter == 'teacher':
                 # Get courses taught by this user
                 courses = Course.query.filter_by(teacher_id=user_id).all()
-            else:
-                # Get courses where this user is enrolled
+                
+            elif role_filter == 'student':
+                # Get courses where this user is enrolled as student
                 enrollments = Enrollment.query.filter_by(
                     student_id=user_id,
                     status='accepted'
@@ -381,13 +523,13 @@ class UserCoursesAPI(Resource):
                     'name': course.name,
                     'description': course.description,
                     'teacher_id': course.teacher_id,
-                    'teacher_name': course.teacher.name,
+                    'teacher_name': course.teacher.name if course.teacher else 'Unknown',
                     'is_public': course.is_public,
                     'is_published': course.is_published,
                     'max_capacity': course.max_capacity,
                     'created_at': course.created_at.isoformat() if course.created_at else None,
                     'updated_at': course.updated_at.isoformat() if course.updated_at else None,
-                    'enrolled_count': len(course.enrollments),
+                    'enrolled_count': len([e for e in course.enrollments if e.status == 'accepted']),
                     'quiz_count': len(course.quizzes)
                 }
                 course_list.append(course_data)
@@ -395,4 +537,100 @@ class UserCoursesAPI(Resource):
             return course_list
             
         except Exception as e:
+            courses_ns.abort(500, str(e))
+
+@courses_ns.route('/<int:course_id>/quizzes')
+class CourseQuizzesAPI(Resource):
+    @courses_ns.doc('get_course_quizzes')
+    @courses_ns.marshal_list_with(course_quiz_model)
+    @courses_ns.response(404, 'Course not found')
+    @courses_ns.param('published_only', 'Show only published quizzes', type='boolean', default=False)
+    def get(self, course_id):
+        """Get all quizzes for a course"""
+        try:
+            course = Course.query.get_or_404(course_id)
+            
+            query = Quiz.query.filter_by(course_id=course_id)
+            
+            published_only = request.args.get('published_only', 'false').lower() == 'true'
+            if published_only:
+                query = query.filter_by(is_published=True)
+            
+            quizzes = query.all()
+            
+            quiz_list = []
+            for quiz in quizzes:
+                quiz_data = {
+                    'id': quiz.id,
+                    'title': quiz.title,
+                    'description': quiz.description,
+                    'course_id': quiz.course_id,
+                    'course_name': quiz.course.name,
+                    'is_published': quiz.is_published,
+                    'due_date': quiz.due_date.isoformat() if quiz.due_date else None,
+                    'created_at': quiz.created_at.isoformat() if quiz.created_at else None,
+                    'question_count': len(quiz.questions),
+                    'total_points': quiz.get_total_points()
+                }
+                quiz_list.append(quiz_data)
+            
+            return quiz_list
+            
+        except Exception as e:
+            courses_ns.abort(500, str(e))
+
+    @courses_ns.doc('create_course_quiz')
+    @courses_ns.expect(course_quiz_create)
+    @courses_ns.marshal_with(course_quiz_model, code=201)
+    @courses_ns.response(400, 'Validation error')
+    @courses_ns.response(404, 'Course not found')
+    def post(self, course_id):
+        """Create a new quiz for a course"""
+        try:
+            course = Course.query.get_or_404(course_id)
+            data = request.get_json()
+            
+            # Validate required fields (course_id not needed since it's from URL)
+            required_fields = ['title', 'description']
+            for field in required_fields:
+                if field not in data or not data[field]:
+                    courses_ns.abort(400, f'{field} is required')
+            
+            # Parse due date if provided
+            due_date = None
+            if data.get('due_date'):
+                try:
+                    due_date = datetime.fromisoformat(data['due_date'].replace('Z', '+00:00'))
+                except ValueError:
+                    courses_ns.abort(400, 'Invalid due_date format')
+            
+            # Create quiz
+            current_time = datetime.utcnow()
+            quiz = Quiz(
+                course_id=course_id,  # Use course_id from URL
+                title=data['title'],
+                description=data['description'],
+                due_date=due_date,
+                is_published=data.get('is_published', False),
+                created_at=current_time
+            )
+            
+            db.session.add(quiz)
+            db.session.commit()
+            
+            return {
+                'id': quiz.id,
+                'course_id': quiz.course_id,
+                'title': quiz.title,
+                'description': quiz.description,
+                'course_name': quiz.course.name,
+                'is_published': quiz.is_published,
+                'due_date': quiz.due_date.isoformat() if quiz.due_date else None,
+                'created_at': quiz.created_at.isoformat() if quiz.created_at else None,
+                'question_count': 0,  # New quiz has no questions yet
+                'total_points': 0     # New quiz has no points yet
+            }
+            
+        except Exception as e:
+            db.session.rollback()
             courses_ns.abort(500, str(e))

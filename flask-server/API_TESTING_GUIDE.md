@@ -124,7 +124,72 @@ curl -X GET "http://localhost:5000/api/courses/1/students?status=accepted"
 
 ### Get User's Courses
 ```bash
-curl -X GET http://localhost:5000/api/users/1/courses
+# Get all courses for a user (both taught and enrolled)
+curl -X GET http://localhost:5000/api/courses/users/1/courses
+
+# Get only courses where user is enrolled as student
+curl -X GET "http://localhost:5000/api/courses/users/2/courses?role=student"
+
+# Get only courses where user is the teacher
+curl -X GET "http://localhost:5000/api/courses/users/1/courses?role=teacher"
+```
+
+### Get Teacher's Courses (Dedicated Endpoint)
+```bash
+# Get all courses taught by a teacher
+curl -X GET http://localhost:5000/api/course-users/teachers/1/courses
+
+# Get only published courses taught by a teacher
+curl -X GET "http://localhost:5000/api/course-users/teachers/1/courses?published_only=true"
+
+# Get teacher's courses with detailed statistics
+curl -X GET "http://localhost:5000/api/course-users/teachers/1/courses?include_stats=true"
+```
+
+### Get Student's Enrolled Courses (Dedicated Endpoint)
+```bash
+# Get all courses where student is enrolled
+curl -X GET http://localhost:5000/api/course-users/students/2/courses
+
+# Get dropped courses for student
+curl -X GET "http://localhost:5000/api/course-users/students/2/courses?status=dropped"
+
+# Get student's courses with grade information
+curl -X GET "http://localhost:5000/api/course-users/students/2/courses?include_grades=true"
+```
+
+---
+
+## 🎫 Course Invitation Management APIs
+
+### Invite Student to Private Course (Teacher)
+```bash
+curl -X POST http://localhost:5000/api/courses/1/invite \
+  -H "Content-Type: application/json" \
+  -d '{
+    "student_email": "student@example.com",
+    "expires_in_days": 7
+  }'
+```
+
+### Get Student Invitations
+```bash
+curl -X GET "http://localhost:5000/api/invitations/users/2?status=pending"
+```
+
+### Get Specific Invitation Details
+```bash
+curl -X GET http://localhost:5000/api/invitations/1
+```
+
+### Accept Course Invitation (Student)
+```bash
+curl -X PUT http://localhost:5000/api/invitations/1/accept
+```
+
+### Reject Course Invitation (Student)
+```bash
+curl -X PUT http://localhost:5000/api/invitations/1/reject
 ```
 
 ---
@@ -139,9 +204,20 @@ curl -X POST http://localhost:5000/api/quizzes \
     "title": "Python Basics Quiz",
     "description": "Test your understanding of Python fundamentals including variables, data types, and control structures.",
     "course_id": 1,
-    "time_limit": 60,
-    "max_attempts": 3,
-    "due_date": "2025-12-31T23:59:59"
+    "due_date": "2025-12-31T23:59:59",
+    "is_published": false
+  }'
+```
+
+### Create Quiz for Specific Course
+```bash
+curl -X POST http://localhost:5000/api/courses/1/quizzes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Python Basics Quiz",
+    "description": "Test your understanding of Python fundamentals.",
+    "due_date": "2025-12-31T23:59:59",
+    "is_published": false
   }'
 ```
 
@@ -405,6 +481,34 @@ curl -X GET http://localhost:5000/api/users/2/stats
 
 # Get notifications
 curl -X GET http://localhost:5000/api/users/2/notifications
+```
+
+### 5. Private Course Invitation Workflow
+```bash
+# Create private course
+curl -X POST http://localhost:5000/api/courses \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Private Course", "description": "Invitation-only course", "teacher_id": 1, "is_public": false}'
+
+# Teacher invites student by email
+curl -X POST http://localhost:5000/api/courses/2/invite \
+  -H "Content-Type: application/json" \
+  -d '{"student_email": "student@test.com", "expires_in_days": 7}'
+
+# Student checks notifications
+curl -X GET "http://localhost:5000/api/users/2/notifications?unread_only=true"
+
+# Student gets invitation details
+curl -X GET http://localhost:5000/api/invitations/1
+
+# Student accepts invitation
+curl -X PUT http://localhost:5000/api/invitations/1/accept
+
+# Teacher gets notification about acceptance
+curl -X GET "http://localhost:5000/api/users/1/notifications?unread_only=true"
+
+# Check enrollment
+curl -X GET http://localhost:5000/api/courses/2/students
 ```
 
 ---

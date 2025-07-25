@@ -14,11 +14,8 @@ quiz_model = quizzes_ns.model('Quiz', {
     'course_id': fields.Integer(description='Course ID'),
     'course_name': fields.String(description='Course name'),
     'is_published': fields.Boolean(description='Whether quiz is published'),
-    'time_limit': fields.Integer(description='Time limit in minutes'),
-    'max_attempts': fields.Integer(description='Maximum attempts allowed'),
     'due_date': fields.DateTime(description='Quiz due date'),
     'created_at': fields.DateTime(description='Quiz creation date'),
-    'updated_at': fields.DateTime(description='Last update date'),
     'question_count': fields.Integer(description='Number of questions'),
     'total_points': fields.Float(description='Total possible points')
 })
@@ -27,18 +24,22 @@ quiz_create = quizzes_ns.model('QuizCreate', {
     'title': fields.String(required=True, description='Quiz title', example='Python Basics Quiz'),
     'description': fields.String(required=True, description='Quiz description', example='Test your knowledge of Python fundamentals'),
     'course_id': fields.Integer(required=True, description='Course ID', example=1),
-    'time_limit': fields.Integer(description='Time limit in minutes', example=60),
-    'max_attempts': fields.Integer(description='Maximum attempts allowed', example=3),
-    'due_date': fields.String(description='Due date (ISO format)', example='2025-12-31T23:59:59')
+    'due_date': fields.String(description='Due date (ISO format)', example='2025-12-31T23:59:59'),
+    'is_published': fields.Boolean(description='Whether quiz is published', default=False)
 })
 
 quiz_update = quizzes_ns.model('QuizUpdate', {
     'title': fields.String(description='Quiz title'),
     'description': fields.String(description='Quiz description'),
     'is_published': fields.Boolean(description='Whether quiz is published'),
-    'time_limit': fields.Integer(description='Time limit in minutes'),
-    'max_attempts': fields.Integer(description='Maximum attempts allowed'),
     'due_date': fields.String(description='Due date (ISO format)')
+})
+
+course_quiz_create = quizzes_ns.model('CourseQuizCreate', {
+    'title': fields.String(required=True, description='Quiz title', example='Python Basics Quiz'),
+    'description': fields.String(required=True, description='Quiz description', example='Test your knowledge of Python fundamentals'),
+    'due_date': fields.String(description='Due date (ISO format)', example='2025-12-31T23:59:59'),
+    'is_published': fields.Boolean(description='Whether quiz is published', default=False)
 })
 
 submission_model = quizzes_ns.model('QuizSubmission', {
@@ -90,11 +91,8 @@ class QuizListAPI(Resource):
                     'course_id': quiz.course_id,
                     'course_name': quiz.course.name,
                     'is_published': quiz.is_published,
-                    'time_limit': quiz.time_limit,
-                    'max_attempts': quiz.max_attempts,
                     'due_date': quiz.due_date.isoformat() if quiz.due_date else None,
                     'created_at': quiz.created_at.isoformat() if quiz.created_at else None,
-                    'updated_at': quiz.updated_at.isoformat() if quiz.updated_at else None,
                     'question_count': len(quiz.questions),
                     'total_points': quiz.get_total_points()
                 }
@@ -132,13 +130,14 @@ class QuizListAPI(Resource):
                     quizzes_ns.abort(400, 'Invalid due_date format')
             
             # Create quiz
+            current_time = datetime.utcnow()
             quiz = Quiz(
                 title=data['title'],
                 description=data['description'],
                 course_id=data['course_id'],
-                time_limit=data.get('time_limit'),
-                max_attempts=data.get('max_attempts', 1),
-                due_date=due_date
+                due_date=due_date,
+                is_published=data.get('is_published', False),
+                created_at=current_time,
             )
             
             db.session.add(quiz)
@@ -151,11 +150,8 @@ class QuizListAPI(Resource):
                 'course_id': quiz.course_id,
                 'course_name': quiz.course.name,
                 'is_published': quiz.is_published,
-                'time_limit': quiz.time_limit,
-                'max_attempts': quiz.max_attempts,
                 'due_date': quiz.due_date.isoformat() if quiz.due_date else None,
                 'created_at': quiz.created_at.isoformat() if quiz.created_at else None,
-                'updated_at': quiz.updated_at.isoformat() if quiz.updated_at else None,
                 'question_count': 0,
                 'total_points': 0
             }, 201
@@ -181,11 +177,8 @@ class QuizAPI(Resource):
                 'course_id': quiz.course_id,
                 'course_name': quiz.course.name,
                 'is_published': quiz.is_published,
-                'time_limit': quiz.time_limit,
-                'max_attempts': quiz.max_attempts,
                 'due_date': quiz.due_date.isoformat() if quiz.due_date else None,
                 'created_at': quiz.created_at.isoformat() if quiz.created_at else None,
-                'updated_at': quiz.updated_at.isoformat() if quiz.updated_at else None,
                 'question_count': len(quiz.questions),
                 'total_points': quiz.get_total_points()
             }
@@ -213,12 +206,6 @@ class QuizAPI(Resource):
             if 'is_published' in data:
                 quiz.is_published = data['is_published']
             
-            if 'time_limit' in data:
-                quiz.time_limit = data['time_limit']
-            
-            if 'max_attempts' in data:
-                quiz.max_attempts = data['max_attempts']
-            
             if 'due_date' in data:
                 if data['due_date']:
                     try:
@@ -228,7 +215,6 @@ class QuizAPI(Resource):
                 else:
                     quiz.due_date = None
             
-            quiz.updated_at = datetime.utcnow()
             db.session.commit()
             
             return {
@@ -238,11 +224,8 @@ class QuizAPI(Resource):
                 'course_id': quiz.course_id,
                 'course_name': quiz.course.name,
                 'is_published': quiz.is_published,
-                'time_limit': quiz.time_limit,
-                'max_attempts': quiz.max_attempts,
                 'due_date': quiz.due_date.isoformat() if quiz.due_date else None,
                 'created_at': quiz.created_at.isoformat() if quiz.created_at else None,
-                'updated_at': quiz.updated_at.isoformat() if quiz.updated_at else None,
                 'question_count': len(quiz.questions),
                 'total_points': quiz.get_total_points()
             }
@@ -295,14 +278,15 @@ class QuizStartAPI(Resource):
             if quiz.due_date and datetime.utcnow() > quiz.due_date:
                 quizzes_ns.abort(400, 'Quiz due date has passed')
             
-            # Check attempt limit
+            # Check attempt limit - for now we'll allow unlimited attempts
+            # (This can be implemented later if max_attempts field is added to Quiz model)
             existing_attempts = QuizSubmission.query.filter_by(
                 quiz_id=quiz_id,
                 student_id=student_id
             ).count()
             
-            if quiz.max_attempts and existing_attempts >= quiz.max_attempts:
-                quizzes_ns.abort(400, 'Maximum attempts reached')
+            # Future: if quiz.max_attempts and existing_attempts >= quiz.max_attempts:
+            #     quizzes_ns.abort(400, 'Maximum attempts reached')
             
             # Check if there's an ongoing submission
             ongoing_submission = QuizSubmission.query.filter_by(
@@ -392,49 +376,6 @@ class QuizSubmissionsAPI(Resource):
                 submission_list.append(submission_data)
             
             return submission_list
-            
-        except Exception as e:
-            quizzes_ns.abort(500, str(e))
-
-@quizzes_ns.route('/courses/<int:course_id>/quizzes')
-class CourseQuizzesAPI(Resource):
-    @quizzes_ns.doc('get_course_quizzes')
-    @quizzes_ns.marshal_list_with(quiz_model)
-    @quizzes_ns.response(404, 'Course not found')
-    @quizzes_ns.param('published_only', 'Show only published quizzes', type='boolean', default=False)
-    def get(self, course_id):
-        """Get all quizzes for a course"""
-        try:
-            course = Course.query.get_or_404(course_id)
-            
-            query = Quiz.query.filter_by(course_id=course_id)
-            
-            published_only = request.args.get('published_only', 'false').lower() == 'true'
-            if published_only:
-                query = query.filter_by(is_published=True)
-            
-            quizzes = query.all()
-            
-            quiz_list = []
-            for quiz in quizzes:
-                quiz_data = {
-                    'id': quiz.id,
-                    'title': quiz.title,
-                    'description': quiz.description,
-                    'course_id': quiz.course_id,
-                    'course_name': quiz.course.name,
-                    'is_published': quiz.is_published,
-                    'time_limit': quiz.time_limit,
-                    'max_attempts': quiz.max_attempts,
-                    'due_date': quiz.due_date.isoformat() if quiz.due_date else None,
-                    'created_at': quiz.created_at.isoformat() if quiz.created_at else None,
-                    'updated_at': quiz.updated_at.isoformat() if quiz.updated_at else None,
-                    'question_count': len(quiz.questions),
-                    'total_points': quiz.get_total_points()
-                }
-                quiz_list.append(quiz_data)
-            
-            return quiz_list
             
         except Exception as e:
             quizzes_ns.abort(500, str(e))
