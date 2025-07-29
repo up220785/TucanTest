@@ -2,6 +2,7 @@ from flask import request
 from flask_restx import Namespace, Resource, fields
 from models import db, CourseInvitation, Course, User, Enrollment
 from datetime import datetime
+from auth import require_teacher, require_student, require_auth
 
 # Create namespace for invitation responses
 invitations_ns = Namespace('invitations', description='Course invitation response operations')
@@ -27,10 +28,12 @@ invitation_response_model = invitations_ns.model('InvitationResponse', {
 
 @invitations_ns.route('/<int:invitation_id>')
 class InvitationDetailAPI(Resource):
-    @invitations_ns.doc('get_invitation_details')
+    @invitations_ns.doc('get_invitation_details', security='Bearer')
     @invitations_ns.marshal_with(invitation_model)
     @invitations_ns.response(404, 'Invitation not found')
-    def get(self, invitation_id):
+    @invitations_ns.response(401, 'Authentication required')
+    @require_auth
+    def get(self, invitation_id, current_user=None):
         """Get details of a specific course invitation"""
         try:
             invitation = CourseInvitation.query.get_or_404(invitation_id)
@@ -52,12 +55,15 @@ class InvitationDetailAPI(Resource):
 
 @invitations_ns.route('/<int:invitation_id>/accept')
 class AcceptInvitationAPI(Resource):
-    @invitations_ns.doc('accept_course_invitation')
+    @invitations_ns.doc('accept_course_invitation', security='Bearer')
     @invitations_ns.marshal_with(invitation_response_model)
     @invitations_ns.response(400, 'Invalid invitation state')
     @invitations_ns.response(404, 'Invitation not found')
+    @invitations_ns.response(401, 'Authentication required')
+    @invitations_ns.response(403, 'Student access required')
     @invitations_ns.response(409, 'Student already enrolled or course full')
-    def put(self, invitation_id):
+    @require_student
+    def put(self, invitation_id, current_user=None):
         """Accept a course invitation"""
         try:
             invitation = CourseInvitation.query.get_or_404(invitation_id)
@@ -128,11 +134,14 @@ class AcceptInvitationAPI(Resource):
 
 @invitations_ns.route('/<int:invitation_id>/reject')
 class RejectInvitationAPI(Resource):
-    @invitations_ns.doc('reject_course_invitation')
+    @invitations_ns.doc('reject_course_invitation', security='Bearer')
     @invitations_ns.marshal_with(invitation_response_model)
     @invitations_ns.response(400, 'Invalid invitation state')
     @invitations_ns.response(404, 'Invitation not found')
-    def put(self, invitation_id):
+    @invitations_ns.response(401, 'Authentication required')
+    @invitations_ns.response(403, 'Student access required')
+    @require_student
+    def put(self, invitation_id, current_user=None):
         """Reject a course invitation"""
         try:
             invitation = CourseInvitation.query.get_or_404(invitation_id)
@@ -168,13 +177,15 @@ class RejectInvitationAPI(Resource):
 
 @invitations_ns.route('/users/<int:student_id>')
 class StudentInvitationsAPI(Resource):
-    @invitations_ns.doc('get_student_invitations')
+    @invitations_ns.doc('get_student_invitations', security='Bearer')
     @invitations_ns.marshal_list_with(invitation_model)
     @invitations_ns.response(403, 'User is not a student')
     @invitations_ns.response(404, 'User not found')
+    @invitations_ns.response(401, 'Authentication required')
     @invitations_ns.param('status', 'Filter by invitation status', enum=['pending', 'accepted', 'rejected', 'expired'])
     @invitations_ns.param('include_expired', 'Include expired invitations', type='boolean', default=False)
-    def get(self, student_id):
+    @require_auth
+    def get(self, student_id, current_user=None):
         """Get all invitations for a student"""
         try:
             student = User.query.get_or_404(student_id)

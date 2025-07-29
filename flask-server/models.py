@@ -193,8 +193,12 @@ class QuizSubmission(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
     student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    started_at = db.Column(db.DateTime, default=datetime.utcnow)
     submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    completed_at = db.Column(db.DateTime, nullable=True)
+    is_completed = db.Column(db.Boolean, default=False)
     is_graded = db.Column(db.Boolean, default=False)
+    attempt_number = db.Column(db.Integer, default=1)
     total_score = db.Column(db.Integer, nullable=True)
     max_possible_score = db.Column(db.Integer, nullable=True)
     auto_graded_score = db.Column(db.Integer, nullable=True)  # Score from auto-graded questions

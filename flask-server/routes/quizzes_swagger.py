@@ -2,6 +2,7 @@ from flask import request
 from flask_restx import Namespace, Resource, fields
 from models import db, Quiz, Course, Question, Option, QuizSubmission, Answer
 from datetime import datetime
+from auth import require_teacher, require_student, require_auth
 
 # Create namespace for quizzes
 quizzes_ns = Namespace('quizzes', description='Quiz management operations')
@@ -61,24 +62,33 @@ submission_model = quizzes_ns.model('QuizSubmission', {
 
 @quizzes_ns.route('/')
 class QuizListAPI(Resource):
-    @quizzes_ns.doc('get_all_quizzes')
+    @quizzes_ns.doc('get_all_quizzes', security='Bearer')
     @quizzes_ns.marshal_list_with(quiz_model)
     @quizzes_ns.param('course_id', 'Filter by course ID', type='integer')
     @quizzes_ns.param('published_only', 'Filter to show only published quizzes', type='boolean', default=False)
-    def get(self):
+    @quizzes_ns.response(401, 'Authentication required')
+    @require_auth
+    def get(self, current_user=None):
         """Get all quizzes"""
         try:
             query = Quiz.query
             
             # Apply filters
             course_id = request.args.get('course_id', type=int)
-            published_only = request.args.get('published_only', 'false').lower() == 'true'
             
             if course_id:
                 query = query.filter_by(course_id=course_id)
             
-            if published_only:
+            # For students: ALWAYS filter to only published quizzes regardless of parameter
+            # For teachers: respect the published_only parameter (default false shows all)
+            if current_user and current_user.role == 'student':
+                # Students can ONLY see published quizzes
                 query = query.filter_by(is_published=True)
+            else:
+                # Teachers can see all quizzes or filter by published_only parameter
+                published_only = request.args.get('published_only', 'false').lower() == 'true'
+                if published_only:
+                    query = query.filter_by(is_published=True)
             
             quizzes = query.all()
             
@@ -103,11 +113,14 @@ class QuizListAPI(Resource):
         except Exception as e:
             quizzes_ns.abort(500, str(e))
 
-    @quizzes_ns.doc('create_quiz')
+    @quizzes_ns.doc('create_quiz', security='Bearer')
     @quizzes_ns.expect(quiz_create)
     @quizzes_ns.marshal_with(quiz_model, code=201)
     @quizzes_ns.response(400, 'Validation error')
-    def post(self):
+    @quizzes_ns.response(401, 'Authentication required')
+    @quizzes_ns.response(403, 'Teacher access required')
+    @require_teacher
+    def post(self, current_user=None):
         """Create a new quiz"""
         try:
             data = request.get_json()
@@ -186,11 +199,14 @@ class QuizAPI(Resource):
         except Exception as e:
             quizzes_ns.abort(404, 'Quiz not found')
 
-    @quizzes_ns.doc('update_quiz')
+    @quizzes_ns.doc('update_quiz', security='Bearer')
     @quizzes_ns.expect(quiz_update)
     @quizzes_ns.marshal_with(quiz_model)
     @quizzes_ns.response(404, 'Quiz not found')
-    def put(self, quiz_id):
+    @quizzes_ns.response(401, 'Authentication required')
+    @quizzes_ns.response(403, 'Teacher access required')
+    @require_teacher
+    def put(self, quiz_id, current_user=None):
         """Update quiz details"""
         try:
             quiz = Quiz.query.get_or_404(quiz_id)
@@ -234,10 +250,13 @@ class QuizAPI(Resource):
             db.session.rollback()
             quizzes_ns.abort(500, str(e))
 
-    @quizzes_ns.doc('delete_quiz')
+    @quizzes_ns.doc('delete_quiz', security='Bearer')
     @quizzes_ns.response(200, 'Quiz deleted successfully')
     @quizzes_ns.response(404, 'Quiz not found')
-    def delete(self, quiz_id):
+    @quizzes_ns.response(401, 'Authentication required')
+    @quizzes_ns.response(403, 'Teacher access required')
+    @require_teacher
+    def delete(self, quiz_id, current_user=None):
         """Delete a quiz"""
         try:
             quiz = Quiz.query.get_or_404(quiz_id)
@@ -253,13 +272,16 @@ class QuizAPI(Resource):
 
 @quizzes_ns.route('/<int:quiz_id>/start')
 class QuizStartAPI(Resource):
-    @quizzes_ns.doc('start_quiz')
+    @quizzes_ns.doc('start_quiz', security='Bearer')
     @quizzes_ns.expect(quizzes_ns.model('StartQuiz', {
         'student_id': fields.Integer(required=True, description='Student ID', example=1)
     }))
     @quizzes_ns.marshal_with(submission_model, code=201)
     @quizzes_ns.response(400, 'Quiz cannot be started')
-    def post(self, quiz_id):
+    @quizzes_ns.response(401, 'Authentication required')
+    @quizzes_ns.response(403, 'Student access required')
+    @require_student
+    def post(self, quiz_id, current_user=None):
         """Start a quiz attempt"""
         try:
             quiz = Quiz.query.get_or_404(quiz_id)
@@ -331,12 +353,15 @@ class QuizStartAPI(Resource):
 
 @quizzes_ns.route('/<int:quiz_id>/submissions')
 class QuizSubmissionsAPI(Resource):
-    @quizzes_ns.doc('get_quiz_submissions')
+    @quizzes_ns.doc('get_quiz_submissions', security='Bearer')
     @quizzes_ns.marshal_list_with(submission_model)
     @quizzes_ns.response(404, 'Quiz not found')
+    @quizzes_ns.response(401, 'Authentication required')
+    @quizzes_ns.response(403, 'Teacher access required')
     @quizzes_ns.param('student_id', 'Filter by student ID', type='integer')
     @quizzes_ns.param('completed_only', 'Show only completed submissions', type='boolean', default=False)
-    def get(self, quiz_id):
+    @require_teacher
+    def get(self, quiz_id, current_user=None):
         """Get all submissions for a quiz"""
         try:
             quiz = Quiz.query.get_or_404(quiz_id)
@@ -378,4 +403,112 @@ class QuizSubmissionsAPI(Resource):
             return submission_list
             
         except Exception as e:
+            quizzes_ns.abort(500, str(e))
+
+@quizzes_ns.route('/courses/<int:course_id>')
+class CourseQuizzesAPI(Resource):
+    @quizzes_ns.doc('get_course_quizzes', security='Bearer')
+    @quizzes_ns.marshal_list_with(quiz_model)
+    @quizzes_ns.response(404, 'Course not found')
+    @quizzes_ns.response(401, 'Authentication required')
+    @quizzes_ns.param('published_only', 'Show only published quizzes', type='boolean', default=False)
+    @require_auth
+    def get(self, course_id, current_user=None):
+        """Get all quizzes for a specific course"""
+        try:
+            course = Course.query.get_or_404(course_id)
+            
+            query = Quiz.query.filter_by(course_id=course_id)
+            
+            # For students: ALWAYS filter to only published quizzes regardless of parameter
+            # For teachers: respect the published_only parameter (default false shows all)
+            if current_user and current_user.role == 'student':
+                # Students can ONLY see published quizzes
+                query = query.filter_by(is_published=True)
+            else:
+                # Teachers can see all quizzes or filter by published_only parameter
+                published_only = request.args.get('published_only', 'false').lower() == 'true'
+                if published_only:
+                    query = query.filter_by(is_published=True)
+            
+            quizzes = query.all()
+            
+            quiz_list = []
+            for quiz in quizzes:
+                quiz_data = {
+                    'id': quiz.id,
+                    'title': quiz.title,
+                    'description': quiz.description,
+                    'course_id': quiz.course_id,
+                    'course_name': quiz.course.name,
+                    'is_published': quiz.is_published,
+                    'due_date': quiz.due_date.isoformat() if quiz.due_date else None,
+                    'created_at': quiz.created_at.isoformat() if quiz.created_at else None,
+                    'question_count': len(quiz.questions),
+                    'total_points': quiz.get_total_points()
+                }
+                quiz_list.append(quiz_data)
+            
+            return quiz_list
+            
+        except Exception as e:
+            quizzes_ns.abort(500, str(e))
+
+    @quizzes_ns.doc('create_course_quiz', security='Bearer')
+    @quizzes_ns.expect(course_quiz_create)
+    @quizzes_ns.marshal_with(quiz_model, code=201)
+    @quizzes_ns.response(400, 'Validation error')
+    @quizzes_ns.response(404, 'Course not found')
+    @quizzes_ns.response(401, 'Authentication required')
+    @quizzes_ns.response(403, 'Teacher access required')
+    @require_teacher
+    def post(self, course_id, current_user=None):
+        """Create a new quiz for a specific course"""
+        try:
+            course = Course.query.get_or_404(course_id)
+            data = request.get_json()
+            
+            # Validate required fields (course_id not needed since it's from URL)
+            required_fields = ['title', 'description']
+            for field in required_fields:
+                if field not in data or not data[field]:
+                    quizzes_ns.abort(400, f'{field} is required')
+            
+            # Parse due date if provided
+            due_date = None
+            if data.get('due_date'):
+                try:
+                    due_date = datetime.fromisoformat(data['due_date'].replace('Z', '+00:00'))
+                except ValueError:
+                    quizzes_ns.abort(400, 'Invalid due_date format')
+            
+            # Create quiz
+            current_time = datetime.utcnow()
+            quiz = Quiz(
+                course_id=course_id,  # Use course_id from URL
+                title=data['title'],
+                description=data['description'],
+                due_date=due_date,
+                is_published=data.get('is_published', False),
+                created_at=current_time
+            )
+            
+            db.session.add(quiz)
+            db.session.commit()
+            
+            return {
+                'id': quiz.id,
+                'course_id': quiz.course_id,
+                'title': quiz.title,
+                'description': quiz.description,
+                'course_name': quiz.course.name,
+                'is_published': quiz.is_published,
+                'due_date': quiz.due_date.isoformat() if quiz.due_date else None,
+                'created_at': quiz.created_at.isoformat() if quiz.created_at else None,
+                'question_count': 0,  # New quiz has no questions yet
+                'total_points': 0     # New quiz has no points yet
+            }
+            
+        except Exception as e:
+            db.session.rollback()
             quizzes_ns.abort(500, str(e))

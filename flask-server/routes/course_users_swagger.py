@@ -2,6 +2,7 @@ from flask import request
 from flask_restx import Namespace, Resource, fields
 from models import db, Course, User, Enrollment
 from datetime import datetime
+from auth import require_teacher, require_student, require_auth
 
 # Create namespace for specialized course endpoints
 course_users_ns = Namespace('course-users', description='Specialized course-user relationship operations')
@@ -24,12 +25,14 @@ course_model = course_users_ns.model('Course', {
 
 @course_users_ns.route('/teachers/<int:teacher_id>/courses')
 class TeacherCoursesAPI(Resource):
-    @course_users_ns.doc('get_teacher_courses')
+    @course_users_ns.doc('get_teacher_courses', security='Bearer')
     @course_users_ns.marshal_list_with(course_model)
     @course_users_ns.response(403, 'User is not a teacher')
     @course_users_ns.response(404, 'Teacher not found')
+    @course_users_ns.response(401, 'Authentication required')
     @course_users_ns.param('published_only', 'Filter to show only published courses', type='boolean', default=False)
     @course_users_ns.param('include_stats', 'Include detailed statistics', type='boolean', default=False)
+    @require_auth
     def get(self, teacher_id):
         """Get all courses taught by a specific teacher"""
         try:
@@ -89,12 +92,14 @@ class TeacherCoursesAPI(Resource):
 
 @course_users_ns.route('/students/<int:student_id>/courses')
 class StudentCoursesAPI(Resource):
-    @course_users_ns.doc('get_student_courses')
+    @course_users_ns.doc('get_student_courses', security='Bearer')
     @course_users_ns.marshal_list_with(course_model)
     @course_users_ns.response(403, 'User is not a student')
     @course_users_ns.response(404, 'Student not found')
+    @course_users_ns.response(401, 'Authentication required')
     @course_users_ns.param('status', 'Filter by enrollment status', enum=['accepted', 'dropped'], default='accepted')
     @course_users_ns.param('include_grades', 'Include grade information', type='boolean', default=False)
+    @require_auth
     def get(self, student_id):
         """Get all courses where a student is enrolled"""
         try:

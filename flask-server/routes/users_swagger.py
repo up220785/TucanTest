@@ -3,6 +3,7 @@ from flask_restx import Namespace, Resource, fields
 from models import db, User
 from datetime import datetime
 import re
+from auth import require_auth, require_teacher, require_student, require_teacher_or_admin
 
 # Create namespace for users
 users_ns = Namespace('users', description='User management operations')
@@ -15,18 +16,6 @@ user_model = users_ns.model('User', {
     'role': fields.String(required=True, description='User role', enum=['student', 'teacher']),
     'created_at': fields.DateTime(description='Account creation date'),
     'last_login': fields.DateTime(description='Last login date')
-})
-
-user_register = users_ns.model('UserRegister', {
-    'name': fields.String(required=True, description='User full name', example='John Doe'),
-    'email': fields.String(required=True, description='User email address', example='john@example.com'),
-    'password': fields.String(required=True, description='User password (min 6 characters)', example='password123'),
-    'role': fields.String(required=True, description='User role', enum=['student', 'teacher'], example='student')
-})
-
-user_login = users_ns.model('UserLogin', {
-    'email': fields.String(required=True, description='User email address', example='john@example.com'),
-    'password': fields.String(required=True, description='User password', example='password123')
 })
 
 user_update = users_ns.model('UserUpdate', {
@@ -53,8 +42,9 @@ def validate_email(email):
 class UserListAPI(Resource):
     @users_ns.doc('get_all_users')
     @users_ns.marshal_list_with(user_model)
-    def get(self):
-        """Get all users (admin functionality)"""
+    @require_teacher_or_admin  # Add authentication and admin/teacher access only
+    def get(self, current_user=None):
+        """Get all users (admin/teacher functionality only)"""
         try:
             users = User.query.all()
             return [{
@@ -73,9 +63,14 @@ class UserAPI(Resource):
     @users_ns.doc('get_user')
     @users_ns.marshal_with(user_model)
     @users_ns.response(404, 'User not found')
-    def get(self, user_id):
-        """Get a specific user by ID"""
+    @require_auth
+    def get(self, user_id, current_user=None):
+        """Get a specific user by ID (requires authentication)"""
         try:
+            # Users can only view their own profile unless they're admin
+            if current_user.id != user_id and current_user.role != 'admin':
+                users_ns.abort(403, 'Access denied. You can only view your own profile.')
+            
             user = User.query.get_or_404(user_id)
             return {
                 'id': user.id,
@@ -93,9 +88,14 @@ class UserAPI(Resource):
     @users_ns.marshal_with(user_model)
     @users_ns.response(404, 'User not found')
     @users_ns.response(400, 'Validation error')
-    def put(self, user_id):
-        """Update user profile"""
+    @require_auth
+    def put(self, user_id, current_user=None):
+        """Update user profile (requires authentication)"""
         try:
+            # Users can only update their own profile unless they're admin
+            if current_user.id != user_id and current_user.role != 'admin':
+                users_ns.abort(403, 'Access denied. You can only update your own profile.')
+            
             user = User.query.get_or_404(user_id)
             data = request.get_json()
             
@@ -139,8 +139,14 @@ class UserAPI(Resource):
     @users_ns.doc('delete_user')
     @users_ns.response(200, 'User deleted successfully')
     @users_ns.response(404, 'User not found')
-    def delete(self, user_id):
-        """Delete a user (admin functionality)"""
+    @users_ns.response(403, 'Access denied')
+    @require_auth  # Changed from require_teacher_or_admin to require_auth
+    def delete(self, user_id, current_user=None):
+        """Delete user profile (users can only delete their own profile)"""
+        # Users can only delete their own profile
+        if current_user.id != user_id:
+            users_ns.abort(403, 'Access denied. You can only delete your own profile.')
+        
         try:
             user = User.query.get_or_404(user_id)
             
@@ -180,108 +186,20 @@ class UserAPI(Resource):
             db.session.rollback()
             users_ns.abort(500, str(e))
 
-@users_ns.route('/register')
-class UserRegisterAPI(Resource):
-    @users_ns.doc('register_user')
-    @users_ns.expect(user_register)
-    @users_ns.marshal_with(user_model, code=201)
-    @users_ns.response(400, 'Validation error')
-    def post(self):
-        """Register a new user"""
-        try:
-            data = request.get_json()
-            
-            # Validate required fields
-            required_fields = ['name', 'email', 'password', 'role']
-            for field in required_fields:
-                if field not in data or not data[field]:
-                    users_ns.abort(400, f'{field} is required')
-            
-            # Validate email format
-            if not validate_email(data['email']):
-                users_ns.abort(400, 'Invalid email format')
-            
-            # Validate role
-            if data['role'] not in ['student', 'teacher']:
-                users_ns.abort(400, 'Role must be either student or teacher')
-            
-            # Check if email already exists
-            if User.query.filter_by(email=data['email']).first():
-                users_ns.abort(400, 'Email already registered')
-            
-            # Validate password length
-            if len(data['password']) < 6:
-                users_ns.abort(400, 'Password must be at least 6 characters long')
-            
-            # Create new user
-            user = User(
-                name=data['name'],
-                email=data['email'],
-                role=data['role']
-            )
-            user.set_password(data['password'])
-            
-            db.session.add(user)
-            db.session.commit()
-            
-            return {
-                'id': user.id,
-                'name': user.name,
-                'email': user.email,
-                'role': user.role,
-                'created_at': user.created_at.isoformat() if user.created_at else None,
-                'last_login': user.last_login.isoformat() if user.last_login else None
-            }, 201
-            
-        except Exception as e:
-            db.session.rollback()
-            users_ns.abort(500, str(e))
-
-@users_ns.route('/login')
-class UserLoginAPI(Resource):
-    @users_ns.doc('login_user')
-    @users_ns.expect(user_login)
-    @users_ns.marshal_with(user_model)
-    @users_ns.response(401, 'Invalid credentials')
-    def post(self):
-        """User login"""
-        try:
-            data = request.get_json()
-            
-            # Validate required fields
-            if not data.get('email') or not data.get('password'):
-                users_ns.abort(400, 'Email and password are required')
-            
-            # Find user by email
-            user = User.query.filter_by(email=data['email']).first()
-            
-            if not user or not user.check_password(data['password']):
-                users_ns.abort(401, 'Invalid email or password')
-            
-            # Update last login
-            user.last_login = datetime.utcnow()
-            db.session.commit()
-            
-            return {
-                'id': user.id,
-                'name': user.name,
-                'email': user.email,
-                'role': user.role,
-                'created_at': user.created_at.isoformat() if user.created_at else None,
-                'last_login': user.last_login.isoformat() if user.last_login else None
-            }
-            
-        except Exception as e:
-            users_ns.abort(500, str(e))
-
 @users_ns.route('/<int:user_id>/stats')
 class UserStatsAPI(Resource):
     @users_ns.doc('get_user_stats')
     @users_ns.marshal_with(user_stats)
     @users_ns.response(404, 'User not found')
-    def get(self, user_id):
-        """Get user statistics"""
+    @users_ns.response(403, 'Access denied')
+    @require_auth  # Require authentication
+    def get(self, user_id, current_user=None):
+        """Get user statistics (requires authentication)"""
         try:
+            # Users can only view their own stats unless they're admin/teacher
+            if current_user.id != user_id and current_user.role not in ['teacher', 'admin']:
+                users_ns.abort(403, 'Access denied. You can only view your own statistics.')
+            
             user = User.query.get_or_404(user_id)
             
             if user.role == 'student':
