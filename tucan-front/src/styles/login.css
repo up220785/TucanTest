@@ -1,0 +1,61 @@
+/* src/styles/login.css y register.css */
+body {
+  margin: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    white,
+    white 30px,
+    #f0f0f0 30px,
+    #f0f0f0 60px
+  );
+}
+
+body:hover {
+  background: repeating-linear-gradient(
+    45deg,
+    #0b1e3d,
+    #0b1e3d 30px,
+    #f0f0f0 30px,
+    #f0f0f0 60px
+  );
+}
+
+.auth-box {
+  margin: 80px auto;
+  padding: 40px;
+  background-color: white;
+  border-radius: 12px;
+  max-width: 420px;
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+.rainbow-title {
+  background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+  background-clip: text;             /* ← propiedad estándar */
+  -webkit-background-clip: text;     /* ← para compatibilidad con WebKit */
+  -webkit-text-fill-color: transparent;
+  font-weight: bold;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+}
+
+/* Botones */
+.orange-btn {
+  background-color: #ffa500;
+  color: #fff;
+}
+
+.orange-btn:hover {
+  background-color: #e69500;
+}
+
+.white-outline-btn {
+  background-color: #fff;
+  border: 2px solid #ffa500;
+  color: #ffa500;
+}
+
+.white-outline-btn:hover {
+  background-color: #ffe4b5;
+}

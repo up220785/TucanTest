@@ -1,17 +1,18 @@
+// src/pages/HomePage.tsx
 import React from "react";
 import { Container, Typography, Button } from "@mui/material";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    router.push("/login"); // Redirige al login tras cerrar sesión
+    navigate("/login");
   };
 
   return (
     <Container maxWidth="sm" sx={{ textAlign: "center", mt: 4 }}>
-      <Typography variant="h3" component="h1" gutterBottom>
+      <Typography variant="h3" gutterBottom>
         Bienvenido a la página de inicio 🏋️‍♂️
       </Typography>
       <Typography variant="body1" gutterBottom>
