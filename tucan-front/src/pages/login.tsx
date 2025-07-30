@@ -1,67 +1,163 @@
-// src/pages/Login.tsx
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   TextField,
   Button,
   Typography,
-  Stack,
-  Box
+  Box,
+  Grid,
 } from "@mui/material";
-import "../styles/login.css";
+import { useNavigate } from "react-router-dom";
 
-const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const Login: React.FC = () => {
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (email === "admin@example.com" && password === "1234") {
-      navigate("/homepage");
-    } else {
-      setError("Usuario o contraseña incorrectos.");
+
+    if (!email || !password) {
+      setError("Debes completar ambos campos.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem("tucan_token", data.token);
+        localStorage.setItem("tucan_user", JSON.stringify(data.user)); // opcional
+
+        navigate("/homepage");
+      } else {
+        setError(data.message || data.error || "Usuario o contraseña incorrectos.");
+      }
+    } catch {
+      setError("Error al conectarse con el servidor.");
     }
   };
 
+  const handleRegister = () => {
+    navigate("/register");
+  };
+
+  useEffect(() => {
+    const boxes = document.querySelectorAll(".box");
+
+    const handleMouseMove = (event: MouseEvent) => {
+      boxes.forEach((box) => {
+        const rect = box.getBoundingClientRect();
+        const distance = Math.sqrt(
+          Math.pow(event.clientX - (rect.left + rect.width / 2), 2) +
+            Math.pow(event.clientY - (rect.top + rect.height / 2), 2)
+        );
+
+        let intensity = Math.max(0, 1 - distance / 100);
+        let color =
+          intensity > 0.7
+            ? "#30638E"
+            : `rgba(48, 99, 142, ${intensity.toFixed(2)})`;
+
+        (box as HTMLElement).style.backgroundColor = color;
+        (box as HTMLElement).style.opacity = "1";
+
+        setTimeout(() => {
+          (box as HTMLElement).style.backgroundColor = "transparent";
+        }, 600);
+      });
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
+
   return (
-    <Container>
-      <Box className="auth-box">
-        <Typography className="rainbow-title">
+    <Box className="background">
+      <Grid container className="grid-background">
+        {[...Array(600)].map((_, index) => (
+          <Box key={index} className="box" />
+        ))}
+      </Grid>
+
+      <Container maxWidth="sm" className="form-container">
+        <Typography
+          variant="h3"
+          component="h1"
+          gutterBottom
+          className="rainbow-text"
+        >
           Iniciar sesión
         </Typography>
-        {error && <Typography color="error">{error}</Typography>}
+
+        {error && (
+          <Typography variant="body1" color="error">
+            {error}
+          </Typography>
+        )}
+
         <form onSubmit={handleLogin}>
-          <Stack spacing={2}>
-            <TextField
-              label="Correo Electrónico"
-              fullWidth
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              label="Contraseña"
-              type="password"
-              fullWidth
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <Button type="submit" variant="contained" className="orange-btn">
-              INICIAR SESIÓN
-            </Button>
-            <Button
-              variant="outlined"
-              className="white-outline-btn"
-              onClick={() => navigate("/register")}
-            >
-              REGISTRARTE
-            </Button>
-          </Stack>
+          <TextField
+            label="Correo Electrónico"
+            type="email"
+            fullWidth
+            margin="normal"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+          />
+          <TextField
+            label="Contraseña"
+            type="password"
+            fullWidth
+            margin="normal"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+          />
+
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            sx={{
+              backgroundColor: "#ffcf49",
+              color: "#fff",
+              "&:hover": { backgroundColor: "#e6b844" },
+              mt: 2,
+              py: 1.5,
+              fontWeight: "bold",
+            }}
+          >
+            Iniciar sesión
+          </Button>
+
+          <Button
+            variant="outlined"
+            fullWidth
+            onClick={handleRegister}
+            sx={{
+              borderColor: "#30638E",
+              color: "#30638E",
+              "&:hover": { backgroundColor: "#30638E", color: "#FFF" },
+              mt: 2,
+              py: 1.5,
+              fontWeight: "bold",
+            }}
+          >
+            Registrarte
+          </Button>
         </form>
-      </Box>
-    </Container>
+      </Container>
+    </Box>
   );
 };
 

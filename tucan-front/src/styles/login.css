@@ -1,76 +1,62 @@
 body {
-  margin: 0;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: repeating-linear-gradient(
-    45deg,
-    white,
-    white 30px,
-    #f0f0f0 30px,
-    #f0f0f0 60px
-  );
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
 }
 
-body:hover {
-  background: repeating-linear-gradient(
-    45deg,
-    #0b1e3d,
-    #0b1e3d 30px,
-    #f0f0f0 30px,
-    #f0f0f0 60px
-  );
+.background {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #F5F5F5;
 }
 
-.auth-box {
-  padding: 40px;
-  background-color: white;
-  border-radius: 12px;
-  max-width: 420px;
-  box-shadow: 0 0 16px rgba(0, 0, 0, 0.15);
-  text-align: center;
+/* Efecto de sombra en el formulario */
+.form-container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    z-index: 10;
 }
 
-/* 🎨 Título animado arcoíris */
-.rainbow-title {
-  font-size: 2.6rem; /* Más grande */
-  font-weight: bold;
-  margin-bottom: 20px;
-  background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
-  background-size: 400%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: rainbowMove 4s linear infinite;
+/* Cuadros en todo el fondo */
+.grid-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+}
+.box {
+    width: 40px;
+    height: 40px;
+    margin: 2px;
+    background-color: transparent; /* Ahora los cuadros inician transparentes */
+    transition: background-color 0.1s ease-in-out, opacity 0.5s ease-out;
+}
+.rainbow-text {
+    text-align: center;
+    font-weight: bold;
+    font-size: 2.5rem;
+    background-image: linear-gradient(90deg, 
+        #070A09, #E4EAF0, #FFCF49, #EA5C00, #F04302);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: rainbowAnimation 3s infinite alternate;
 }
 
-/* 🌀 Animación que mueve el gradiente */
-@keyframes rainbowMove {
-  0% {
-    background-position: 0% center;
-  }
-  100% {
-    background-position: 100% center;
-  }
-}
-
-/* Botones */
-.orange-btn {
-  background-color: #ffa500;
-  color: #fff;
-}
-
-.orange-btn:hover {
-  background-color: #e69500;
-}
-
-.white-outline-btn {
-  background-color: #fff;
-  border: 2px solid #ffa500;
-  color: #ffa500;
-}
-
-.white-outline-btn:hover {
-  background-color: #ffe4b5;
+@keyframes rainbowAnimation {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
 }
