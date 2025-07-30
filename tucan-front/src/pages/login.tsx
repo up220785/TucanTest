@@ -6,14 +6,30 @@ import {
   Typography,
   Box,
   Grid,
+  Alert,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Check for registration/logout success message and pre-fill email
+  useEffect(() => {
+    if (location.state) {
+      const { message, email: registeredEmail } = location.state as any;
+      if (message) {
+        setSuccessMessage(message);
+      }
+      if (registeredEmail) {
+        setEmail(registeredEmail);
+      }
+    }
+  }, [location.state]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -97,6 +113,12 @@ const Login: React.FC = () => {
         >
           Iniciar sesión
         </Typography>
+
+        {successMessage && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {successMessage}
+          </Alert>
+        )}
 
         {error && (
           <Typography variant="body1" color="error">

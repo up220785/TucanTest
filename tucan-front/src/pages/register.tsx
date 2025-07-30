@@ -34,24 +34,43 @@ const Register: React.FC = () => {
       return;
     }
 
+    // Frontend validation to match backend requirements
+    if (password.length < 8) {
+      setError("La contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+
+    if (!/[A-Za-z]/.test(password)) {
+      setError("La contraseña debe contener al menos una letra.");
+      return;
+    }
+
+    if (!/\d/.test(password)) {
+      setError("La contraseña debe contener al menos un número.");
+      return;
+    }
+
     try {
       const response = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fullName: name.trim(),
+          name: name.trim(),
           email: email.trim().toLowerCase(),
           password,
-          confirmPassword,
           role: role === "Alumno" ? "student" : "teacher",
         }),
       });
 
       const data = await response.json();
       if (response.ok) {
-        localStorage.setItem("tucan_token", data.token);
-        localStorage.setItem("tucan_user", JSON.stringify(data.user));
-        navigate("/homepage");
+        // Registration successful - redirect to login page
+        navigate("/login", { 
+          state: { 
+            message: "¡Registro exitoso! Por favor, inicia sesión con tus credenciales.",
+            email: email.trim().toLowerCase() 
+          } 
+        });
       } else {
         setError(data.message || data.error || "Error en el registro.");
       }
