@@ -1,4 +1,116 @@
-# 🧪 TucanTest API## 🚀 Getting Started
+# 🧪 TucanTest API
+
+## 🚀 Quick Setup Guide
+
+### 📋 Prerequisites
+- **Python 3.8+** installed on your system
+- **Git** for cloning the repository
+- **Command line/Terminal** access
+
+### 🔧 Initial Setup (First Time Only)
+
+#### 1. Clone the Repository
+```bash
+git clone https://github.com/up220785/TucanTest.git
+cd TucanTest/flask-server
+```
+
+#### 2. Create Virtual Environment (Recommended)
+```bash
+# Windows
+python -m venv .venv
+.venv\Scripts\activate
+
+# macOS/Linux
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+#### 3. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+#### 4. Initialize Database (Automatic)
+The database will be automatically created when you first run the server. The system includes:
+- ✅ Auto-creation of all tables
+- ✅ Sample data for testing
+- ✅ Proper schema validation
+
+#### 5. Start the Server
+```bash
+python server.py
+```
+
+### ✅ Verify Installation
+After starting the server, you should see:
+```
+Database tables created successfully!
+Sample data already exists!
+ * Serving Flask app 'server'
+ * Debug mode: on
+ * Running on http://127.0.0.1:5000
+```
+
+### 🌐 Access Points
+- **API Server**: http://localhost:5000
+- **Swagger UI**: http://localhost:5000/api/docs/
+- **Interactive API Documentation**: Full testing interface available
+
+### 🧪 Quick Test
+1. Open http://localhost:5000/api/docs/ in your browser
+2. Try the `GET /api/auth/config-check` endpoint (no authentication required)
+3. You should get a successful response confirming the system is working
+
+### 🔄 Daily Development Workflow
+```bash
+# 1. Navigate to project directory
+cd TucanTest/flask-server
+
+# 2. Activate virtual environment (if not already active)
+# Windows:
+.venv\Scripts\activate
+# macOS/Linux:
+source .venv/bin/activate
+
+# 3. Start the server
+python server.py
+```
+
+### 🔍 Troubleshooting
+
+#### ❌ "Module not found" errors:
+```bash
+# Make sure virtual environment is activated and dependencies installed
+pip install -r requirements.txt
+```
+
+#### ❌ Port 5000 already in use:
+```bash
+# Kill process using port 5000 (Windows)
+netstat -ano | findstr :5000
+taskkill /PID <PID_NUMBER> /F
+
+# Kill process using port 5000 (macOS/Linux)
+lsof -ti:5000 | xargs kill -9
+```
+
+#### ❌ Database issues:
+The database file `tucantestschema.db` is included in the project. If you encounter issues:
+1. Stop the server
+2. Delete `tucantestschema.db` (if present)
+3. Restart the server - it will recreate the database automatically
+
+### 📚 What's Included
+- **Complete REST API** with JWT authentication
+- **Swagger Documentation** at `/api/docs/`
+- **Sample Data** for immediate testing
+- **Role-based Access Control** (teachers and students)
+- **Comprehensive Test Examples** (see sections below)
+
+---
+
+## 🚀 Getting Started
 
 1. Start your Flask server: `python server.py`
 2. Server will be running on: `http://localhost:5000`
