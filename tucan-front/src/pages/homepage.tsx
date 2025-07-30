@@ -49,6 +49,22 @@ const HomePage: React.FC = () => {
         <Typography variant="body2" sx={{ mb: 2, color: "#666" }}>
           {userName}
         </Typography>
+        
+        <Typography 
+          className="sidebar-item" 
+          onClick={() => navigate("/profile")}
+          sx={{ 
+            cursor: "pointer", 
+            "&:hover": { 
+              backgroundColor: "#f0f0f0", 
+              borderRadius: "4px",
+              padding: "4px 8px",
+              margin: "0 -8px"
+            } 
+          }}
+        >
+          Ver Mi Perfil
+        </Typography>
         <Typography className="sidebar-item">Formularios Guardados</Typography>
         <Typography className="sidebar-item">Aulas Guardadas</Typography>
         

@@ -1,0 +1,134 @@
+/* Profile page styles */
+.profile-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding-top: 2rem;
+}
+
+.profile-paper {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.profile-header {
+  background: linear-gradient(135deg, #30638E 0%, #ffcf49 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 12px 12px 0 0;
+  margin: -2rem -2rem 2rem -2rem;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1rem;
+  background-color: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.profile-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.profile-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.profile-field {
+  margin-bottom: 1rem;
+}
+
+.profile-field-label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.profile-field-value {
+  color: #666;
+  background-color: #f9f9f9;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+}
+
+.profile-edit-button {
+  background: linear-gradient(135deg, #ffcf49 0%, #30638E 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 25px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.profile-edit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(48, 99, 142, 0.3);
+}
+
+.profile-save-button {
+  background-color: #30638E;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 25px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.profile-save-button:hover {
+  background-color: #2a5a85;
+  transform: translateY(-1px);
+}
+
+.profile-cancel-button {
+  background-color: transparent;
+  color: #666;
+  border: 2px solid #666;
+  padding: 0.75rem 2rem;
+  border-radius: 25px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.profile-cancel-button:hover {
+  background-color: #666;
+  color: white;
+}
+
+.profile-password-section {
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  border-left: 4px solid #ffcf49;
+}
+
+.profile-info-chip {
+  margin: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 1rem;
+  }
+  
+  .profile-header {
+    padding: 1.5rem 1rem;
+  }
+  
+  .profile-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+}
