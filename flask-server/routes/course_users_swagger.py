@@ -33,7 +33,7 @@ class TeacherCoursesAPI(Resource):
     @course_users_ns.param('published_only', 'Filter to show only published courses', type='boolean', default=False)
     @course_users_ns.param('include_stats', 'Include detailed statistics', type='boolean', default=False)
     @require_auth
-    def get(self, teacher_id):
+    def get(self, teacher_id, current_user=None):
         """Get all courses taught by a specific teacher"""
         try:
             teacher = User.query.get_or_404(teacher_id)
@@ -100,7 +100,7 @@ class StudentCoursesAPI(Resource):
     @course_users_ns.param('status', 'Filter by enrollment status', enum=['accepted', 'dropped'], default='accepted')
     @course_users_ns.param('include_grades', 'Include grade information', type='boolean', default=False)
     @require_auth
-    def get(self, student_id):
+    def get(self, student_id, current_user=None):
         """Get all courses where a student is enrolled"""
         try:
             student = User.query.get_or_404(student_id)

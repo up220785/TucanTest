@@ -77,6 +77,39 @@ def get_course(course_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 404
 
+@courses_bp.route('/api/courses/public', methods=['GET'])
+def get_public_courses():
+    """Get all public published courses for student exploration"""
+    try:
+        # Get all public and published courses
+        courses = Course.query.filter_by(is_public=True, is_published=True).all()
+        
+        course_list = []
+        for course in courses:
+            # Get quiz count for this course
+            quiz_count = Quiz.query.filter_by(course_id=course.id, is_published=True).count()
+            
+            course_data = {
+                'id': course.id,
+                'name': course.name,
+                'description': course.description,
+                'is_public': course.is_public,
+                'is_published': course.is_published,
+                'max_capacity': course.max_capacity,
+                'teacher_id': course.teacher_id,
+                'teacher_name': course.teacher.name,
+                'created_at': course.created_at.isoformat() if course.created_at else None,
+                'enrolled_count': course.get_enrolled_count(),
+                'quiz_count': quiz_count,
+                'is_full': course.is_full()
+            }
+            course_list.append(course_data)
+        
+        return jsonify(course_list)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @courses_bp.route('/api/courses', methods=['POST'])
 def create_course():
     """Create a new course"""

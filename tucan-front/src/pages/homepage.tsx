@@ -3,13 +3,35 @@ import {
   Typography,
   Box,
   Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import "../styles/homepage.css";
 
+interface Course {
+  id: number;
+  name: string;
+  description: string;
+  is_public: boolean;
+  is_published: boolean;
+  max_capacity?: number;
+  enrolled_count: number;
+  quiz_count: number;
+  created_at: string;
+  teacher_name?: string;
+  enrollment_date?: string;
+}
+
 const HomePage: React.FC = () => {
   const [role, setRole] = useState<"student" | "teacher" | null>(null);
   const [userName, setUserName] = useState<string>("");
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,6 +42,13 @@ const HomePage: React.FC = () => {
         if (user && user.role) {
           setRole(user.role === "student" ? "student" : "teacher");
           setUserName(user.name || "Usuario");
+          
+          // Fetch published courses if user is a teacher
+          if (user.role === "teacher") {
+            fetchPublishedCourses(user.id);
+          } else if (user.role === "student") {
+            fetchEnrolledCourses(user.id);
+          }
         } else {
           setRole(null);
         }
@@ -28,6 +57,87 @@ const HomePage: React.FC = () => {
       }
     }
   }, []);
+
+  const fetchPublishedCourses = async (teacherId: number) => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("tucan_token");
+      
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      const response = await fetch(`http://localhost:5000/api/course-users/teachers/${teacherId}/courses`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.status === 401) {
+        localStorage.removeItem('tucan_token');
+        localStorage.removeItem('tucan_user');
+        navigate('/login');
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch courses');
+      }
+
+      const data = await response.json();
+      
+      // Filter to show only published courses
+      const publishedCourses = data.filter((course: Course) => course.is_published);
+      setCourses(publishedCourses.slice(0, 4)); // Show max 4 courses on homepage
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load courses');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchEnrolledCourses = async (studentId: number) => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("tucan_token");
+      
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      const response = await fetch(`http://localhost:5000/api/course-users/students/${studentId}/courses`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.status === 401) {
+        localStorage.removeItem('tucan_token');
+        localStorage.removeItem('tucan_user');
+        navigate('/login');
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch enrolled courses');
+      }
+
+      const data = await response.json();
+      
+      // Show max 4 enrolled courses on homepage
+      setCourses(data.slice(0, 4));
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load enrolled courses');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     // Clear user session data
@@ -65,6 +175,43 @@ const HomePage: React.FC = () => {
         >
           Ver Mi Perfil
         </Typography>
+        
+        {role === "teacher" && (
+          <Typography 
+            className="sidebar-item" 
+            onClick={() => navigate("/my-courses")}
+            sx={{ 
+              cursor: "pointer", 
+              "&:hover": { 
+                backgroundColor: "#f0f0f0", 
+                borderRadius: "4px",
+                padding: "4px 8px",
+                margin: "0 -8px"
+              } 
+            }}
+          >
+            Mis Cursos
+          </Typography>
+        )}
+
+        {role === "student" && (
+          <Typography 
+            className="sidebar-item" 
+            onClick={() => navigate("/explore-courses")}
+            sx={{ 
+              cursor: "pointer", 
+              "&:hover": { 
+                backgroundColor: "#f0f0f0", 
+                borderRadius: "4px",
+                padding: "4px 8px",
+                margin: "0 -8px"
+              } 
+            }}
+          >
+            Explorar Cursos
+          </Typography>
+        )}
+        
         <Typography className="sidebar-item">Formularios Guardados</Typography>
         <Typography className="sidebar-item">Aulas Guardadas</Typography>
         
@@ -95,33 +242,191 @@ const HomePage: React.FC = () => {
 
         {role === "teacher" && (
           <Box className="teacher-actions">
-            <Button className="create-form-button">Crear Formulario</Button>
+            <Button 
+              className="create-form-button"
+              onClick={() => navigate("/my-courses")}
+            >
+              Gestionar Cursos
+            </Button>
           </Box>
         )}
 
-        <Box
-          className="form-grid"
-          display="flex"
-          flexWrap="wrap"
-          gap={2}
-          justifyContent="flex-start"
-        >
-          <Box className="form-card" flex="1 1 300px">
-            <Typography className="form-name">Nombre del formulario</Typography>
-            <Typography className="form-grade">
-              {role === "teacher"
-                ? "Calificación General 10/10"
-                : "Calificación 10/10"}
-            </Typography>
-            <Typography className="form-status">No Contestado - Pendiente</Typography>
+        {role === "student" && (
+          <Box className="teacher-actions">
+            <Button 
+              className="create-form-button"
+              onClick={() => navigate("/explore-courses")}
+            >
+              Explorar Cursos
+            </Button>
           </Box>
+        )}
 
-          <Box className="form-card" flex="1 1 300px">
-            <Typography className="form-name">Nombre del formulario</Typography>
-            <Typography className="form-grade">No Calificado - Pendiente</Typography>
-            <Typography className="form-status">En revisión</Typography>
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        )}
+
+        {role === "teacher" && (
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+              Mis Cursos Publicados
+            </Typography>
+            
+            {loading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : courses.length === 0 ? (
+              <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+                <Typography variant="body1">
+                  No tienes cursos publicados aún
+                </Typography>
+                <Button 
+                  variant="outlined" 
+                  sx={{ mt: 2 }}
+                  onClick={() => navigate("/my-courses")}
+                >
+                  Crear tu primer curso
+                </Button>
+              </Box>
+            ) : (
+              <Box
+                className="form-grid"
+                display="flex"
+                flexWrap="wrap"
+                gap={2}
+                justifyContent="flex-start"
+              >
+                {courses.map((course) => (
+                  <Card key={course.id} sx={{ flex: "1 1 300px", maxWidth: 400 }}>
+                    <CardContent>
+                      <Typography variant="h6" className="form-name" sx={{ mb: 1 }}>
+                        {course.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        {course.description || 'Sin descripción'}
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                        <Chip 
+                          label="Publicado" 
+                          color="success" 
+                          size="small" 
+                        />
+                        <Chip 
+                          label={course.is_public ? 'Público' : 'Privado'} 
+                          color={course.is_public ? 'primary' : 'secondary'} 
+                          size="small" 
+                        />
+                      </Box>
+                      <Typography className="form-grade" variant="body2">
+                        {course.enrolled_count} estudiante{course.enrolled_count !== 1 ? 's' : ''} matriculado{course.enrolled_count !== 1 ? 's' : ''}
+                        {course.max_capacity && ` / ${course.max_capacity}`}
+                      </Typography>
+                      <Typography className="form-status" variant="body2">
+                        {course.quiz_count} quiz{course.quiz_count !== 1 ? 'zes' : ''} disponible{course.quiz_count !== 1 ? 's' : ''}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Box>
+            )}
+
+            {courses.length > 0 && (
+              <Box sx={{ textAlign: 'center', mt: 3 }}>
+                <Button 
+                  variant="outlined" 
+                  onClick={() => navigate("/my-courses")}
+                >
+                  Ver todos mis cursos
+                </Button>
+              </Box>
+            )}
           </Box>
-        </Box>
+        )}
+
+        {role === "student" && (
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+              Mis Cursos Matriculados
+            </Typography>
+            
+            {loading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : courses.length === 0 ? (
+              <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+                <Typography variant="body1">
+                  No estás matriculado en ningún curso aún
+                </Typography>
+                <Button 
+                  variant="outlined" 
+                  sx={{ mt: 2 }}
+                  onClick={() => navigate("/explore-courses")}
+                >
+                  Explorar cursos disponibles
+                </Button>
+              </Box>
+            ) : (
+              <Box
+                className="form-grid"
+                display="flex"
+                flexWrap="wrap"
+                gap={2}
+                justifyContent="flex-start"
+              >
+                {courses.map((course) => (
+                  <Card key={course.id} sx={{ flex: "1 1 300px", maxWidth: 400 }}>
+                    <CardContent>
+                      <Typography variant="h6" className="form-name" sx={{ mb: 1 }}>
+                        {course.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        {course.description || 'Sin descripción'}
+                      </Typography>
+                      {course.teacher_name && (
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                          Profesor: {course.teacher_name}
+                        </Typography>
+                      )}
+                      <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                        <Chip 
+                          label="Matriculado" 
+                          color="success" 
+                          size="small" 
+                        />
+                        <Chip 
+                          label={course.is_public ? 'Público' : 'Privado'} 
+                          color={course.is_public ? 'primary' : 'secondary'} 
+                          size="small" 
+                        />
+                      </Box>
+                      <Typography className="form-grade" variant="body2">
+                        {course.enrolled_count} estudiante{course.enrolled_count !== 1 ? 's' : ''} matriculado{course.enrolled_count !== 1 ? 's' : ''}
+                      </Typography>
+                      <Typography className="form-status" variant="body2">
+                        {course.quiz_count} quiz{course.quiz_count !== 1 ? 'zes' : ''} disponible{course.quiz_count !== 1 ? 's' : ''}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Box>
+            )}
+
+            {courses.length > 0 && (
+              <Box sx={{ textAlign: 'center', mt: 3 }}>
+                <Button 
+                  variant="outlined" 
+                  onClick={() => navigate("/explore-courses")}
+                >
+                  Explorar más cursos
+                </Button>
+              </Box>
+            )}
+          </Box>
+        )}
       </main>
     </Box>
   );

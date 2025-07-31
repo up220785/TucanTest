@@ -35,6 +35,7 @@ available_course_model = courses_ns.model('AvailableCourse', {
     'created_at': fields.DateTime(description='Course creation date'),
     'updated_at': fields.DateTime(description='Last update date'),
     'enrolled_count': fields.Integer(description='Number of enrolled students'),
+    'quiz_count': fields.Integer(description='Number of published quizzes'),
     'is_enrolled': fields.Boolean(description='Whether current student is enrolled'),
     'enrollment_status': fields.String(description='Current enrollment status'),
     'can_enroll': fields.Boolean(description='Whether student can enroll now')
@@ -221,6 +222,7 @@ class AvailableCoursesAPI(Resource):
                     'created_at': course.created_at.isoformat() if course.created_at else None,
                     'updated_at': course.updated_at.isoformat() if course.updated_at else None,
                     'enrolled_count': len([e for e in course.enrollments if e.status == 'accepted']),
+                    'quiz_count': len([q for q in course.quizzes if q.is_published]),
                     'is_enrolled': is_enrolled,
                     'enrollment_status': enrollment_status,
                     'can_enroll': not is_enrolled and (not course.max_capacity or len([e for e in course.enrollments if e.status == 'accepted']) < course.max_capacity)
