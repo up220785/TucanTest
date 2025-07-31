@@ -9,6 +9,7 @@ import Index from "./pages/index";
 import MyCourses from "./pages/my-courses";
 import EditCourse from "./pages/edit-course";
 import ExploreCourses from "./pages/explore-courses";
+import NotificationsPage from "./pages/notifications";
 
 const App = () => (
   <Routes>
@@ -19,6 +20,7 @@ const App = () => (
     <Route path="/profile" element={<Profile />} />
     <Route path="/my-courses" element={<MyCourses />} />
     <Route path="/explore-courses" element={<ExploreCourses />} />
+    <Route path="/notifications" element={<NotificationsPage />} />
     <Route path="/courses/:courseId/edit" element={<EditCourse />} />
   </Routes>
 );

@@ -195,21 +195,38 @@ const HomePage: React.FC = () => {
         )}
 
         {role === "student" && (
-          <Typography 
-            className="sidebar-item" 
-            onClick={() => navigate("/explore-courses")}
-            sx={{ 
-              cursor: "pointer", 
-              "&:hover": { 
-                backgroundColor: "#f0f0f0", 
-                borderRadius: "4px",
-                padding: "4px 8px",
-                margin: "0 -8px"
-              } 
-            }}
-          >
-            Explorar Cursos
-          </Typography>
+          <>
+            <Typography 
+              className="sidebar-item" 
+              onClick={() => navigate("/explore-courses")}
+              sx={{ 
+                cursor: "pointer", 
+                "&:hover": { 
+                  backgroundColor: "#f0f0f0", 
+                  borderRadius: "4px",
+                  padding: "4px 8px",
+                  margin: "0 -8px"
+                } 
+              }}
+            >
+              Explorar Cursos
+            </Typography>
+            <Typography 
+              className="sidebar-item" 
+              onClick={() => navigate("/notifications")}
+              sx={{ 
+                cursor: "pointer", 
+                "&:hover": { 
+                  backgroundColor: "#f0f0f0", 
+                  borderRadius: "4px",
+                  padding: "4px 8px",
+                  margin: "0 -8px"
+                } 
+              }}
+            >
+              Notificaciones
+            </Typography>
+          </>
         )}
         
         <Typography className="sidebar-item">Formularios Guardados</Typography>

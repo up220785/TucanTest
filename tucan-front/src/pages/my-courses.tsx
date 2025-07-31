@@ -37,8 +37,10 @@ import {
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
   School as SchoolIcon,
+  Email as EmailIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import InviteStudentsDialog from '../components/InviteStudentsDialog';
 import '../styles/my-courses.css';
 
 interface Course {
@@ -65,6 +67,7 @@ const MyCourses: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   
@@ -185,6 +188,11 @@ const MyCourses: React.FC = () => {
   const handleMenuClose = () => {
     setAnchorEl(null);
     setSelectedCourse(null);
+  };
+
+  const handleInviteStudents = () => {
+    setInviteDialogOpen(true);
+    handleMenuClose();
   };
 
   const handleTogglePublished = async (course: Course) => {
@@ -483,6 +491,12 @@ const MyCourses: React.FC = () => {
           {selectedCourse?.is_published ? <VisibilityOffIcon sx={{ mr: 1 }} /> : <VisibilityIcon sx={{ mr: 1 }} />}
           {selectedCourse?.is_published ? 'Unpublish' : 'Publish'}
         </MenuItem>
+        {selectedCourse && !selectedCourse.is_public && (
+          <MenuItem onClick={handleInviteStudents}>
+            <EmailIcon sx={{ mr: 1 }} />
+            Invite Students
+          </MenuItem>
+        )}
         <Divider />
         <MenuItem 
           onClick={() => selectedCourse && handleDeleteCourse(selectedCourse)}
@@ -553,6 +567,20 @@ const MyCourses: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Invite Students Dialog */}
+      {selectedCourse && (
+        <InviteStudentsDialog
+          open={inviteDialogOpen}
+          onClose={() => setInviteDialogOpen(false)}
+          courseId={selectedCourse.id}
+          courseName={selectedCourse.name}
+          onInvitesSent={() => {
+            // Refresh courses to update any counts if needed
+            fetchCourses();
+          }}
+        />
+      )}
     </Container>
   );
 };
