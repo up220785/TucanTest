@@ -21,6 +21,7 @@ import {
   Notifications as NotificationsIcon,
   MarkEmailRead as MarkReadIcon,
   School as CourseIcon,
+  Quiz as QuizIcon,
   Check as AcceptIcon,
   Close as RejectIcon,
   AccessTime as TimeIcon,
@@ -132,7 +133,18 @@ const NotificationsPage: React.FC = () => {
     }
   };
 
-  const handleInvitationClick = async (notification: Notification) => {
+  const handleNotificationClick = async (notification: Notification) => {
+    // Mark as read first
+    if (!notification.is_read) {
+      markAsRead(notification.id);
+    }
+
+    if (notification.type === 'quiz_published' && notification.action_url) {
+      // Navigate to the course quizzes page
+      navigate(notification.action_url);
+      return;
+    }
+
     if (notification.type === 'course_invitation' && notification.related_id) {
       try {
         const token = localStorage.getItem('tucan_token');
@@ -223,6 +235,8 @@ const NotificationsPage: React.FC = () => {
     switch (type) {
       case 'course_invitation':
         return <CourseIcon color="primary" />;
+      case 'quiz_published':
+        return <QuizIcon color="secondary" />;
       default:
         return <NotificationsIcon color="primary" />;
     }
@@ -232,6 +246,8 @@ const NotificationsPage: React.FC = () => {
     switch (type) {
       case 'course_invitation':
         return 'primary';
+      case 'quiz_published':
+        return 'secondary';
       default:
         return 'default';
     }
@@ -297,7 +313,7 @@ const NotificationsPage: React.FC = () => {
                   boxShadow: notification.type === 'course_invitation' ? 4 : 1,
                 }
               }}
-              onClick={() => handleInvitationClick(notification)}
+              onClick={() => handleNotificationClick(notification)}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
@@ -351,6 +367,37 @@ const NotificationsPage: React.FC = () => {
                   )}
                 </Box>
               </CardContent>
+              
+              {/* Add action buttons for quiz notifications */}
+              {notification.type === 'quiz_published' && (
+                <CardActions>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    color="secondary"
+                    startIcon={<QuizIcon />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (notification.action_url) {
+                        navigate(notification.action_url);
+                      }
+                    }}
+                  >
+                    View Quiz
+                  </Button>
+                  {!notification.is_read && (
+                    <Button
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        markAsRead(notification.id);
+                      }}
+                    >
+                      Mark as Read
+                    </Button>
+                  )}
+                </CardActions>
+              )}
             </Card>
           ))}
         </Box>

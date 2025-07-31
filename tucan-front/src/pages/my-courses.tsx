@@ -195,6 +195,13 @@ const MyCourses: React.FC = () => {
     handleMenuClose();
   };
 
+  const handleCreateQuiz = () => {
+    if (selectedCourse) {
+      navigate(`/courses/${selectedCourse.id}/create-quiz`);
+    }
+    handleMenuClose();
+  };
+
   const handleTogglePublished = async (course: Course) => {
     try {
       const token = localStorage.getItem('tucan_token');
@@ -486,6 +493,14 @@ const MyCourses: React.FC = () => {
         <MenuItem onClick={() => navigate(`/courses/${selectedCourse?.id}/edit`)}>
           <EditIcon sx={{ mr: 1 }} />
           Edit Course
+        </MenuItem>
+        <MenuItem onClick={() => navigate(`/courses/${selectedCourse?.id}/quizzes`)}>
+          <QuizIcon sx={{ mr: 1 }} />
+          View Quizzes
+        </MenuItem>
+        <MenuItem onClick={handleCreateQuiz}>
+          <AddIcon sx={{ mr: 1 }} />
+          Create Quiz
         </MenuItem>
         <MenuItem onClick={() => selectedCourse && handleTogglePublished(selectedCourse)}>
           {selectedCourse?.is_published ? <VisibilityOffIcon sx={{ mr: 1 }} /> : <VisibilityIcon sx={{ mr: 1 }} />}

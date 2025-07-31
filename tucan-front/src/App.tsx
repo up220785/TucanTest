@@ -10,6 +10,9 @@ import MyCourses from "./pages/my-courses";
 import EditCourse from "./pages/edit-course";
 import ExploreCourses from "./pages/explore-courses";
 import NotificationsPage from "./pages/notifications";
+import CreateQuiz from "./pages/create-quiz";
+import CourseQuizzes from "./pages/course-quizzes";
+import TakeQuiz from "./pages/take-quiz";
 
 const App = () => (
   <Routes>
@@ -22,6 +25,9 @@ const App = () => (
     <Route path="/explore-courses" element={<ExploreCourses />} />
     <Route path="/notifications" element={<NotificationsPage />} />
     <Route path="/courses/:courseId/edit" element={<EditCourse />} />
+    <Route path="/courses/:courseId/create-quiz" element={<CreateQuiz />} />
+    <Route path="/courses/:courseId/quizzes" element={<CourseQuizzes />} />
+    <Route path="/quiz/:quizId/take" element={<TakeQuiz />} />
   </Routes>
 );
 
