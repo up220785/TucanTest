@@ -8,6 +8,15 @@ from auth import require_auth, require_teacher, require_student
 courses_ns = Namespace('courses', description='Course management operations')
 
 # Define models for Swagger documentation
+quiz_model = courses_ns.model('Quiz', {
+    'id': fields.Integer(description='Quiz ID'),
+    'title': fields.String(description='Quiz title'),
+    'description': fields.String(description='Quiz description'),
+    'due_date': fields.DateTime(description='Quiz due date'),
+    'is_published': fields.Boolean(description='Whether quiz is published'),
+    'total_points': fields.Integer(description='Total points for quiz')
+})
+
 course_model = courses_ns.model('Course', {
     'id': fields.Integer(description='Course ID'),
     'name': fields.String(description='Course name'),
@@ -19,7 +28,10 @@ course_model = courses_ns.model('Course', {
     'max_capacity': fields.Integer(description='Maximum number of students'),
     'created_at': fields.DateTime(description='Course creation date'),
     'updated_at': fields.DateTime(description='Last update date'),
-    'enrolled_count': fields.Integer(description='Number of enrolled students')
+    'enrolled_count': fields.Integer(description='Number of enrolled students'),
+    'is_full': fields.Boolean(description='Whether course is at capacity'),
+    'email': fields.String(description='Course contact email'),
+    'quizzes': fields.List(fields.Nested(quiz_model), description='List of course quizzes')
 })
 
 # Model for available courses (includes enrollment info for students)
@@ -244,6 +256,29 @@ class CourseAPI(Resource):
         try:
             course = Course.query.get_or_404(course_id)
             
+            print(f"DEBUG: Found course {course.id} - {course.name}")
+            print(f"DEBUG: Course has {len(course.quizzes)} quizzes")
+            for quiz in course.quizzes:
+                print(f"DEBUG: Quiz {quiz.id} - {quiz.title} - Published: {quiz.is_published}")
+            
+            quizzes_data = []
+            for quiz in course.quizzes:
+                try:
+                    quiz_data = {
+                        'id': quiz.id,
+                        'title': quiz.title,
+                        'description': quiz.description,
+                        'due_date': quiz.due_date.isoformat() if quiz.due_date else None,
+                        'is_published': quiz.is_published,
+                        'total_points': quiz.get_total_points() if hasattr(quiz, 'get_total_points') else 0
+                    }
+                    quizzes_data.append(quiz_data)
+                    print(f"DEBUG: Successfully processed quiz {quiz.id}")
+                except Exception as quiz_error:
+                    print(f"DEBUG: Error processing quiz {quiz.id}: {quiz_error}")
+            
+            print(f"DEBUG: Final quizzes_data length: {len(quizzes_data)}")
+            
             return {
                 'id': course.id,
                 'name': course.name,
@@ -255,7 +290,10 @@ class CourseAPI(Resource):
                 'max_capacity': course.max_capacity,
                 'created_at': course.created_at.isoformat() if course.created_at else None,
                 'updated_at': course.updated_at.isoformat() if course.updated_at else None,
-                'enrolled_count': len(course.enrollments)
+                'enrolled_count': len(course.enrollments),
+                'is_full': course.is_full() if hasattr(course, 'is_full') else False,
+                'email': course.email,
+                'quizzes': quizzes_data
             }
             
         except Exception as e:

@@ -13,6 +13,7 @@ import NotificationsPage from "./pages/notifications";
 import CreateQuiz from "./pages/create-quiz";
 import CourseQuizzes from "./pages/course-quizzes";
 import CourseStudents from "./pages/course-students";
+import ViewCourse from "./pages/view-course";
 import TakeQuiz from "./pages/take-quiz";
 import QuizSubmissions from "./pages/quiz-submissions";
 
@@ -27,6 +28,7 @@ const App = () => (
     <Route path="/explore-courses" element={<ExploreCourses />} />
     <Route path="/notifications" element={<NotificationsPage />} />
     <Route path="/courses/:courseId/edit" element={<EditCourse />} />
+    <Route path="/courses/:courseId/view" element={<ViewCourse />} />
     <Route path="/courses/:courseId/create-quiz" element={<CreateQuiz />} />
     <Route path="/courses/:courseId/quizzes" element={<CourseQuizzes />} />
     <Route path="/courses/:courseId/students" element={<CourseStudents />} />
