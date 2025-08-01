@@ -10,7 +10,6 @@ import {
   Chip,
   Alert,
   LinearProgress,
-  Grid,
   Divider,
   IconButton,
   Menu,
@@ -142,9 +141,9 @@ const CourseQuizzes: React.FC = () => {
 
   const handleViewQuiz = (quizId: number) => {
     if (userRole === 'teacher') {
-      navigate(`/quizzes/${quizId}/view`);
+      navigate(`/quiz/${quizId}/submissions`);
     } else {
-      navigate(`/quizzes/${quizId}/take`);
+      navigate(`/quiz/${quizId}/take`);
     }
     handleMenuClose();
   };
@@ -191,7 +190,7 @@ const CourseQuizzes: React.FC = () => {
     });
   };
 
-  const formatDueDate = (dateString: string | null) => {
+  const formatDueDate = (dateString: string | null | undefined) => {
     if (!dateString) return 'No due date';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -290,9 +289,41 @@ const CourseQuizzes: React.FC = () => {
           </CardContent>
         </Card>
       ) : (
-        <Grid container spacing={3}>
-          {quizzes.map((quiz) => (
-            <Grid item xs={12} md={6} lg={4} key={quiz.id}>
+        <Box 
+          sx={{ 
+            maxHeight: '70vh',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            pr: 1,
+            '&::-webkit-scrollbar': {
+              width: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              background: '#f1f1f1',
+              borderRadius: '4px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: '#c1c1c1',
+              borderRadius: '4px',
+              '&:hover': {
+                background: '#a8a8a8',
+              },
+            },
+          }}
+        >
+          <Box 
+            sx={{ 
+              display: 'grid', 
+              gridTemplateColumns: { 
+                xs: '1fr', 
+                md: 'repeat(2, 1fr)', 
+                lg: 'repeat(3, 1fr)' 
+              },
+              gap: 3 
+            }}
+          >
+            {quizzes.map((quiz) => (
+            <Box key={quiz.id}>
               <Card 
                 sx={{ 
                   height: '100%', 
@@ -376,13 +407,14 @@ const CourseQuizzes: React.FC = () => {
                     onClick={() => handleViewQuiz(quiz.id)}
                     disabled={!quiz.is_published && userRole === 'student'}
                   >
-                    {userRole === 'teacher' ? 'View' : 'Take Quiz'}
+                    {userRole === 'teacher' ? 'View Submissions' : 'Take Quiz'}
                   </Button>
                 </CardActions>
               </Card>
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+          </Box>
+        </Box>
       )}
 
       {/* Quiz Actions Menu */}
@@ -393,7 +425,7 @@ const CourseQuizzes: React.FC = () => {
       >
         <MenuItem onClick={() => selectedQuiz && handleViewQuiz(selectedQuiz.id)}>
           <VisibilityIcon sx={{ mr: 1 }} />
-          View Quiz
+          View Submissions
         </MenuItem>
         <MenuItem onClick={() => selectedQuiz && handleEditQuiz(selectedQuiz.id)}>
           <EditIcon sx={{ mr: 1 }} />

@@ -48,6 +48,7 @@ submission_model = quizzes_ns.model('QuizSubmission', {
     'quiz_id': fields.Integer(description='Quiz ID'),
     'student_id': fields.Integer(description='Student ID'),
     'student_name': fields.String(description='Student name'),
+    'student_email': fields.String(description='Student email'),
     'started_at': fields.DateTime(description='Submission start time'),
     'completed_at': fields.DateTime(description='Submission completion time'),
     'is_completed': fields.Boolean(description='Whether submission is completed'),
@@ -385,8 +386,9 @@ class QuizSubmissionsAPI(Resource):
                 submission_data = {
                     'id': submission.id,
                     'quiz_id': submission.quiz_id,
-                    'student_id': submission.student_id,
+                    'student_id': submission.student.id,
                     'student_name': submission.student.name,
+                    'student_email': submission.student.email,
                     'started_at': submission.started_at.isoformat() if submission.started_at else None,
                     'completed_at': submission.completed_at.isoformat() if submission.completed_at else None,
                     'is_completed': submission.is_completed,
@@ -835,6 +837,177 @@ class QuizSubmitAPI(Resource):
                 'max_possible_score': max_possible_score,
                 'percentage': (total_score / max_possible_score * 100) if max_possible_score > 0 else 0,
                 'is_past_due': is_past_due
+            }
+            
+        except Exception as e:
+            db.session.rollback()
+            quizzes_ns.abort(500, str(e))
+
+
+# Define models for submission details
+submission_answer_model = quizzes_ns.model('SubmissionAnswer', {
+    'id': fields.Integer(description='Answer ID'),
+    'question_id': fields.Integer(description='Question ID'),
+    'question_text': fields.String(description='Question text'),
+    'question_type': fields.String(description='Question type'),
+    'question_points': fields.Float(description='Question points'),
+    'selected_option_id': fields.Integer(description='Selected option ID'),
+    'selected_option_text': fields.String(description='Selected option text'),
+    'text_answer': fields.String(description='Text answer'),
+    'score': fields.Float(description='Score awarded'),
+    'is_correct': fields.Boolean(description='Whether answer is correct'),
+    'grading_comment': fields.String(description='Teacher feedback/comment'),
+    'graded_by': fields.Integer(description='ID of teacher who graded this answer'),
+    'graded_at': fields.DateTime(description='When this answer was graded')
+})
+
+submission_detail_model = quizzes_ns.model('SubmissionDetail', {
+    'id': fields.Integer(description='Submission ID'),
+    'student': fields.Raw(description='Student information'),
+    'started_at': fields.DateTime(description='Start time'),
+    'completed_at': fields.DateTime(description='Completion time'),
+    'is_completed': fields.Boolean(description='Whether submission is completed'),
+    'total_score': fields.Float(description='Total score'),
+    'max_possible_score': fields.Float(description='Maximum possible score'),
+    'percentage': fields.Float(description='Score percentage'),
+    'attempt_number': fields.Integer(description='Attempt number'),
+    'answers': fields.List(fields.Nested(submission_answer_model), description='Submission answers')
+})
+
+
+@quizzes_ns.route('/submissions/<int:submission_id>/details')
+class SubmissionDetailsAPI(Resource):
+    @quizzes_ns.doc('get_submission_details', security='Bearer')
+    @quizzes_ns.marshal_with(submission_detail_model)
+    @quizzes_ns.response(404, 'Submission not found')
+    @quizzes_ns.response(401, 'Authentication required')
+    @quizzes_ns.response(403, 'Teacher access required')
+    @require_teacher
+    def get(self, submission_id, current_user=None):
+        """Get detailed submission data with answers"""
+        try:
+            submission = QuizSubmission.query.get_or_404(submission_id)
+            
+            # Get all answers for this submission
+            answers = Answer.query.filter_by(submission_id=submission_id).all()
+            
+            answer_list = []
+            for answer in answers:
+                answer_data = {
+                    'id': answer.id,
+                    'question_id': answer.question_id,
+                    'question_text': answer.question.text,
+                    'question_type': answer.question.question_type,
+                    'question_points': answer.question.points,
+                    'score': answer.score,
+                    'grading_comment': answer.grading_comment,
+                    'graded_by': answer.graded_by,
+                    'graded_at': answer.graded_at.isoformat() if answer.graded_at else None
+                }
+                
+                if answer.question.question_type == 'multiple_choice':
+                    if answer.option_id:
+                        selected_option = Option.query.get(answer.option_id)
+                        answer_data['selected_option_id'] = answer.option_id
+                        answer_data['selected_option_text'] = selected_option.text if selected_option else None
+                        answer_data['is_correct'] = selected_option.is_correct if selected_option else False
+                    else:
+                        answer_data['selected_option_id'] = None
+                        answer_data['selected_option_text'] = None
+                        answer_data['is_correct'] = False
+                else:
+                    answer_data['text_answer'] = answer.text_answer
+                    # For text questions, we can't automatically determine correctness
+                    answer_data['is_correct'] = answer.score > 0
+                
+                answer_list.append(answer_data)
+            
+            # Sort answers by question order
+            answer_list.sort(key=lambda x: x['question_id'])
+            
+            return {
+                'id': submission.id,
+                'student': {
+                    'id': submission.student.id,
+                    'name': submission.student.name,
+                    'email': submission.student.email
+                },
+                'started_at': submission.started_at.isoformat() if submission.started_at else None,
+                'completed_at': submission.completed_at.isoformat() if submission.completed_at else None,
+                'is_completed': submission.is_completed,
+                'total_score': submission.total_score,
+                'max_possible_score': submission.max_possible_score,
+                'percentage': submission.get_percentage() if submission.is_graded else None,
+                'attempt_number': submission.attempt_number,
+                'answers': answer_list
+            }
+            
+        except Exception as e:
+            quizzes_ns.abort(500, str(e))
+
+
+# Define models for manual grading
+grade_answer_model = quizzes_ns.model('GradeAnswer', {
+    'score': fields.Float(required=True, description='Score to award (0 to question points)', example=2.5),
+    'feedback': fields.String(description='Optional feedback for the student', example='Good answer but missing some details.')
+})
+
+@quizzes_ns.route('/answers/<int:answer_id>/grade')
+class GradeAnswerAPI(Resource):
+    @quizzes_ns.doc('grade_answer', security='Bearer')
+    @quizzes_ns.expect(grade_answer_model)
+    @quizzes_ns.response(200, 'Answer graded successfully')
+    @quizzes_ns.response(400, 'Invalid grade data')
+    @quizzes_ns.response(401, 'Authentication required')
+    @quizzes_ns.response(403, 'Teacher access required')
+    @quizzes_ns.response(404, 'Answer not found')
+    @require_teacher
+    def put(self, answer_id, current_user=None):
+        """Grade an individual answer (especially for text questions)"""
+        try:
+            answer = Answer.query.get_or_404(answer_id)
+            data = request.get_json()
+            
+            if 'score' not in data:
+                quizzes_ns.abort(400, 'score is required')
+            
+            score = data['score']
+            feedback = data.get('feedback', '')
+            
+            # Validate score is within range
+            if score < 0 or score > answer.question.points:
+                quizzes_ns.abort(400, f'Score must be between 0 and {answer.question.points}')
+            
+            # Update the answer
+            old_score = answer.score or 0
+            answer.score = score
+            answer.grading_comment = feedback
+            answer.graded_by = current_user.id
+            answer.graded_at = datetime.utcnow()
+            
+            # Recalculate submission total score
+            submission = answer.submission
+            score_difference = score - old_score
+            submission.total_score = (submission.total_score or 0) + score_difference
+            
+            # Check if all answers are graded to mark submission as fully graded
+            all_answers = Answer.query.filter_by(submission_id=submission.id).all()
+            all_graded = all(a.score is not None for a in all_answers)
+            
+            if all_graded and not submission.is_graded:
+                submission.is_graded = True
+                submission.graded_by = current_user.id
+                submission.graded_at = datetime.utcnow()
+            
+            db.session.commit()
+            
+            return {
+                'message': 'Answer graded successfully',
+                'answer_id': answer.id,
+                'new_score': score,
+                'feedback': feedback,
+                'submission_total_score': submission.total_score,
+                'submission_is_fully_graded': submission.is_graded
             }
             
         except Exception as e:
