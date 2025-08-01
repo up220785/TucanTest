@@ -994,12 +994,46 @@ class GradeAnswerAPI(Resource):
             all_answers = Answer.query.filter_by(submission_id=submission.id).all()
             all_graded = all(a.score is not None for a in all_answers)
             
+            # Track if this is a new grading or re-grading
+            was_previously_graded = submission.is_graded
+            
             if all_graded and not submission.is_graded:
                 submission.is_graded = True
                 submission.graded_by = current_user.id
                 submission.graded_at = datetime.utcnow()
             
             db.session.commit()
+            
+            # Send notification to student when submission is fully graded (new or re-graded)
+            if all_graded:
+                quiz = submission.quiz
+                student = submission.student
+                percentage = (submission.total_score / submission.max_possible_score * 100) if submission.max_possible_score > 0 else 0
+                
+                # Determine notification type and message
+                if was_previously_graded:
+                    notification_title = f"Quiz Re-graded: {quiz.title}"
+                    notification_message = f"Your quiz submission for '{quiz.title}' has been re-graded. New score: {submission.total_score}/{submission.max_possible_score} ({percentage:.1f}%)"
+                    notification_type = 'quiz_regraded'
+                else:
+                    notification_title = f"Quiz Graded: {quiz.title}"
+                    notification_message = f"Your quiz submission for '{quiz.title}' has been graded. Score: {submission.total_score}/{submission.max_possible_score} ({percentage:.1f}%)"
+                    notification_type = 'quiz_graded'
+                
+                # Create notification
+                current_time = datetime.utcnow()
+                notification = Notification(
+                    user_id=student.id,
+                    title=notification_title,
+                    message=notification_message,
+                    notification_type=notification_type,
+                    related_id=submission.id,
+                    related_type='quiz_submission',
+                    action_url=f"/quiz/{quiz.id}/take",
+                    created_at=current_time
+                )
+                db.session.add(notification)
+                db.session.commit()
             
             return {
                 'message': 'Answer graded successfully',

@@ -237,6 +237,10 @@ const NotificationsPage: React.FC = () => {
         return <CourseIcon color="primary" />;
       case 'quiz_published':
         return <QuizIcon color="secondary" />;
+      case 'quiz_graded':
+        return <QuizIcon color="success" />;
+      case 'quiz_regraded':
+        return <QuizIcon color="warning" />;
       default:
         return <NotificationsIcon color="primary" />;
     }
@@ -248,6 +252,10 @@ const NotificationsPage: React.FC = () => {
         return 'primary';
       case 'quiz_published':
         return 'secondary';
+      case 'quiz_graded':
+        return 'success';
+      case 'quiz_regraded':
+        return 'warning';
       default:
         return 'default';
     }
@@ -300,7 +308,31 @@ const NotificationsPage: React.FC = () => {
           </CardContent>
         </Card>
       ) : (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: 2,
+            maxHeight: '70vh',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            pr: 1,
+            '&::-webkit-scrollbar': {
+              width: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              background: '#f1f1f1',
+              borderRadius: '4px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: '#c1c1c1',
+              borderRadius: '4px',
+              '&:hover': {
+                background: '#a8a8a8',
+              },
+            },
+          }}
+        >
           {notifications.map((notification) => (
             <Card 
               key={notification.id}
@@ -369,12 +401,12 @@ const NotificationsPage: React.FC = () => {
               </CardContent>
               
               {/* Add action buttons for quiz notifications */}
-              {notification.type === 'quiz_published' && (
+              {(notification.type === 'quiz_published' || notification.type === 'quiz_graded' || notification.type === 'quiz_regraded') && (
                 <CardActions>
                   <Button
                     size="small"
                     variant="contained"
-                    color="secondary"
+                    color={notification.type === 'quiz_published' ? 'secondary' : 'success'}
                     startIcon={<QuizIcon />}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -383,7 +415,7 @@ const NotificationsPage: React.FC = () => {
                       }
                     }}
                   >
-                    View Quiz
+                    {notification.type === 'quiz_published' ? 'View Quiz' : 'View Results'}
                   </Button>
                   {!notification.is_read && (
                     <Button
