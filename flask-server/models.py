@@ -117,8 +117,8 @@ class Enrollment(db.Model):
             ).first()
             
             if submission:
-                total_score += submission.score or 0
-                total_possible += submission.total_possible or 0
+                total_score += submission.total_score or 0
+                total_possible += submission.max_possible_score or 0
         
         if total_possible == 0:
             return 0.0
