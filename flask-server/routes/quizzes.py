@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models import db, Quiz, Course, Question, Option, User, QuizSubmission, Answer
 from datetime import datetime
+from auth import require_auth, get_current_user
 
 quizzes_bp = Blueprint('quizzes', __name__)
 
@@ -393,3 +394,107 @@ def get_submission_details(submission_id):
         
     except Exception as e:
         return jsonify({'error': str(e)}), 404
+
+
+@quizzes_bp.route('/api/quiz/<int:quiz_id>/results', methods=['GET'])
+@require_auth
+def get_quiz_results(quiz_id, current_user=None):
+    """Get quiz results for the current student"""
+    try:
+        # Get the quiz
+        quiz = Quiz.query.get_or_404(quiz_id)
+        
+        # Get the student's submission for this quiz
+        submission = QuizSubmission.query.filter_by(
+            quiz_id=quiz_id, 
+            student_id=current_user.id
+        ).first()
+        
+        if not submission:
+            return jsonify({'error': 'No submission found for this quiz'}), 404
+            
+        if not submission.is_graded:
+            return jsonify({'error': 'Quiz has not been graded yet'}), 400
+        
+        # Get quiz questions with their options
+        questions = []
+        for question in quiz.questions:
+            question_data = {
+                'id': question.id,
+                'text': question.text,
+                'question_type': question.question_type,
+                'options': [],
+                'correct_answer': ''
+            }
+            
+            if question.question_type == 'multiple_choice':
+                question_data['options'] = [option.text for option in question.options]
+                # Find the correct answer
+                correct_option = next((opt for opt in question.options if opt.is_correct), None)
+                if correct_option:
+                    question_data['correct_answer'] = correct_option.text
+                    
+            elif question.question_type == 'true_false':
+                question_data['options'] = ['True', 'False']
+                # Find the correct answer - assuming it's stored in the first option
+                correct_option = next((opt for opt in question.options if opt.is_correct), None)
+                if correct_option:
+                    question_data['correct_answer'] = correct_option.text
+                    
+            questions.append(question_data)
+        
+        # Get submission answers
+        submission_answers = []
+        for answer in submission.answers:
+            # Determine if answer is correct
+            is_correct = False
+            
+            if answer.question.question_type == 'multiple_choice' and answer.option:
+                # For multiple choice, check if selected option is the correct one
+                is_correct = answer.option.is_correct
+            elif answer.question.question_type == 'true_false' and answer.option:
+                # For true/false, check if selected option is the correct one
+                is_correct = answer.option.is_correct
+            elif answer.score is not None:
+                # For other types or manually graded, use the score
+                is_correct = answer.score > 0
+            
+            answer_data = {
+                'question_id': answer.question_id,
+                'selected_answer': '',
+                'is_correct': is_correct
+            }
+            
+            if answer.option:
+                answer_data['selected_answer'] = answer.option.text
+            elif answer.text_answer:
+                answer_data['selected_answer'] = answer.text_answer
+                
+            submission_answers.append(answer_data)
+        
+        # Prepare response data
+        result_data = {
+            'quiz': {
+                'id': quiz.id,
+                'title': quiz.title,
+                'description': quiz.description,
+                'total_points': quiz.get_total_points(),
+                'course_id': quiz.course_id,
+                'course_name': quiz.course.name
+            },
+            'submission': {
+                'id': submission.id,
+                'quiz_id': submission.quiz_id,
+                'student_id': submission.student_id,
+                'score': submission.total_score or 0,
+                'submitted_at': submission.submitted_at.isoformat() if submission.submitted_at else '',
+                'graded_at': submission.graded_at.isoformat() if submission.graded_at else '',
+                'answers': submission_answers
+            },
+            'questions': questions
+        }
+        
+        return jsonify(result_data)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

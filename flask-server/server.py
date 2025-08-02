@@ -245,7 +245,7 @@ def create_app(config_name='development'):
     # Only using Flask-RESTX namespaces for now
     # from routes.users import users_bp
     # from routes.courses import courses_bp
-    # from routes.quizzes import quizzes_bp
+    from routes.quizzes import quizzes_bp
     # from routes.questions import questions_bp
     # from routes.answers import answers_bp
     # from routes.notifications import notifications_bp
@@ -254,7 +254,7 @@ def create_app(config_name='development'):
     
     # app.register_blueprint(users_bp)
     # app.register_blueprint(courses_bp)
-    # app.register_blueprint(quizzes_bp)
+    app.register_blueprint(quizzes_bp)
     # app.register_blueprint(questions_bp)
     # app.register_blueprint(answers_bp)
     # app.register_blueprint(notifications_bp)

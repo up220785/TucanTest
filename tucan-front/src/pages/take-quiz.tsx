@@ -54,6 +54,7 @@ interface Quiz {
   question_count: number;
   is_past_due: boolean;
   course_name: string;
+  course_id: number;
   questions: Question[];
 }
 
@@ -157,7 +158,12 @@ const TakeQuiz: React.FC = () => {
 
       if (response.ok) {
         alert('Quiz submitted successfully!');
-        navigate('/homepage'); // Redirect to student dashboard
+        // Navigate back to the course view page
+        if (quiz?.course_id) {
+          navigate(`/courses/${quiz.course_id}/view`);
+        } else {
+          navigate('/homepage'); // Fallback to homepage if course_id is not available
+        }
       } else {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to submit quiz');
@@ -222,10 +228,16 @@ const TakeQuiz: React.FC = () => {
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Button
             startIcon={<ArrowBackIcon />}
-            onClick={() => navigate('/homepage')}
+            onClick={() => {
+              if (quiz?.course_id) {
+                navigate(`/courses/${quiz.course_id}/view`);
+              } else {
+                navigate('/homepage');
+              }
+            }}
             sx={{ mr: 2 }}
           >
-            Back
+            Back to Course
           </Button>
           <Box>
             <Typography variant="h4" component="h1">

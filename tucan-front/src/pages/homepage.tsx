@@ -408,7 +408,20 @@ const HomePage: React.FC = () => {
                 justifyContent="flex-start"
               >
                 {courses.map((course) => (
-                  <Card key={course.id} sx={{ flex: "1 1 300px", maxWidth: 400 }}>
+                  <Card 
+                    key={course.id} 
+                    sx={{ 
+                      flex: "1 1 300px", 
+                      maxWidth: 400,
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: 3,
+                      }
+                    }}
+                    onClick={() => navigate(`/courses/${course.id}/view`)}
+                  >
                     <CardContent>
                       <Typography variant="h6" className="form-name" sx={{ mb: 1 }}>
                         {course.name}

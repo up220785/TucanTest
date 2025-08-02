@@ -1,6 +1,6 @@
 from flask import request
 from flask_restx import Namespace, Resource, fields
-from models import db, Course, User, Enrollment, CourseInvitation
+from models import db, Course, User, Enrollment, CourseInvitation, Quiz, QuizSubmission
 from datetime import datetime
 from auth import require_auth, require_teacher, require_student
 
@@ -8,13 +8,22 @@ from auth import require_auth, require_teacher, require_student
 courses_ns = Namespace('courses', description='Course management operations')
 
 # Define models for Swagger documentation
+submission_model = courses_ns.model('QuizSubmission', {
+    'id': fields.Integer(description='Submission ID'),
+    'submitted_at': fields.DateTime(description='Submission date'),
+    'is_graded': fields.Boolean(description='Whether submission is graded'),
+    'grade': fields.Float(description='Grade received'),
+    'total_score': fields.Float(description='Total score')
+})
+
 quiz_model = courses_ns.model('Quiz', {
     'id': fields.Integer(description='Quiz ID'),
     'title': fields.String(description='Quiz title'),
     'description': fields.String(description='Quiz description'),
     'due_date': fields.DateTime(description='Quiz due date'),
     'is_published': fields.Boolean(description='Whether quiz is published'),
-    'total_points': fields.Integer(description='Total points for quiz')
+    'total_points': fields.Integer(description='Total points for quiz'),
+    'submission': fields.Nested(submission_model, description='Student submission data (for students only)', allow_null=True)
 })
 
 course_model = courses_ns.model('Course', {
@@ -248,18 +257,19 @@ class AvailableCoursesAPI(Resource):
 
 @courses_ns.route('/<int:course_id>')
 class CourseAPI(Resource):
-    @courses_ns.doc('get_course')
+    @courses_ns.doc('get_course', security='Bearer')
     @courses_ns.marshal_with(course_model)
     @courses_ns.response(404, 'Course not found')
-    def get(self, course_id):
+    @courses_ns.response(401, 'Authentication required')
+    @require_auth
+    def get(self, course_id, current_user=None):
         """Get a specific course"""
         try:
             course = Course.query.get_or_404(course_id)
             
             print(f"DEBUG: Found course {course.id} - {course.name}")
             print(f"DEBUG: Course has {len(course.quizzes)} quizzes")
-            for quiz in course.quizzes:
-                print(f"DEBUG: Quiz {quiz.id} - {quiz.title} - Published: {quiz.is_published}")
+            print(f"DEBUG: Current user: {current_user.id} - {current_user.role}")
             
             quizzes_data = []
             for quiz in course.quizzes:
@@ -272,6 +282,27 @@ class CourseAPI(Resource):
                         'is_published': quiz.is_published,
                         'total_points': quiz.get_total_points() if hasattr(quiz, 'get_total_points') else 0
                     }
+                    
+                    # If user is a student, include submission data
+                    if current_user.role == 'student':
+                        submission = QuizSubmission.query.filter_by(
+                            quiz_id=quiz.id,
+                            student_id=current_user.id
+                        ).first()
+                        
+                        if submission:
+                            quiz_data['submission'] = {
+                                'id': submission.id,
+                                'submitted_at': submission.submitted_at.isoformat() if submission.submitted_at else None,
+                                'is_graded': submission.is_graded,
+                                'grade': submission.total_score,
+                                'total_score': submission.total_score
+                            }
+                            print(f"DEBUG: Found submission for quiz {quiz.id}: graded={submission.is_graded}, score={submission.total_score}")
+                        else:
+                            quiz_data['submission'] = None
+                            print(f"DEBUG: No submission found for quiz {quiz.id}")
+                    
                     quizzes_data.append(quiz_data)
                     print(f"DEBUG: Successfully processed quiz {quiz.id}")
                 except Exception as quiz_error:
