@@ -350,6 +350,6 @@ if __name__ == "__main__":
     create_tables()
     
     # Optionally seed sample data (comment out if not needed)
-    seed_sample_data()
+    # seed_sample_data()
     
     app.run(debug=True)
