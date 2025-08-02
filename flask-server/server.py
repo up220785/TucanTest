@@ -250,7 +250,7 @@ def create_app(config_name='development'):
     # from routes.answers import answers_bp
     # from routes.notifications import notifications_bp
     # from routes.invitations import invitations_bp
-    # from routes.statistics import statistics_bp
+    from routes.statistics import statistics_bp
     
     # app.register_blueprint(users_bp)
     # app.register_blueprint(courses_bp)
@@ -259,7 +259,7 @@ def create_app(config_name='development'):
     # app.register_blueprint(answers_bp)
     # app.register_blueprint(notifications_bp)
     # app.register_blueprint(invitations_bp)
-    # app.register_blueprint(statistics_bp)
+    app.register_blueprint(statistics_bp)
     
     return app
 

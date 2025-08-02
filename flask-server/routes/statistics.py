@@ -97,6 +97,80 @@ def get_course_statistics(course_id):
                     'completion_rate': round((len(quiz_submissions) / enrollments) * 100, 2) if enrollments > 0 else 0
                 })
         
+        # Student submission rankings (most to least submissions)
+        student_submission_counts = {}
+        for submission in submissions:
+            student_id = submission.student_id
+            if student_id not in student_submission_counts:
+                student_submission_counts[student_id] = {
+                    'student_id': student_id,
+                    'student_name': submission.student.name,
+                    'student_email': submission.student.email,
+                    'submission_count': 0,
+                    'total_score': 0,
+                    'total_possible': 0,
+                    'graded_submissions': 0
+                }
+            student_submission_counts[student_id]['submission_count'] += 1
+            if submission.is_graded:
+                student_submission_counts[student_id]['total_score'] += submission.total_score
+                student_submission_counts[student_id]['total_possible'] += submission.max_possible_score
+                student_submission_counts[student_id]['graded_submissions'] += 1
+
+        # Calculate accumulated grades for each student
+        student_rankings_by_submissions = []
+        student_rankings_by_grades = []
+        
+        for student_data in student_submission_counts.values():
+            # For submission ranking
+            student_rankings_by_submissions.append({
+                'student_id': student_data['student_id'],
+                'student_name': student_data['student_name'],
+                'student_email': student_data['student_email'],
+                'submission_count': student_data['submission_count'],
+                'graded_submissions': student_data['graded_submissions']
+            })
+            
+            # For grade ranking (only if they have graded submissions)
+            if student_data['graded_submissions'] > 0:
+                accumulated_percentage = (student_data['total_score'] / student_data['total_possible']) * 100
+                student_rankings_by_grades.append({
+                    'student_id': student_data['student_id'],
+                    'student_name': student_data['student_name'],
+                    'student_email': student_data['student_email'],
+                    'accumulated_score': student_data['total_score'],
+                    'total_possible': student_data['total_possible'],
+                    'accumulated_percentage': round(accumulated_percentage, 2),
+                    'graded_submissions': student_data['graded_submissions']
+                })
+
+        # Sort rankings
+        student_rankings_by_submissions.sort(key=lambda x: x['submission_count'], reverse=True)
+        student_rankings_by_grades.sort(key=lambda x: x['accumulated_percentage'], reverse=True)
+
+        # Add ranks
+        for i, student in enumerate(student_rankings_by_submissions):
+            student['rank'] = i + 1
+        
+        for i, student in enumerate(student_rankings_by_grades):
+            student['rank'] = i + 1
+
+        # Students who haven't submitted anything
+        submitted_student_ids = set(student_submission_counts.keys())
+        enrolled_students = db.session.query(User).join(Enrollment).filter(
+            Enrollment.course_id == course_id,
+            Enrollment.status == 'accepted'
+        ).all()
+        
+        students_no_submissions = []
+        for student in enrolled_students:
+            if student.id not in submitted_student_ids:
+                students_no_submissions.append({
+                    'student_id': student.id,
+                    'student_name': student.name,
+                    'student_email': student.email
+                })
+
         return jsonify({
             'course_id': course_id,
             'course_name': course.name,
@@ -122,7 +196,12 @@ def get_course_statistics(course_id):
                 'good': good_threshold,
                 'passing': passing_threshold
             },
-            'quiz_statistics': quiz_stats
+            'quiz_statistics': quiz_stats,
+            'student_rankings': {
+                'by_submissions': student_rankings_by_submissions,
+                'by_grades': student_rankings_by_grades,
+                'no_submissions': students_no_submissions
+            }
         })
         
     except Exception as e:

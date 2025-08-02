@@ -473,7 +473,7 @@ const MyCourses: React.FC = () => {
                   <Button
                     size="small"
                     startIcon={<AnalyticsIcon />}
-                    onClick={() => navigate(`/courses/${course.id}/statistics`)}
+                    onClick={() => navigate('/teacher/statistics')}
                   >
                     Stats
                   </Button>

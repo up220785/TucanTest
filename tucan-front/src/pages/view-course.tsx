@@ -16,6 +16,7 @@ import {
   ListItemText,
   ListItemIcon,
   Divider,
+  Stack,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -210,13 +211,25 @@ const ViewCourse: React.FC = () => {
 
   return (
     <Box sx={{ 
-      minHeight: '100vh', 
-      overflowY: 'auto',
-      overflowX: 'hidden',
+      height: '100vh',
+      overflow: 'auto',
       backgroundColor: '#f5f5f5',
-      pb: 4
+      '&::-webkit-scrollbar': {
+        width: '12px',
+      },
+      '&::-webkit-scrollbar-track': {
+        backgroundColor: '#f1f1f1',
+        borderRadius: '6px',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        backgroundColor: '#c1c1c1',
+        borderRadius: '6px',
+        '&:hover': {
+          backgroundColor: '#a8a8a8',
+        },
+      },
     }}>
-      <Container maxWidth="lg" sx={{ pt: 4, pb: 4, minHeight: '100vh' }}>
+      <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 3 }}>
           <Button
@@ -244,9 +257,9 @@ const ViewCourse: React.FC = () => {
         </Box>
       </Box>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={3} sx={{ mt: 0 }}>
         {/* Course Information */}
-        <Grid size={{ xs: 12, md: userRole === 'teacher' ? 8 : 12 }}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Card sx={{ mb: 3 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -278,6 +291,164 @@ const ViewCourse: React.FC = () => {
             </CardContent>
           </Card>
 
+          {/* Student Progress Card - Only for Students */}
+          {userRole === 'student' && (
+            <Card sx={{ mb: 3 }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  <BarChartIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                  My Progress
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+                
+                {(() => {
+                  const publishedQuizzes = (course.quizzes || []).filter(quiz => quiz.is_published);
+                  const gradedSubmissions = publishedQuizzes.filter(quiz => quiz.submission?.is_graded);
+                  
+                  const totalEarned = gradedSubmissions.reduce((sum, quiz) => 
+                    sum + (quiz.submission?.total_score || 0), 0
+                  );
+                  const totalPossible = publishedQuizzes.reduce((sum, quiz) => 
+                    sum + quiz.total_points, 0
+                  );
+                  const gradedTotal = gradedSubmissions.reduce((sum, quiz) => 
+                    sum + quiz.total_points, 0
+                  );
+                  
+                  const overallPercentage = totalPossible > 0 ? (totalEarned / totalPossible) * 100 : 0;
+                  const gradedPercentage = gradedTotal > 0 ? (totalEarned / gradedTotal) * 100 : 0;
+                  
+                  const getScoreColor = (percentage: number) => {
+                    if (percentage >= 90) return 'success';
+                    if (percentage >= 80) return 'info';
+                    if (percentage >= 70) return 'warning';
+                    return 'error';
+                  };
+
+                  return (
+                    <Box>
+                      {/* Overall Score */}
+                      <Box sx={{ mb: 2 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                          <Typography variant="body1" fontWeight="medium">
+                            Overall Course Score
+                          </Typography>
+                          <Chip
+                            label={`${overallPercentage.toFixed(1)}%`}
+                            color={getScoreColor(overallPercentage)}
+                            size="medium"
+                            sx={{ fontWeight: 'bold' }}
+                          />
+                        </Box>
+                        
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                          <Typography variant="h4" component="span" color="primary">
+                            {totalEarned}
+                          </Typography>
+                          <Typography variant="h6" component="span" color="text.secondary">
+                            / {totalPossible} points
+                          </Typography>
+                        </Box>
+                        
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                          Across {publishedQuizzes.length} published quiz{publishedQuizzes.length !== 1 ? 'es' : ''}
+                        </Typography>
+                        
+                        {/* Progress Bar */}
+                        <LinearProgress
+                          variant="determinate"
+                          value={overallPercentage}
+                          color={getScoreColor(overallPercentage)}
+                          sx={{
+                            height: 8,
+                            borderRadius: 4,
+                            backgroundColor: 'grey.200',
+                            '& .MuiLinearProgress-bar': {
+                              borderRadius: 4,
+                            },
+                          }}
+                        />
+                      </Box>
+
+                      {/* Graded vs Pending */}
+                      <Divider sx={{ mb: 2 }} />
+                      
+                      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Graded Quizzes
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="h6" color="primary">
+                              {gradedSubmissions.length}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              / {publishedQuizzes.length}
+                            </Typography>
+                            {gradedSubmissions.length > 0 && (
+                              <Chip
+                                label={`${gradedPercentage.toFixed(1)}%`}
+                                color={getScoreColor(gradedPercentage)}
+                                size="small"
+                              />
+                            )}
+                          </Box>
+                        </Box>
+                        
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Pending Grading
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="h6" color="warning.main">
+                              {publishedQuizzes.filter(quiz => quiz.submission && !quiz.submission.is_graded).length}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              quiz{publishedQuizzes.filter(quiz => quiz.submission && !quiz.submission.is_graded).length !== 1 ? 'es' : ''}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Not Attempted
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="h6" color="error.main">
+                              {publishedQuizzes.filter(quiz => !quiz.submission).length}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              quiz{publishedQuizzes.filter(quiz => !quiz.submission).length !== 1 ? 'es' : ''}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                      
+                      {publishedQuizzes.length === 0 ? (
+                        <Box sx={{ textAlign: 'center', py: 2 }}>
+                          <Typography variant="body2" color="text.secondary">
+                            No published quizzes yet
+                          </Typography>
+                        </Box>
+                      ) : (
+                        <Box sx={{ mt: 1, p: 1.5, backgroundColor: 'grey.50', borderRadius: 1 }}>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', fontSize: '0.875rem' }}>
+                            {overallPercentage >= 90 ? "🎉 Excellent work! Keep it up!" :
+                             overallPercentage >= 80 ? "👍 Great job! You're doing well!" :
+                             overallPercentage >= 70 ? "📈 Good progress! Keep studying!" :
+                             overallPercentage >= 60 ? "💪 You're on track! Don't give up!" :
+                             gradedSubmissions.length === 0 ? "🚀 Ready to start your quiz journey?" :
+                             "📚 Keep working hard - you've got this!"}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Published Quizzes */}
           <Card>
             <CardContent>
@@ -288,26 +459,10 @@ const ViewCourse: React.FC = () => {
               <Divider sx={{ mb: 2 }} />
               
               <Box sx={{ 
-                maxHeight: '300px', 
-                overflowY: 'scroll',
                 border: '1px solid #e0e0e0',
                 borderRadius: '4px',
                 backgroundColor: '#fafafa',
                 padding: '8px',
-                '&::-webkit-scrollbar': {
-                  width: '8px',
-                },
-                '&::-webkit-scrollbar-track': {
-                  backgroundColor: '#f1f1f1',
-                  borderRadius: '4px',
-                },
-                '&::-webkit-scrollbar-thumb': {
-                  backgroundColor: '#c1c1c1',
-                  borderRadius: '4px',
-                  '&:hover': {
-                    backgroundColor: '#a8a8a8',
-                  },
-                },
               }}>
                 {(!course.quizzes || course.quizzes.filter(quiz => userRole === 'teacher' || quiz.is_published).length === 0) ? (
                   <Paper sx={{ p: 3, textAlign: 'center', backgroundColor: '#f5f5f5' }}>
@@ -422,6 +577,21 @@ const ViewCourse: React.FC = () => {
                                     Take Quiz
                                   </Button>
                                 )}
+                                {userRole === 'teacher' && (
+                                  <Button
+                                    variant="outlined"
+                                    size="small"
+                                    color="info"
+                                    startIcon={<BarChartIcon />}
+                                    sx={{ ml: 1 }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigate(`/quiz/${quiz.id}/statistics`);
+                                    }}
+                                  >
+                                    Statistics
+                                  </Button>
+                                )}
                               </Box>
                             }
                             secondary={
@@ -433,7 +603,7 @@ const ViewCourse: React.FC = () => {
                                   {quiz.total_points} points
                                   {quiz.due_date && ` • Due: ${formatDateTime(quiz.due_date)}`}
                                   {userRole === 'student' && quiz.submission && quiz.submission.is_graded && (
-                                    ` • Grade: ${quiz.submission.grade || 0}/${quiz.total_points}`
+                                    ` • Score: ${quiz.submission.total_score || 0}/${quiz.total_points} (${Math.round(((quiz.submission.total_score || 0) / quiz.total_points) * 100)}%)`
                                   )}
                                   {userRole === 'student' && quiz.submission && quiz.submission.submitted_at && (
                                     ` • Submitted: ${formatDateTime(quiz.submission.submitted_at)}`
@@ -453,103 +623,216 @@ const ViewCourse: React.FC = () => {
           </Card>
         </Grid>
 
-        {/* Quick Actions Sidebar - Only for Teachers */}
-        {userRole === 'teacher' && (
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Quick Actions
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                    startIcon={<PeopleIcon />}
-                    onClick={() => navigate(`/courses/${courseId}/students`)}
-                  >
-                    View Students
-                  </Button>
+        {/* Sidebar - Different content for Teachers vs Students */}
+        <Grid size={{ xs: 12, md: 4 }}>
+          {userRole === 'teacher' ? (
+            <>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Quick Actions
+                  </Typography>
+                  <Divider sx={{ mb: 2 }} />
                   
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                    startIcon={<QuizIcon />}
-                    onClick={() => navigate(`/courses/${courseId}/quizzes`)}
-                  >
-                    Manage Quizzes
-                  </Button>
-                  
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                    startIcon={<BarChartIcon />}
-                    disabled
-                    sx={{ 
-                      color: 'text.secondary',
-                      borderColor: 'action.disabled',
-                      '&.Mui-disabled': {
-                        borderColor: 'action.disabled',
-                        color: 'text.disabled'
-                      }
-                    }}
-                  >
-                    Course Statistics (Coming Soon)
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Button
+                      variant="outlined"
+                      fullWidth
+                      startIcon={<PeopleIcon />}
+                      onClick={() => navigate(`/courses/${courseId}/students`)}
+                    >
+                      View Students
+                    </Button>
+                    
+                    <Button
+                      variant="outlined"
+                      fullWidth
+                      startIcon={<QuizIcon />}
+                      onClick={() => navigate(`/courses/${courseId}/quizzes`)}
+                    >
+                      Manage Quizzes
+                    </Button>
+                    
+                    <Button
+                      variant="outlined"
+                      fullWidth
+                      startIcon={<BarChartIcon />}
+                      onClick={() => navigate(`/courses/${courseId}/statistics`)}
+                    >
+                      Course Statistics
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
 
-            {/* Course Stats */}
-            <Card sx={{ mt: 2 }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Course Overview
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2">Total Students:</Typography>
-                  <Typography variant="body2" fontWeight="bold">
-                    {course.enrolled_count}
+              {/* Course Stats */}
+              <Card sx={{ mt: 2 }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Course Overview
                   </Typography>
-                </Box>
-                
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2">Total Quizzes:</Typography>
-                  <Typography variant="body2" fontWeight="bold">
-                    {(course.quizzes || []).length}
+                  <Divider sx={{ mb: 2 }} />
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2">Total Students:</Typography>
+                    <Typography variant="body2" fontWeight="bold">
+                      {course.enrolled_count}
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2">Total Quizzes:</Typography>
+                    <Typography variant="body2" fontWeight="bold">
+                      {(course.quizzes || []).length}
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2">Published Quizzes:</Typography>
+                    <Typography variant="body2" fontWeight="bold">
+                      {(course.quizzes || []).filter(quiz => quiz.is_published).length}
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2">Total Points:</Typography>
+                    <Typography variant="body2" fontWeight="bold">
+                      {(course.quizzes || []).reduce((sum, quiz) => sum + (quiz.total_points || 0), 0)}
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography variant="body2">Status:</Typography>
+                    <Chip 
+                      label={course.is_full ? 'Full' : 'Open'} 
+                      color={course.is_full ? 'error' : 'success'} 
+                      size="small"
+                    />
+                  </Box>
+                </CardContent>
+              </Card>
+            </>
+          ) : (
+            /* Student Sidebar */
+            <>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Quick Stats
                   </Typography>
-                </Box>
-                
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2">Published Quizzes:</Typography>
-                  <Typography variant="body2" fontWeight="bold">
-                    {(course.quizzes || []).filter(quiz => quiz.is_published).length}
+                  <Divider sx={{ mb: 2 }} />
+                  
+                  {(() => {
+                    const publishedQuizzes = (course.quizzes || []).filter(quiz => quiz.is_published);
+                    const gradedSubmissions = publishedQuizzes.filter(quiz => quiz.submission?.is_graded);
+                    
+                    if (gradedSubmissions.length === 0) {
+                      return (
+                        <Box sx={{ textAlign: 'center', py: 2 }}>
+                          <Typography variant="body2" color="text.secondary">
+                            Complete some quizzes to see your stats here!
+                          </Typography>
+                        </Box>
+                      );
+                    }
+                    
+                    const scores = gradedSubmissions.map(quiz => ({
+                      title: quiz.title,
+                      percentage: ((quiz.submission?.total_score || 0) / quiz.total_points) * 100
+                    }));
+                    
+                    const bestQuiz = scores.reduce((best, current) => 
+                      current.percentage > best.percentage ? current : best
+                    );
+                    
+                    const averageScore = scores.reduce((sum, quiz) => sum + quiz.percentage, 0) / scores.length;
+                    
+                    return (
+                      <Stack spacing={1.5}>
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Best Performance
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="body1" fontWeight="bold" color="success.main">
+                              {bestQuiz.percentage.toFixed(1)}%
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ 
+                              overflow: 'hidden', 
+                              textOverflow: 'ellipsis', 
+                              whiteSpace: 'nowrap',
+                              maxWidth: '120px'
+                            }}>
+                              {bestQuiz.title}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Average Score
+                          </Typography>
+                          <Typography variant="body1" fontWeight="bold" color="primary">
+                            {averageScore.toFixed(1)}%
+                          </Typography>
+                        </Box>
+                        
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Quizzes Completed
+                          </Typography>
+                          <Typography variant="body1" fontWeight="bold">
+                            {gradedSubmissions.length} / {publishedQuizzes.length}
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+              
+              {/* Course Info for Students */}
+              <Card sx={{ mt: 2 }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Course Info
                   </Typography>
-                </Box>
-                
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2">Total Points:</Typography>
-                  <Typography variant="body2" fontWeight="bold">
-                    {(course.quizzes || []).reduce((sum, quiz) => sum + (quiz.total_points || 0), 0)}
-                  </Typography>
-                </Box>
-                
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="body2">Status:</Typography>
-                  <Chip 
-                    label={course.is_full ? 'Full' : 'Open'} 
-                    color={course.is_full ? 'error' : 'success'} 
-                    size="small"
-                  />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        )}
+                  <Divider sx={{ mb: 2 }} />
+                  
+                  <Stack spacing={1}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" color="text.secondary">Instructor:</Typography>
+                      <Typography variant="body2" fontWeight="bold">
+                        {course.teacher_name}
+                      </Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" color="text.secondary">Students:</Typography>
+                      <Typography variant="body2" fontWeight="bold">
+                        {course.enrolled_count}
+                      </Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" color="text.secondary">Total Quizzes:</Typography>
+                      <Typography variant="body2" fontWeight="bold">
+                        {(course.quizzes || []).filter(quiz => quiz.is_published).length}
+                      </Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" color="text.secondary">Total Points:</Typography>
+                      <Typography variant="body2" fontWeight="bold">
+                        {(course.quizzes || []).filter(quiz => quiz.is_published).reduce((sum, quiz) => sum + quiz.total_points, 0)}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </>
+          )}
+        </Grid>
       </Grid>
       </Container>
     </Box>

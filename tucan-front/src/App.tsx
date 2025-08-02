@@ -17,6 +17,9 @@ import ViewCourse from "./pages/view-course";
 import TakeQuiz from "./pages/take-quiz";
 import QuizResults from "./pages/quiz-results";
 import QuizSubmissions from "./pages/quiz-submissions";
+import CourseStatistics from "./pages/course-statistics";
+import TeacherStatistics from "./pages/teacher-statistics";
+import QuizStatistics from "./pages/quiz-statistics";
 
 const App = () => (
   <Routes>
@@ -33,6 +36,9 @@ const App = () => (
     <Route path="/courses/:courseId/create-quiz" element={<CreateQuiz />} />
     <Route path="/courses/:courseId/quizzes" element={<CourseQuizzes />} />
     <Route path="/courses/:courseId/students" element={<CourseStudents />} />
+    <Route path="/courses/:courseId/statistics" element={<CourseStatistics />} />
+    <Route path="/teacher/statistics" element={<TeacherStatistics />} />
+    <Route path="/quiz/:quizId/statistics" element={<QuizStatistics />} />
     <Route path="/quiz/:quizId/take" element={<TakeQuiz />} />
     <Route path="/course/:courseId/quiz/:quizId" element={<TakeQuiz />} />
     <Route path="/quiz/:quizId/results" element={<QuizResults />} />
