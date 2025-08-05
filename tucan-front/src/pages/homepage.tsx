@@ -184,7 +184,34 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <Box className={`homepage ${role}`}>
+    <Box sx={{ 
+      minHeight: '100vh', 
+      height: '100vh',
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      backgroundColor: '#f5f5f5',
+      pb: 4,
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      '&::-webkit-scrollbar': {
+        width: '8px',
+      },
+      '&::-webkit-scrollbar-track': {
+        backgroundColor: '#f1f1f1',
+        borderRadius: '4px',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        backgroundColor: '#c1c1c1',
+        borderRadius: '4px',
+        '&:hover': {
+          backgroundColor: '#a8a8a8',
+        },
+      },
+    }}>
+      <Box className={`homepage ${role}`}>
       <aside className="sidebar">
         <Typography className="sidebar-title">¡Bienvenido!</Typography>
         <Typography variant="body2" sx={{ mb: 2, color: "#666" }}>
@@ -512,6 +539,7 @@ const HomePage: React.FC = () => {
           </Box>
         )}
       </main>
+      </Box>
     </Box>
   );
 };

@@ -122,6 +122,20 @@ class AcceptInvitationAPI(Resource):
             from routes.notifications import create_invitation_response_notification
             create_invitation_response_notification(invitation_id, accepted=True)
             
+            # Create notification for student (successful enrollment)
+            from models import Notification
+            student_notification = Notification(
+                user_id=invitation.student_id,
+                title=f"Course Enrollment Confirmed",
+                message=f"You have successfully joined '{course.name}'. You can now access course materials and take quizzes.",
+                notification_type="invitation_accepted",
+                related_id=course.id,
+                related_type="course",
+                action_url=f"/courses/{course.id}/view"
+            )
+            db.session.add(student_notification)
+            db.session.commit()
+            
             return {
                 'message': 'Invitation accepted successfully',
                 'course_name': course.name,

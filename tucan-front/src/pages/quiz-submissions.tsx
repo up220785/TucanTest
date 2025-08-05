@@ -325,7 +325,33 @@ const QuizSubmissions: React.FC = () => {
   const stats = calculateStats();
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        height: '100vh',
+        overflowY: 'auto',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        '&::-webkit-scrollbar': {
+          width: '8px',
+        },
+        '&::-webkit-scrollbar-track': {
+          background: '#f1f1f1',
+          borderRadius: '4px',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          background: '#c1c1c1',
+          borderRadius: '4px',
+        },
+        '&::-webkit-scrollbar-thumb:hover': {
+          background: '#a8a8a8',
+        },
+      }}
+    >
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -707,6 +733,7 @@ const QuizSubmissions: React.FC = () => {
         </DialogActions>
       </Dialog>
     </Container>
+    </Box>
   );
 };
 

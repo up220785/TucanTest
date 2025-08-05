@@ -83,6 +83,15 @@ const TakeQuiz: React.FC = () => {
     }
   }, [quizId]);
 
+  useEffect(() => {
+    if (!localStorage.getItem('tucan_prev_location')) {
+      localStorage.setItem('tucan_prev_location', document.referrer || '/homepage');
+    }
+    return () => {
+      localStorage.removeItem('tucan_prev_location');
+    };
+  }, []);
+
   const fetchQuiz = async () => {
     try {
       const token = localStorage.getItem('tucan_token');
@@ -162,8 +171,11 @@ const TakeQuiz: React.FC = () => {
         await markQuizNotificationsAsRead();
         
         alert('Quiz submitted successfully!');
-        // Navigate back to the course view page
-        if (quiz?.course_id) {
+        // Go back to previous location if available
+        const prevLocation = localStorage.getItem('tucan_prev_location');
+        if (prevLocation) {
+          navigate(prevLocation);
+        } else if (quiz?.course_id) {
           navigate(`/courses/${quiz.course_id}/view`);
         } else {
           navigate('/homepage'); // Fallback to homepage if course_id is not available
@@ -210,7 +222,10 @@ const TakeQuiz: React.FC = () => {
   };
 
   const handleBackNavigation = () => {
-    if (quiz?.course_id) {
+    const prevLocation = localStorage.getItem('tucan_prev_location');
+    if (prevLocation) {
+      navigate(prevLocation);
+    } else if (quiz?.course_id) {
       navigate(`/courses/${quiz.course_id}/view`);
     } else {
       navigate(-1);
@@ -256,9 +271,35 @@ const TakeQuiz: React.FC = () => {
   const currentQuestion = quiz.questions[currentQuestionIndex];
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        height: '100vh',
+        overflowY: 'auto',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        '&::-webkit-scrollbar': {
+          width: '8px',
+        },
+        '&::-webkit-scrollbar-track': {
+          background: '#f1f1f1',
+          borderRadius: '4px',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          background: '#c1c1c1',
+          borderRadius: '4px',
+        },
+        '&::-webkit-scrollbar-thumb:hover': {
+          background: '#a8a8a8',
+        },
+      }}
+    >
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        {/* Header */}
+        <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Box sx={{ display: 'flex', gap: 1, mr: 2 }}>
             <Button
@@ -462,6 +503,7 @@ const TakeQuiz: React.FC = () => {
         </DialogActions>
       </Dialog>
     </Container>
+    </Box>
   );
 };
 

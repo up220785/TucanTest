@@ -238,7 +238,34 @@ const CourseQuizzes: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Box sx={{ 
+      minHeight: '100vh', 
+      height: '100vh',
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      backgroundColor: '#f5f5f5',
+      pb: 4,
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      '&::-webkit-scrollbar': {
+        width: '8px',
+      },
+      '&::-webkit-scrollbar-track': {
+        backgroundColor: '#f1f1f1',
+        borderRadius: '4px',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        backgroundColor: '#c1c1c1',
+        borderRadius: '4px',
+        '&:hover': {
+          backgroundColor: '#a8a8a8',
+        },
+      },
+    }}>
+      <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -473,7 +500,8 @@ const CourseQuizzes: React.FC = () => {
           Delete Quiz
         </MenuItem>
       </Menu>
-    </Container>
+      </Container>
+    </Box>
   );
 };
 

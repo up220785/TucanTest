@@ -242,6 +242,8 @@ const NotificationsPage: React.FC = () => {
     switch (type) {
       case 'course_invitation':
         return <CourseIcon color="primary" />;
+      case 'invitation_accepted':
+        return <CourseIcon color="success" />;
       case 'quiz_published':
         return <QuizIcon color="secondary" />;
       case 'quiz_graded':
@@ -257,6 +259,8 @@ const NotificationsPage: React.FC = () => {
     switch (type) {
       case 'course_invitation':
         return 'primary';
+      case 'invitation_accepted':
+        return 'success';
       case 'quiz_published':
         return 'secondary';
       case 'quiz_graded':
@@ -278,19 +282,74 @@ const NotificationsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Box sx={{ width: '100%' }}>
-          <LinearProgress />
-        </Box>
-        <Typography variant="h6" sx={{ mt: 2, textAlign: 'center' }}>
-          Loading notifications...
-        </Typography>
-      </Container>
+      <Box sx={{ 
+        minHeight: '100vh', 
+        height: '100vh',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        backgroundColor: '#f5f5f5',
+        pb: 4,
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        '&::-webkit-scrollbar': {
+          width: '8px',
+        },
+        '&::-webkit-scrollbar-track': {
+          backgroundColor: '#f1f1f1',
+          borderRadius: '4px',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: '#c1c1c1',
+          borderRadius: '4px',
+          '&:hover': {
+            backgroundColor: '#a8a8a8',
+          },
+        },
+      }}>
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Box sx={{ width: '100%' }}>
+            <LinearProgress />
+          </Box>
+          <Typography variant="h6" sx={{ mt: 2, textAlign: 'center' }}>
+            Loading notifications...
+          </Typography>
+        </Container>
+      </Box>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Box sx={{ 
+      minHeight: '100vh', 
+      height: '100vh',
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      backgroundColor: '#f5f5f5',
+      pb: 4,
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      '&::-webkit-scrollbar': {
+        width: '8px',
+      },
+      '&::-webkit-scrollbar-track': {
+        backgroundColor: '#f1f1f1',
+        borderRadius: '4px',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        backgroundColor: '#c1c1c1',
+        borderRadius: '4px',
+        '&:hover': {
+          backgroundColor: '#a8a8a8',
+        },
+      },
+    }}>
+      <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
@@ -376,26 +435,39 @@ const NotificationsPage: React.FC = () => {
                 border: notification.is_read ? 'none' : '2px solid',
                 borderColor: notification.is_read ? 'transparent' : 'primary.main',
                 cursor: notification.type === 'course_invitation' ? 'pointer' : 'default',
+                width: '100%',
+                minHeight: 'auto',
+                height: 'auto',
+                overflow: 'visible',
                 '&:hover': {
                   boxShadow: notification.type === 'course_invitation' ? 4 : 1,
                 }
               }}
               onClick={() => handleNotificationClick(notification)}
             >
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', flex: 1 }}>
+              <CardContent sx={{ width: '100%', overflow: 'visible', padding: '16px' }}>
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', width: '100%' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', flex: 1, minWidth: 0 }}>
                     <Box sx={{ mr: 2, mt: 0.5 }}>
                       {getNotificationIcon(notification.type)}
                     </Box>
-                    <Box sx={{ flex: 1 }}>
+                    <Box sx={{ flex: 1, minWidth: 0, overflow: 'visible' }}>
                       <Typography variant="h6" component="h3" gutterBottom>
                         {notification.title}
                         {!notification.is_read && (
                           <Badge color="primary" variant="dot" sx={{ ml: 1 }} />
                         )}
                       </Typography>
-                      <Typography variant="body1" sx={{ mb: 2 }}>
+                      <Typography 
+                        variant="body1" 
+                        sx={{ 
+                          mb: 2,
+                          wordWrap: 'break-word',
+                          whiteSpace: 'pre-wrap',
+                          overflowWrap: 'break-word',
+                          wordBreak: 'break-word'
+                        }}
+                      >
                         {notification.message}
                       </Typography>
                       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -435,23 +507,57 @@ const NotificationsPage: React.FC = () => {
                 </Box>
               </CardContent>
               
-              {/* Add action buttons for quiz notifications */}
-              {(notification.type === 'quiz_published' || notification.type === 'quiz_graded' || notification.type === 'quiz_regraded') && (
+              {/* Add action buttons for different notification types */}
+              {(notification.type === 'quiz_published' || notification.type === 'quiz_graded' || notification.type === 'quiz_regraded' || notification.type === 'invitation_accepted') && (
                 <CardActions>
-                  <Button
-                    size="small"
-                    variant="contained"
-                    color={notification.type === 'quiz_published' ? 'secondary' : 'success'}
-                    startIcon={<QuizIcon />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (notification.action_url) {
-                        navigate(notification.action_url);
-                      }
-                    }}
-                  >
-                    {notification.type === 'quiz_published' ? 'View Quiz' : 'View Results'}
-                  </Button>
+                  {notification.type === 'quiz_published' && (
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color="secondary"
+                      startIcon={<QuizIcon />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (notification.action_url) {
+                          navigate(notification.action_url);
+                        }
+                      }}
+                    >
+                      Take Quiz
+                    </Button>
+                  )}
+                  {(notification.type === 'quiz_graded' || notification.type === 'quiz_regraded') && (
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color="success"
+                      startIcon={<QuizIcon />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (notification.action_url) {
+                          navigate(notification.action_url);
+                        }
+                      }}
+                    >
+                      View Results
+                    </Button>
+                  )}
+                  {notification.type === 'invitation_accepted' && (
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color="primary"
+                      startIcon={<CourseIcon />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (notification.action_url) {
+                          navigate(notification.action_url);
+                        }
+                      }}
+                    >
+                      Go to Course
+                    </Button>
+                  )}
                   {!notification.is_read && (
                     <Button
                       size="small"
@@ -539,7 +645,8 @@ const NotificationsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+      </Container>
+    </Box>
   );
 };
 

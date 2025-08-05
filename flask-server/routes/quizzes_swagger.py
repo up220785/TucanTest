@@ -1038,7 +1038,7 @@ class GradeAnswerAPI(Resource):
                     notification_type=notification_type,
                     related_id=submission.id,
                     related_type='quiz_submission',
-                    action_url=f"/quiz/{quiz.id}/take",
+                    action_url=f"/quiz/{quiz.id}/results",
                     created_at=current_time
                 )
                 db.session.add(notification)

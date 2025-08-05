@@ -101,6 +101,15 @@ const CreateQuiz: React.FC = () => {
     }
   }, [courseId]);
 
+  useEffect(() => {
+    if (!localStorage.getItem('tucan_prev_location')) {
+      localStorage.setItem('tucan_prev_location', document.referrer || '/homepage');
+    }
+    return () => {
+      localStorage.removeItem('tucan_prev_location');
+    };
+  }, []);
+
   const fetchCourse = async () => {
     try {
       const token = localStorage.getItem('tucan_token');
@@ -284,15 +293,20 @@ const CreateQuiz: React.FC = () => {
       if (response.ok) {
         const result = await response.json();
         setSaveSuccess(true);
-        
         if (shouldPublish) {
           alert('Quiz created and published successfully!');
         } else {
           alert('Quiz saved as draft successfully!');
         }
-        
-        // Navigate back to course quizzes page
-        navigate(`/courses/${courseId}/quizzes`);
+        // Go back to previous location if available
+        const prevLocation = localStorage.getItem('tucan_prev_location');
+        if (prevLocation) {
+          navigate(prevLocation);
+        } else if (courseId) {
+          navigate(`/courses/${courseId}/quizzes`);
+        } else {
+          navigate('/homepage');
+        }
       } else {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to save quiz');
@@ -309,7 +323,10 @@ const CreateQuiz: React.FC = () => {
   };
 
   const handleBackNavigation = () => {
-    if (courseId) {
+    const prevLocation = localStorage.getItem('tucan_prev_location');
+    if (prevLocation) {
+      navigate(prevLocation);
+    } else if (courseId) {
       navigate(`/courses/${courseId}/quizzes`);
     } else {
       navigate(-1);

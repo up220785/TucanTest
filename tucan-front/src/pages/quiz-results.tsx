@@ -22,6 +22,7 @@ interface Question {
   id: number;
   text: string;
   question_type: string;
+  points: number;
   options: string[];
   correct_answer: string;
 }
@@ -30,6 +31,7 @@ interface SubmissionAnswer {
   question_id: number;
   selected_answer: string;
   is_correct: boolean;
+  score: number;
 }
 
 interface QuizSubmission {
@@ -314,6 +316,9 @@ const QuizResults: React.FC = () => {
           const userAnswer = submission.answers.find(a => a.question_id === question.id);
           const isCorrect = userAnswer?.is_correct || false;
           
+          // Use the actual score from the API instead of calculating based on isCorrect
+          const pointsEarned = userAnswer?.score || 0;
+          
           return (
             <Card key={question.id} sx={{ 
               mb: 2, 
@@ -338,6 +343,12 @@ const QuizResults: React.FC = () => {
                   <Chip
                     label={isCorrect ? 'Correct' : 'Incorrect'}
                     color={isCorrect ? 'success' : 'error'}
+                    size="small"
+                  />
+                  <Chip
+                    label={`${pointsEarned}/${question.points} points`}
+                    color={pointsEarned === question.points ? 'success' : pointsEarned > 0 ? 'warning' : 'error'}
+                    variant="outlined"
                     size="small"
                   />
                 </Box>

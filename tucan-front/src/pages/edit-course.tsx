@@ -78,6 +78,15 @@ const EditCourse: React.FC = () => {
     fetchCourse();
   }, [courseId]);
 
+  useEffect(() => {
+    if (!localStorage.getItem('tucan_prev_location')) {
+      localStorage.setItem('tucan_prev_location', document.referrer || '/homepage');
+    }
+    return () => {
+      localStorage.removeItem('tucan_prev_location');
+    };
+  }, []);
+
   const fetchCourse = async () => {
     try {
       setLoading(true);
@@ -192,6 +201,14 @@ const EditCourse: React.FC = () => {
       setCourse(updatedCourse);
       setSuccess('Course updated successfully!');
       
+      // Go back to previous location if available
+      const prevLocation = localStorage.getItem('tucan_prev_location');
+      if (prevLocation) {
+        navigate(prevLocation);
+      } else {
+        navigate('/my-courses');
+      }
+
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
@@ -222,7 +239,12 @@ const EditCourse: React.FC = () => {
   };
 
   const handleBackNavigation = () => {
-    navigate('/my-courses');
+    const prevLocation = localStorage.getItem('tucan_prev_location');
+    if (prevLocation) {
+      navigate(prevLocation);
+    } else {
+      navigate('/my-courses');
+    }
   };
 
   const handleHomeNavigation = () => {

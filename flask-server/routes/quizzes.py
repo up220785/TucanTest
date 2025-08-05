@@ -424,6 +424,7 @@ def get_quiz_results(quiz_id, current_user=None):
                 'id': question.id,
                 'text': question.text,
                 'question_type': question.question_type,
+                'points': question.points,
                 'options': [],
                 'correct_answer': ''
             }
@@ -463,7 +464,8 @@ def get_quiz_results(quiz_id, current_user=None):
             answer_data = {
                 'question_id': answer.question_id,
                 'selected_answer': '',
-                'is_correct': is_correct
+                'is_correct': is_correct,
+                'score': answer.score if answer.score is not None else 0
             }
             
             if answer.option:
