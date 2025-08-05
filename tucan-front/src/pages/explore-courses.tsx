@@ -24,6 +24,8 @@ import {
   Visibility as VisibilityIcon,
   Public as PublicIcon,
   AccountCircle as TeacherIcon,
+  ArrowBack as ArrowBackIcon,
+  Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import '../styles/explore-courses.css';
@@ -197,6 +199,14 @@ const ExploreCourses: React.FC = () => {
     return course.enrolled_count >= course.max_capacity;
   };
 
+  const handleBackNavigation = () => {
+    navigate(-1);
+  };
+
+  const handleHomeNavigation = () => {
+    navigate('/homepage');
+  };
+
   if (loading) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -222,9 +232,29 @@ const ExploreCourses: React.FC = () => {
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Explore Courses
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              onClick={handleBackNavigation}
+              size="medium"
+            >
+              Back
+            </Button>
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography variant="h4" component="h1" gutterBottom>
+                Explore Courses
+              </Typography>
+            </Box>
+            <Button
+              variant="outlined"
+              startIcon={<HomeIcon />}
+              onClick={handleHomeNavigation}
+              size="medium"
+            >
+              Home
+            </Button>
+          </Box>
           <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
             Discover and enroll in public courses offered by our teachers
           </Typography>

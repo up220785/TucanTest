@@ -823,10 +823,18 @@ class QuizSubmitAPI(Resource):
             submission.total_score = total_score
             submission.max_possible_score = max_possible_score
             
-            # Mark as graded for now (auto-grading)
-            submission.is_graded = True
-            submission.graded_at = datetime.utcnow()
-            submission.graded_by = current_user.id  # Self-graded for now
+            # Check if all questions are auto-graded (no text questions)
+            text_questions = [q for q in quiz.questions if q.question_type == 'text']
+            if not text_questions:
+                # Mark as graded only if no text questions requiring manual grading
+                submission.is_graded = True
+                submission.graded_at = datetime.utcnow()
+                submission.graded_by = current_user.id  # Self-graded for now
+            else:
+                # Quiz has text questions requiring manual grading
+                submission.is_graded = False
+                submission.graded_at = None
+                submission.graded_by = None
             
             db.session.commit()
             
@@ -836,7 +844,8 @@ class QuizSubmitAPI(Resource):
                 'total_score': total_score,
                 'max_possible_score': max_possible_score,
                 'percentage': (total_score / max_possible_score * 100) if max_possible_score > 0 else 0,
-                'is_past_due': is_past_due
+                'is_past_due': is_past_due,
+                'requires_manual_grading': len(text_questions) > 0
             }
             
         except Exception as e:
@@ -1042,6 +1051,40 @@ class GradeAnswerAPI(Resource):
                 'feedback': feedback,
                 'submission_total_score': submission.total_score,
                 'submission_is_fully_graded': submission.is_graded
+            }
+            
+        except Exception as e:
+            db.session.rollback()
+            quizzes_ns.abort(500, str(e))
+
+
+@quizzes_ns.route('/<int:quiz_id>/mark-notifications-read')
+class QuizNotificationsAPI(Resource):
+    @quizzes_ns.doc('mark_quiz_notifications_read')
+    @quizzes_ns.response(200, 'Notifications marked as read successfully')
+    @quizzes_ns.response(404, 'Quiz not found')
+    @quizzes_ns.response(500, 'Internal server error')
+    @require_auth
+    def post(self, quiz_id, current_user=None):
+        """Mark all notifications related to this quiz as read for the current user"""
+        try:
+            # Find all unread notifications for this user related to this quiz
+            notifications = Notification.query.filter_by(
+                user_id=current_user.id,
+                related_id=quiz_id,
+                related_type='quiz',
+                is_read=False
+            ).all()
+            
+            # Mark them as read
+            for notification in notifications:
+                notification.is_read = True
+            
+            db.session.commit()
+            
+            return {
+                'message': f'Marked {len(notifications)} quiz notifications as read',
+                'notifications_updated': len(notifications)
             }
             
         except Exception as e:

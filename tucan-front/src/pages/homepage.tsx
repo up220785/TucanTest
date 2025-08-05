@@ -8,6 +8,7 @@ import {
   Chip,
   CircularProgress,
   Alert,
+  Badge,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import "../styles/homepage.css";
@@ -32,6 +33,7 @@ const HomePage: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,6 +44,9 @@ const HomePage: React.FC = () => {
         if (user && user.role) {
           setRole(user.role === "student" ? "student" : "teacher");
           setUserName(user.name || "Usuario");
+          
+          // Fetch unread notifications count for all users
+          fetchUnreadNotifications(user.id);
           
           // Fetch published courses if user is a teacher
           if (user.role === "teacher") {
@@ -139,6 +144,32 @@ const HomePage: React.FC = () => {
     }
   };
 
+  const fetchUnreadNotifications = async (userId: number) => {
+    try {
+      const token = localStorage.getItem("tucan_token");
+      
+      if (!token) {
+        return;
+      }
+
+      const response = await fetch(`http://localhost:5000/api/notifications/users/${userId}/notifications`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const unreadCount = data.notifications?.filter((notification: any) => !notification.is_read).length || 0;
+        setUnreadNotifications(unreadCount);
+      }
+    } catch (err) {
+      // Silently handle errors for notifications count
+      console.error('Failed to fetch unread notifications count:', err);
+    }
+  };
+
   const handleLogout = () => {
     // Clear user session data
     localStorage.removeItem("tucan_token");
@@ -155,7 +186,7 @@ const HomePage: React.FC = () => {
   return (
     <Box className={`homepage ${role}`}>
       <aside className="sidebar">
-        <Typography className="sidebar-title">Mi Perfil</Typography>
+        <Typography className="sidebar-title">¡Bienvenido!</Typography>
         <Typography variant="body2" sx={{ mb: 2, color: "#666" }}>
           {userName}
         </Typography>
@@ -216,6 +247,8 @@ const HomePage: React.FC = () => {
               onClick={() => navigate("/notifications")}
               sx={{ 
                 cursor: "pointer", 
+                display: "flex",
+                alignItems: "center",
                 "&:hover": { 
                   backgroundColor: "#f0f0f0", 
                   borderRadius: "4px",
@@ -224,13 +257,21 @@ const HomePage: React.FC = () => {
                 } 
               }}
             >
-              Notificaciones
+              <Badge 
+                badgeContent={unreadNotifications} 
+                color="error"
+                sx={{ 
+                  '& .MuiBadge-badge': {
+                    right: -3,
+                    top: 3,
+                  }
+                }}
+              >
+                Notificaciones
+              </Badge>
             </Typography>
           </>
         )}
-        
-        <Typography className="sidebar-item">Formularios Guardados</Typography>
-        <Typography className="sidebar-item">Aulas Guardadas</Typography>
         
         <Box sx={{ mt: "auto", pt: 2 }}>
           <Button

@@ -28,6 +28,7 @@ import {
   TrendingUp as TrendingUpIcon,
   Assignment as AssignmentIcon,
   EmojiEvents as TrophyIcon,
+  Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -91,6 +92,7 @@ const QuizStatistics: React.FC = () => {
   const [statistics, setStatistics] = useState<QuizStatistics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [courseId, setCourseId] = useState<number | null>(null);
 
   console.log('QuizStatistics component mounted, quizId:', quizId);
 
@@ -149,9 +151,52 @@ const QuizStatistics: React.FC = () => {
     } catch (err) {
       console.error('Error fetching quiz statistics:', err);
       setError(err instanceof Error ? err.message : 'Failed to load statistics');
+      
+      // Try to get basic quiz info as fallback to get course ID
+      await fetchBasicQuizInfo();
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchBasicQuizInfo = async () => {
+    try {
+      console.log('Fetching basic quiz info as fallback for quizId:', quizId);
+      const token = localStorage.getItem('tucan_token');
+      
+      if (!token) return;
+
+      const response = await fetch(`http://localhost:5000/api/quizzes/${quizId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const quizData = await response.json();
+        console.log('Basic quiz data received:', quizData);
+        if (quizData.course_id) {
+          setCourseId(quizData.course_id);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching basic quiz info:', err);
+    }
+  };
+
+  const handleBackNavigation = () => {
+    // Use browser history to go back to the previous page
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      // Fallback if no history available
+      navigate('/my-courses');
+    }
+  };
+
+  const handleHomeNavigation = () => {
+    navigate('/homepage');
   };
 
   const formatDateTime = (dateString: string) => {
@@ -203,7 +248,45 @@ const QuizStatistics: React.FC = () => {
         backgroundColor: '#f5f5f5',
       }}>
         <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              onClick={handleBackNavigation}
+            >
+              Back
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<HomeIcon />}
+              onClick={handleHomeNavigation}
+            >
+              Home
+            </Button>
+          </Box>
           <Alert severity="error">{error}</Alert>
+          <Box sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'center' }}>
+            <Button
+              variant="contained"
+              startIcon={<ArrowBackIcon />}
+              onClick={handleBackNavigation}
+            >
+              Back
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<HomeIcon />}
+              onClick={handleHomeNavigation}
+            >
+              Home
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </Button>
+          </Box>
         </Container>
       </Box>
     );
@@ -217,7 +300,45 @@ const QuizStatistics: React.FC = () => {
         backgroundColor: '#f5f5f5',
       }}>
         <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              onClick={handleBackNavigation}
+            >
+              Back
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<HomeIcon />}
+              onClick={handleHomeNavigation}
+            >
+              Home
+            </Button>
+          </Box>
           <Alert severity="warning">No quiz statistics found</Alert>
+          <Box sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'center' }}>
+            <Button
+              variant="contained"
+              startIcon={<ArrowBackIcon />}
+              onClick={handleBackNavigation}
+            >
+              Back
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<HomeIcon />}
+              onClick={handleHomeNavigation}
+            >
+              Home
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </Button>
+          </Box>
         </Container>
       </Box>
     );
@@ -248,14 +369,22 @@ const QuizStatistics: React.FC = () => {
       <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 3 }}>
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBackIcon />}
-            onClick={() => navigate(`/courses/${statistics.course_id}/view`)}
-            sx={{ mb: 2 }}
-          >
-            Back to Course
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              onClick={handleBackNavigation}
+            >
+              Back
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<HomeIcon />}
+              onClick={handleHomeNavigation}
+            >
+              Home
+            </Button>
+          </Box>
           
           <Typography variant="h4" component="h1" gutterBottom>
             Quiz Statistics: {statistics.quiz_title}

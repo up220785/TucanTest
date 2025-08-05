@@ -14,7 +14,9 @@ import {
   Alert,
   Stack
 } from '@mui/material';
-import { ArrowBack, CheckCircle, Cancel, Help } from '@mui/icons-material';
+import {
+  ArrowBack, CheckCircle, Cancel, Help, Home as HomeIcon
+} from '@mui/icons-material';
 
 interface Question {
   id: number;
@@ -35,9 +37,19 @@ interface QuizSubmission {
   quiz_id: number;
   student_id: number;
   score: number;
+  auto_graded_score: number;
+  manual_graded_score: number | null;
+  is_graded: boolean;
+  is_pending_manual_grade: boolean;
   submitted_at: string;
   graded_at: string;
   answers: SubmissionAnswer[];
+}
+
+interface GradingStatus {
+  has_text_questions: boolean;
+  is_fully_graded: boolean;
+  requires_manual_grading: boolean;
 }
 
 interface QuizResultsData {
@@ -51,6 +63,7 @@ interface QuizResultsData {
   };
   submission: QuizSubmission;
   questions: Question[];
+  grading_status: GradingStatus;
 }
 
 const QuizResults: React.FC = () => {
@@ -94,12 +107,22 @@ const QuizResults: React.FC = () => {
     }
   }, [quizId]);
 
-  const handleBackToCourse = () => {
-    if (resultsData?.quiz.course_id) {
-      navigate(`/courses/${resultsData.quiz.course_id}/view`);
+  const handleBackNavigation = () => {
+    // Use browser history to go back to the previous page
+    if (window.history.length > 1) {
+      navigate(-1);
     } else {
-      navigate('/homepage');
+      // Fallback to course if available
+      if (resultsData?.quiz.course_id) {
+        navigate(`/courses/${resultsData.quiz.course_id}/view`);
+      } else {
+        navigate('/homepage');
+      }
     }
+  };
+
+  const handleHomeNavigation = () => {
+    navigate('/homepage');
   };
 
   const getScoreColor = (score: number, totalPoints: number) => {
@@ -125,14 +148,22 @@ const QuizResults: React.FC = () => {
     return (
       <Container sx={{ mt: 4 }}>
         <Alert severity="error">{error}</Alert>
-        <Button
-          variant="contained"
-          startIcon={<ArrowBack />}
-          onClick={() => navigate('/homepage')}
-          sx={{ mt: 2 }}
-        >
-          Back to Homepage
-        </Button>
+        <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+          <Button
+            variant="contained"
+            startIcon={<ArrowBack />}
+            onClick={handleBackNavigation}
+          >
+            Back
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<HomeIcon />}
+            onClick={handleHomeNavigation}
+          >
+            Home
+          </Button>
+        </Box>
       </Container>
     );
   }
@@ -145,28 +176,61 @@ const QuizResults: React.FC = () => {
     );
   }
 
-  const { quiz, submission, questions } = resultsData;
-  const scorePercentage = Math.round((submission.score / quiz.total_points) * 100);
+  const { quiz, submission, questions, grading_status } = resultsData;
+  
+  // Calculate appropriate score and percentage based on grading status
+  const displayScore = submission.is_graded ? submission.score : submission.auto_graded_score || 0;
+  const maxPossibleScore = submission.is_graded ? quiz.total_points : 
+    (quiz.total_points - questions.filter(q => q.question_type === 'text').length * 5); // Assuming 5 points per text question
+  const scorePercentage = maxPossibleScore > 0 ? Math.round((displayScore / maxPossibleScore) * 100) : 0;
 
   return (
     <Box sx={{ 
       minHeight: '100vh', 
+      height: '100vh',
       overflowY: 'auto',
       overflowX: 'hidden',
       backgroundColor: '#f5f5f5',
-      pb: 4
+      pb: 4,
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      '&::-webkit-scrollbar': {
+        width: '8px',
+      },
+      '&::-webkit-scrollbar-track': {
+        backgroundColor: '#f1f1f1',
+        borderRadius: '4px',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        backgroundColor: '#c1c1c1',
+        borderRadius: '4px',
+        '&:hover': {
+          backgroundColor: '#a8a8a8',
+        },
+      },
     }}>
-      <Container maxWidth="lg" sx={{ pt: 4, pb: 4, minHeight: '100vh' }}>
+      <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 3 }}>
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBack />}
-            onClick={handleBackToCourse}
-            sx={{ mb: 2 }}
-          >
-            Back to Course
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBack />}
+              onClick={handleBackNavigation}
+            >
+              Back
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<HomeIcon />}
+              onClick={handleHomeNavigation}
+            >
+              Home
+            </Button>
+          </Box>
         
         <Typography variant="h4" component="h1" gutterBottom>
           Quiz Results: {quiz.title}
@@ -178,24 +242,43 @@ const QuizResults: React.FC = () => {
       </Box>
 
       {/* Score Summary */}
-      <Paper elevation={3} sx={{ p: { xs: 2, md: 3 }, mb: 3, bgcolor: 'background.paper', position: 'sticky', top: 0, zIndex: 1 }}>
+      <Paper elevation={3} sx={{ p: { xs: 2, md: 3 }, mb: 3, bgcolor: 'background.paper' }}>
+        {grading_status.requires_manual_grading && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <Typography variant="body2">
+              This quiz contains text questions that require manual grading. Your final score is pending teacher review.
+            </Typography>
+          </Alert>
+        )}
+        
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: 'flex-start' }}>
           <Box sx={{ flex: 1 }}>
             <Stack spacing={2}>
-              <Typography variant="h6">Your Score</Typography>
+              <Typography variant="h6">
+                {grading_status.requires_manual_grading ? 'Partial Score (Auto-Graded)' : 'Your Score'}
+              </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
                 <Typography variant="h3" component="span">
-                  {submission.score}
+                  {displayScore}
                 </Typography>
                 <Typography variant="h5" component="span" color="text.secondary">
-                  / {quiz.total_points}
+                  / {grading_status.requires_manual_grading ? maxPossibleScore : quiz.total_points}
                 </Typography>
-                <Chip
-                  label={`${scorePercentage}%`}
-                  color={getScoreColor(submission.score, quiz.total_points)}
-                  size="medium"
-                  sx={{ fontSize: '1rem', fontWeight: 'bold' }}
-                />
+                {grading_status.requires_manual_grading ? (
+                  <Chip
+                    label="Pending Grade"
+                    color="warning"
+                    size="medium"
+                    sx={{ fontSize: '1rem', fontWeight: 'bold' }}
+                  />
+                ) : (
+                  <Chip
+                    label={`${scorePercentage}%`}
+                    color={getScoreColor(displayScore, quiz.total_points)}
+                    size="medium"
+                    sx={{ fontSize: '1rem', fontWeight: 'bold' }}
+                  />
+                )}
               </Box>
             </Stack>
           </Box>
@@ -206,10 +289,11 @@ const QuizResults: React.FC = () => {
                 <strong>Submitted:</strong> {formatDate(submission.submitted_at)}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                <strong>Graded:</strong> {formatDate(submission.graded_at)}
+                <strong>Graded:</strong> {submission.is_graded ? formatDate(submission.graded_at) : 'Pending'}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                <strong>Questions Correct:</strong> {submission.answers.filter(a => a.is_correct).length} / {questions.length}
+                <strong>Questions Correct:</strong> {submission.answers.filter(a => a.is_correct).length} / {questions.filter(q => q.question_type !== 'text').length}
+                {grading_status.has_text_questions && ' (excluding text questions)'}
               </Typography>
             </Stack>
           </Box>
@@ -225,23 +309,6 @@ const QuizResults: React.FC = () => {
         display: 'flex', 
         flexDirection: 'column', 
         gap: 2,
-        maxHeight: { xs: 'none', md: '60vh' },
-        overflowY: { xs: 'visible', md: 'auto' },
-        pr: { xs: 0, md: 1 },
-        '&::-webkit-scrollbar': {
-          width: '8px',
-        },
-        '&::-webkit-scrollbar-track': {
-          backgroundColor: '#f1f1f1',
-          borderRadius: '4px',
-        },
-        '&::-webkit-scrollbar-thumb': {
-          backgroundColor: '#c1c1c1',
-          borderRadius: '4px',
-          '&:hover': {
-            backgroundColor: '#a8a8a8',
-          },
-        },
       }}>
         {questions.map((question, index) => {
           const userAnswer = submission.answers.find(a => a.question_id === question.id);
@@ -401,14 +468,22 @@ const QuizResults: React.FC = () => {
       </Box>
 
       {/* Footer Actions */}
-      <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+      <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center' }}>
         <Button
           variant="contained"
           size="large"
-          onClick={handleBackToCourse}
+          onClick={handleBackNavigation}
           startIcon={<ArrowBack />}
         >
-          Return to Course
+          Back
+        </Button>
+        <Button
+          variant="outlined"
+          size="large"
+          onClick={handleHomeNavigation}
+          startIcon={<HomeIcon />}
+        >
+          Home
         </Button>
       </Box>
       </Container>

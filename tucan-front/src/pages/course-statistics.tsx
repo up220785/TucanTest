@@ -28,6 +28,7 @@ import {
   School as SchoolIcon,
   EmojiEvents as TrophyIcon,
   Person as PersonIcon,
+  Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -144,6 +145,14 @@ const CourseStatistics: React.FC = () => {
     return 'error';
   };
 
+  const handleBackNavigation = () => {
+    navigate(-1);
+  };
+
+  const handleHomeNavigation = () => {
+    navigate('/homepage');
+  };
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -181,13 +190,22 @@ const CourseStatistics: React.FC = () => {
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
           </Alert>
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBackIcon />}
-            onClick={() => navigate('/my-courses')}
-          >
-            Back to My Courses
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              onClick={handleBackNavigation}
+            >
+              Back
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<HomeIcon />}
+              onClick={handleHomeNavigation}
+            >
+              Home
+            </Button>
+          </Box>
         </Container>
       </Box>
     );
@@ -234,14 +252,22 @@ const CourseStatistics: React.FC = () => {
       <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 3 }}>
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBackIcon />}
-            onClick={() => navigate(`/courses/${courseId}/view`)}
-            sx={{ mb: 2 }}
-          >
-            Back to Course
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              onClick={handleBackNavigation}
+            >
+              Back
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<HomeIcon />}
+              onClick={handleHomeNavigation}
+            >
+              Home
+            </Button>
+          </Box>
           
           <Typography variant="h4" component="h1" gutterBottom>
             Course Statistics: {statistics.course_name}

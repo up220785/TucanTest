@@ -28,6 +28,7 @@ import {
   VisibilityOff as VisibilityOffIcon,
   People as PeopleIcon,
   Quiz as QuizIcon,
+  Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import '../styles/edit-course.css';
@@ -220,6 +221,14 @@ const EditCourse: React.FC = () => {
     });
   };
 
+  const handleBackNavigation = () => {
+    navigate('/my-courses');
+  };
+
+  const handleHomeNavigation = () => {
+    navigate('/homepage');
+  };
+
   if (loading) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -239,14 +248,22 @@ const EditCourse: React.FC = () => {
         <Alert severity="error">
           Course not found or you don't have permission to edit it.
         </Alert>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/my-courses')}
-          sx={{ mt: 2 }}
-        >
-          Back to My Courses
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            onClick={handleBackNavigation}
+          >
+            Back
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<HomeIcon />}
+            onClick={handleHomeNavigation}
+          >
+            Home
+          </Button>
+        </Box>
       </Container>
     );
   }
@@ -255,14 +272,22 @@ const EditCourse: React.FC = () => {
     <Container maxWidth="lg" sx={{ mt: 2, mb: 2, height: '100vh', overflow: 'auto' }}>
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/my-courses')}
-          sx={{ mr: 2 }}
-        >
-          Back
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1, mr: 2 }}>
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            onClick={handleBackNavigation}
+          >
+            Back
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<HomeIcon />}
+            onClick={handleHomeNavigation}
+          >
+            Home
+          </Button>
+        </Box>
         <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h4" component="h1" gutterBottom>
             Edit Course

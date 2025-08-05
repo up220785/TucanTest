@@ -12,6 +12,7 @@ submission_model = courses_ns.model('QuizSubmission', {
     'id': fields.Integer(description='Submission ID'),
     'submitted_at': fields.DateTime(description='Submission date'),
     'is_graded': fields.Boolean(description='Whether submission is graded'),
+    'is_pending_manual_grade': fields.Boolean(description='Whether submission has text questions pending manual grading'),
     'grade': fields.Float(description='Grade received'),
     'total_score': fields.Float(description='Total score')
 })
@@ -291,10 +292,15 @@ class CourseAPI(Resource):
                         ).first()
                         
                         if submission:
+                            # Check if quiz has text questions that require manual grading
+                            text_questions = [q for q in quiz.questions if q.question_type == 'text']
+                            is_pending_manual_grade = len(text_questions) > 0 and not submission.is_graded
+                            
                             quiz_data['submission'] = {
                                 'id': submission.id,
                                 'submitted_at': submission.submitted_at.isoformat() if submission.submitted_at else None,
                                 'is_graded': submission.is_graded,
+                                'is_pending_manual_grade': is_pending_manual_grade,
                                 'grade': submission.total_score,
                                 'total_score': submission.total_score
                             }

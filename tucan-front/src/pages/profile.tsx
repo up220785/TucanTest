@@ -9,6 +9,10 @@ import {
   Alert,
   Chip,
 } from "@mui/material";
+import {
+  ArrowBack as ArrowBackIcon,
+  Home as HomeIcon,
+} from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import "../styles/profile.css";
 
@@ -195,6 +199,14 @@ const Profile: React.FC = () => {
     return role === "teacher" ? "Docente" : "Estudiante";
   };
 
+  const handleBackNavigation = () => {
+    navigate(-1);
+  };
+
+  const handleHomeNavigation = () => {
+    navigate('/homepage');
+  };
+
   const getRoleColor = (role: string) => {
     return role === "teacher" ? "primary" : "secondary";
   };
@@ -218,16 +230,27 @@ const Profile: React.FC = () => {
   return (
     <Container maxWidth="md" sx={{ mt: 2, mb: 2, height: "100vh", overflow: "auto" }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            onClick={handleBackNavigation}
+            sx={{ borderColor: "#30638E", color: "#30638E" }}
+          >
+            Atrás
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<HomeIcon />}
+            onClick={handleHomeNavigation}
+            sx={{ borderColor: "#30638E", color: "#30638E" }}
+          >
+            Inicio
+          </Button>
+        </Box>
         <Typography variant="h4" component="h1">
           Mi Perfil
         </Typography>
-        <Button
-          variant="outlined"
-          onClick={() => navigate("/homepage")}
-          sx={{ borderColor: "#30638E", color: "#30638E" }}
-        >
-          Volver al Inicio
-        </Button>
       </Box>
 
       <Paper elevation={3} sx={{ p: 3, maxHeight: "calc(100vh - 120px)", overflow: "auto" }}>

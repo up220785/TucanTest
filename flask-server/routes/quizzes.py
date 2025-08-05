@@ -412,9 +412,10 @@ def get_quiz_results(quiz_id, current_user=None):
         
         if not submission:
             return jsonify({'error': 'No submission found for this quiz'}), 404
-            
-        if not submission.is_graded:
-            return jsonify({'error': 'Quiz has not been graded yet'}), 400
+        
+        # Check if quiz has text questions that require manual grading
+        text_questions = [q for q in quiz.questions if q.question_type == 'text']
+        has_text_questions = len(text_questions) > 0
         
         # Get quiz questions with their options
         questions = []
@@ -486,15 +487,54 @@ def get_quiz_results(quiz_id, current_user=None):
                 'id': submission.id,
                 'quiz_id': submission.quiz_id,
                 'student_id': submission.student_id,
-                'score': submission.total_score or 0,
+                'score': submission.total_score if submission.is_graded else submission.auto_graded_score,
+                'auto_graded_score': submission.auto_graded_score,
+                'manual_graded_score': submission.manual_graded_score,
+                'is_graded': submission.is_graded,
+                'is_pending_manual_grade': has_text_questions and not submission.is_graded,
                 'submitted_at': submission.submitted_at.isoformat() if submission.submitted_at else '',
                 'graded_at': submission.graded_at.isoformat() if submission.graded_at else '',
                 'answers': submission_answers
             },
-            'questions': questions
+            'questions': questions,
+            'grading_status': {
+                'has_text_questions': has_text_questions,
+                'is_fully_graded': submission.is_graded,
+                'requires_manual_grading': has_text_questions and not submission.is_graded
+            }
         }
         
         return jsonify(result_data)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@quizzes_bp.route('/api/quizzes/<int:quiz_id>/mark-notifications-read', methods=['POST'])
+@require_auth
+def mark_quiz_notifications_read(quiz_id, current_user=None):
+    """Mark all notifications related to this quiz as read for the current user"""
+    try:
+        from models import Notification
+        
+        # Find all unread notifications for this user related to this quiz
+        notifications = Notification.query.filter_by(
+            user_id=current_user.id,
+            related_id=quiz_id,
+            related_type='quiz',
+            is_read=False
+        ).all()
+        
+        # Mark them as read
+        for notification in notifications:
+            notification.is_read = True
+        
+        db.session.commit()
+        
+        return jsonify({
+            'message': f'Marked {len(notifications)} quiz notifications as read',
+            'notifications_updated': len(notifications)
+        })
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500

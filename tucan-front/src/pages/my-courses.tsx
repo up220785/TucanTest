@@ -38,6 +38,8 @@ import {
   VisibilityOff as VisibilityOffIcon,
   School as SchoolIcon,
   Email as EmailIcon,
+  ArrowBack as ArrowBackIcon,
+  Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import InviteStudentsDialog from '../components/InviteStudentsDialog';
@@ -191,8 +193,10 @@ const MyCourses: React.FC = () => {
   };
 
   const handleInviteStudents = () => {
+    // Close the menu but keep the selected course for the dialog
+    setAnchorEl(null);
+    // Open the invite dialog immediately
     setInviteDialogOpen(true);
-    handleMenuClose();
   };
 
   const handleCreateQuiz = () => {
@@ -266,6 +270,14 @@ const MyCourses: React.FC = () => {
     });
   };
 
+  const handleBackNavigation = () => {
+    navigate(-1);
+  };
+
+  const handleHomeNavigation = () => {
+    navigate('/homepage');
+  };
+
   if (loading) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -283,13 +295,33 @@ const MyCourses: React.FC = () => {
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Box>
-          <Typography variant="h4" component="h1" gutterBottom>
-            My Courses
-          </Typography>
-          <Typography variant="subtitle1" color="text.secondary">
-            Manage all your courses, track enrollment, and monitor performance
-          </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              onClick={handleBackNavigation}
+              size="medium"
+            >
+              Back
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<HomeIcon />}
+              onClick={handleHomeNavigation}
+              size="medium"
+            >
+              Home
+            </Button>
+          </Box>
+          <Box>
+            <Typography variant="h4" component="h1" gutterBottom>
+              My Courses
+            </Typography>
+            <Typography variant="subtitle1" color="text.secondary">
+              Manage all your courses, track enrollment, and monitor performance
+            </Typography>
+          </Box>
         </Box>
         <Button
           variant="contained"
@@ -587,12 +619,15 @@ const MyCourses: React.FC = () => {
       {selectedCourse && (
         <InviteStudentsDialog
           open={inviteDialogOpen}
-          onClose={() => setInviteDialogOpen(false)}
+          onClose={() => {
+            setInviteDialogOpen(false);
+            setSelectedCourse(null);
+          }}
           courseId={selectedCourse.id}
           courseName={selectedCourse.name}
           onInvitesSent={() => {
-            // Refresh courses to update any counts if needed
-            fetchCourses();
+            // No need to refresh the entire page
+            // The dialog will handle showing success and closing
           }}
         />
       )}

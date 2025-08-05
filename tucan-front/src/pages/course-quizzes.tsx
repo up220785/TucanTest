@@ -27,6 +27,8 @@ import {
   ArrowBack as ArrowBackIcon,
   Publish as PublishIcon,
   UnpublishedOutlined as UnpublishedIcon,
+  BarChart as BarChartIcon,
+  Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -148,6 +150,11 @@ const CourseQuizzes: React.FC = () => {
     handleMenuClose();
   };
 
+  const handleStatsView = (quizId: number) => {
+    navigate(`/quiz/${quizId}/statistics`);
+    handleMenuClose();
+  };
+
   const handleEditQuiz = (quizId: number) => {
     navigate(`/quizzes/${quizId}/edit`);
     handleMenuClose();
@@ -190,6 +197,14 @@ const CourseQuizzes: React.FC = () => {
     });
   };
 
+  const handleBackNavigation = () => {
+    navigate(-1);
+  };
+
+  const handleHomeNavigation = () => {
+    navigate('/homepage');
+  };
+
   const formatDueDate = (dateString: string | null | undefined) => {
     if (!dateString) return 'No due date';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -228,12 +243,12 @@ const CourseQuizzes: React.FC = () => {
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <IconButton 
-            onClick={() => navigate('/my-courses')}
+            onClick={handleBackNavigation}
             sx={{ mr: 1 }}
           >
             <ArrowBackIcon />
           </IconButton>
-          <Box>
+          <Box sx={{ flexGrow: 1 }}>
             <Typography variant="h4" component="h1">
               <QuizIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
               Course Quizzes
@@ -242,6 +257,12 @@ const CourseQuizzes: React.FC = () => {
               {course.name}
             </Typography>
           </Box>
+          <IconButton 
+            onClick={handleHomeNavigation}
+            sx={{ ml: 1 }}
+          >
+            <HomeIcon />
+          </IconButton>
         </Box>
 
         {userRole === 'teacher' && (
@@ -409,6 +430,15 @@ const CourseQuizzes: React.FC = () => {
                   >
                     {userRole === 'teacher' ? 'View Submissions' : 'Take Quiz'}
                   </Button>
+                  {userRole === 'teacher' && (
+                    <Button
+                      size="small"
+                      startIcon={<BarChartIcon />}
+                      onClick={() => handleStatsView(quiz.id)}
+                    >
+                      Stats
+                    </Button>
+                  )}
                 </CardActions>
               </Card>
             </Box>
@@ -426,6 +456,10 @@ const CourseQuizzes: React.FC = () => {
         <MenuItem onClick={() => selectedQuiz && handleViewQuiz(selectedQuiz.id)}>
           <VisibilityIcon sx={{ mr: 1 }} />
           View Submissions
+        </MenuItem>
+        <MenuItem onClick={() => selectedQuiz && handleStatsView(selectedQuiz.id)}>
+          <BarChartIcon sx={{ mr: 1 }} />
+          Statistics
         </MenuItem>
         <MenuItem onClick={() => selectedQuiz && handleEditQuiz(selectedQuiz.id)}>
           <EditIcon sx={{ mr: 1 }} />

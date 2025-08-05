@@ -37,6 +37,8 @@ import {
   Publish as PublishIcon,
   Preview as PreviewIcon,
   DragIndicator as DragIcon,
+  ArrowBack as ArrowBackIcon,
+  Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -306,6 +308,18 @@ const CreateQuiz: React.FC = () => {
     return quiz.questions.reduce((total, question) => total + question.points, 0);
   };
 
+  const handleBackNavigation = () => {
+    if (courseId) {
+      navigate(`/courses/${courseId}/quizzes`);
+    } else {
+      navigate(-1);
+    }
+  };
+
+  const handleHomeNavigation = () => {
+    navigate('/homepage');
+  };
+
   if (!course) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -324,14 +338,34 @@ const CreateQuiz: React.FC = () => {
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 4 }}>
-            <Typography variant="h4" component="h1" gutterBottom>
-              <QuizIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
-              Create Quiz
-            </Typography>
-            <Typography variant="subtitle1" color="text.secondary">
-              Course: {course.name}
-            </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Box sx={{ display: 'flex', gap: 1, mr: 2 }}>
+              <Button
+                variant="outlined"
+                startIcon={<ArrowBackIcon />}
+                onClick={handleBackNavigation}
+              >
+                Back
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<HomeIcon />}
+                onClick={handleHomeNavigation}
+              >
+                Home
+              </Button>
+            </Box>
+            <Box>
+              <Typography variant="h4" component="h1" gutterBottom>
+                <QuizIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
+                Create Quiz
+              </Typography>
+              <Typography variant="subtitle1" color="text.secondary">
+                Course: {course.name}
+              </Typography>
+            </Box>
           </Box>
+        </Box>
 
         {/* Error Alert */}
         {error && (

@@ -27,6 +27,7 @@ import {
   Assignment as AssignmentIcon,
   Check as CheckIcon,
   ArrowBack as ArrowBackIcon,
+  Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -157,6 +158,9 @@ const TakeQuiz: React.FC = () => {
       });
 
       if (response.ok) {
+        // Mark quiz-related notifications as read
+        await markQuizNotificationsAsRead();
+        
         alert('Quiz submitted successfully!');
         // Navigate back to the course view page
         if (quiz?.course_id) {
@@ -176,6 +180,24 @@ const TakeQuiz: React.FC = () => {
     }
   };
 
+  const markQuizNotificationsAsRead = async () => {
+    try {
+      const token = localStorage.getItem('tucan_token');
+      
+      // Call backend endpoint to mark quiz notifications as read
+      await fetch(`http://localhost:5000/api/quizzes/${quizId}/mark-notifications-read`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+    } catch (err) {
+      // Don't fail the submission if notification marking fails
+      console.warn('Failed to mark quiz notifications as read:', err);
+    }
+  };
+
   const formatDueDate = (dateString: string | null) => {
     if (!dateString) return 'No due date';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -185,6 +207,18 @@ const TakeQuiz: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  const handleBackNavigation = () => {
+    if (quiz?.course_id) {
+      navigate(`/courses/${quiz.course_id}/view`);
+    } else {
+      navigate(-1);
+    }
+  };
+
+  const handleHomeNavigation = () => {
+    navigate('/homepage');
   };
 
   const getAnsweredCount = () => {
@@ -226,19 +260,20 @@ const TakeQuiz: React.FC = () => {
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Button
-            startIcon={<ArrowBackIcon />}
-            onClick={() => {
-              if (quiz?.course_id) {
-                navigate(`/courses/${quiz.course_id}/view`);
-              } else {
-                navigate('/homepage');
-              }
-            }}
-            sx={{ mr: 2 }}
-          >
-            Back to Course
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1, mr: 2 }}>
+            <Button
+              startIcon={<ArrowBackIcon />}
+              onClick={handleBackNavigation}
+            >
+              Back
+            </Button>
+            <Button
+              startIcon={<HomeIcon />}
+              onClick={handleHomeNavigation}
+            >
+              Home
+            </Button>
+          </Box>
           <Box>
             <Typography variant="h4" component="h1">
               <QuizIcon sx={{ mr: 2, verticalAlign: 'middle' }} />

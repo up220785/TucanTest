@@ -130,6 +130,13 @@ const InviteStudentsDialog: React.FC<InviteStudentsDialogProps> = ({
         if (onInvitesSent) {
           onInvitesSent();
         }
+
+        // If all invitations were successful, close the dialog after a short delay
+        if (failed.length === 0) {
+          setTimeout(() => {
+            handleClose();
+          }, 1500); // Show success message for 1.5 seconds before closing
+        }
       }
 
       if (failed.length > 0) {
@@ -137,8 +144,8 @@ const InviteStudentsDialog: React.FC<InviteStudentsDialogProps> = ({
         setError(`Failed to send ${failed.length} invitation(s):\\n${failedMessages}`);
       }
 
-      // Clear successful emails
-      if (successful.length > 0) {
+      // Clear successful emails (only if there were failures to allow retry)
+      if (successful.length > 0 && failed.length > 0) {
         const remainingEmails = emails.filter((email, index) => {
           return !successful.some(s => s.email === email.trim());
         });

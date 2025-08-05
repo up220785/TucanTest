@@ -22,6 +22,7 @@ import {
   Assignment as AssignmentIcon,
   TrendingUp as TrendingUpIcon,
   Analytics as AnalyticsIcon,
+  Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
@@ -126,6 +127,14 @@ const TeacherStatistics: React.FC = () => {
     });
   };
 
+  const handleBackNavigation = () => {
+    navigate(-1);
+  };
+
+  const handleHomeNavigation = () => {
+    navigate('/homepage');
+  };
+
   const getPublishStatusColor = (isPublished: boolean) => {
     return isPublished ? 'success' : 'default';
   };
@@ -156,12 +165,15 @@ const TeacherStatistics: React.FC = () => {
       }}>
         <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-            <IconButton onClick={() => navigate('/my-courses')} sx={{ mr: 2 }}>
+            <IconButton onClick={handleBackNavigation} sx={{ mr: 2 }}>
               <ArrowBackIcon />
             </IconButton>
-            <Typography variant="h4" component="h1">
+            <Typography variant="h4" component="h1" sx={{ flexGrow: 1 }}>
               Teacher Statistics
             </Typography>
+            <IconButton onClick={handleHomeNavigation} sx={{ ml: 2 }}>
+              <HomeIcon />
+            </IconButton>
           </Box>
           <Alert severity="error">{error}</Alert>
         </Container>
@@ -185,15 +197,37 @@ const TeacherStatistics: React.FC = () => {
   return (
     <Box sx={{ 
       minHeight: '100vh',
+      height: '100vh',
+      overflowY: 'auto',
+      overflowX: 'hidden',
       backgroundColor: '#f5f5f5',
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      '&::-webkit-scrollbar': {
+        width: '8px',
+      },
+      '&::-webkit-scrollbar-track': {
+        backgroundColor: '#f1f1f1',
+        borderRadius: '4px',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        backgroundColor: '#c1c1c1',
+        borderRadius: '4px',
+        '&:hover': {
+          backgroundColor: '#a8a8a8',
+        },
+      },
     }}>
       <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
         {/* Header */}
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-          <IconButton onClick={() => navigate('/my-courses')} sx={{ mr: 2 }}>
+          <IconButton onClick={handleBackNavigation} sx={{ mr: 2 }}>
             <ArrowBackIcon />
           </IconButton>
-          <Box>
+          <Box sx={{ flexGrow: 1 }}>
             <Typography variant="h4" component="h1" gutterBottom>
               Teaching Overview: {statistics.teacher_name}
             </Typography>
@@ -201,6 +235,9 @@ const TeacherStatistics: React.FC = () => {
               Comprehensive statistics across all your courses
             </Typography>
           </Box>
+          <IconButton onClick={handleHomeNavigation} sx={{ ml: 2 }}>
+            <HomeIcon />
+          </IconButton>
         </Box>
 
         {/* Overall Statistics Cards */}

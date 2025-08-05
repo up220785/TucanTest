@@ -27,6 +27,7 @@ import {
   CalendarToday as CalendarIcon,
   CheckCircle as CheckCircleIcon,
   Assignment as AssignmentIcon,
+  Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -57,6 +58,7 @@ interface Quiz {
     id: number;
     submitted_at: string;
     is_graded: boolean;
+    is_pending_manual_grade?: boolean;
     grade?: number;
     total_score?: number;
   };
@@ -171,6 +173,14 @@ const ViewCourse: React.FC = () => {
     });
   };
 
+  const handleBackNavigation = () => {
+    navigate(-1);
+  };
+
+  const handleHomeNavigation = () => {
+    navigate('/homepage');
+  };
+
   console.log('ViewCourse render - loading:', loading, 'error:', error, 'course:', course);
 
   if (loading) {
@@ -190,13 +200,22 @@ const ViewCourse: React.FC = () => {
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
         </Alert>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/homepage')}
-        >
-          Back to Homepage
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            onClick={handleBackNavigation}
+          >
+            Back
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<HomeIcon />}
+            onClick={handleHomeNavigation}
+          >
+            Home
+          </Button>
+        </Box>
       </Container>
     );
   }
@@ -232,14 +251,22 @@ const ViewCourse: React.FC = () => {
       <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 3 }}>
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBackIcon />}
-            onClick={() => navigate('/homepage')}
-            sx={{ mb: 2 }}
-          >
-            Back to Homepage
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              onClick={handleBackNavigation}
+            >
+              Back
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<HomeIcon />}
+              onClick={handleHomeNavigation}
+            >
+              Home
+            </Button>
+          </Box>
         
         <Typography variant="h4" component="h1" gutterBottom>
           {course.name}
@@ -536,22 +563,27 @@ const ViewCourse: React.FC = () => {
                                   />
                                   {userRole === 'student' && quiz.submission && (
                                     <Chip 
-                                      label={quiz.submission.is_graded ? 'Graded' : 'Submitted'} 
-                                      color={quiz.submission.is_graded ? 'primary' : 'info'} 
+                                      label={
+                                        quiz.submission.is_graded ? 'Graded' : 
+                                        quiz.submission.is_pending_manual_grade ? 'Pending Grade' : 'Submitted'
+                                      } 
+                                      color={
+                                        quiz.submission.is_graded ? 'primary' : 
+                                        quiz.submission.is_pending_manual_grade ? 'warning' : 'info'
+                                      } 
                                       size="small"
-                                      clickable={quiz.submission.is_graded}
+                                      clickable={true}
                                       onClick={(e) => {
-                                        if (quiz.submission?.is_graded) {
-                                          e.stopPropagation();
-                                          navigate(`/quiz/${quiz.id}/results`);
-                                        }
+                                        e.stopPropagation();
+                                        navigate(`/quiz/${quiz.id}/results`);
                                       }}
                                       sx={{
-                                        cursor: quiz.submission.is_graded ? 'pointer' : 'default',
-                                        '&:hover': quiz.submission.is_graded ? {
-                                          backgroundColor: 'primary.dark',
+                                        cursor: 'pointer',
+                                        '&:hover': {
+                                          backgroundColor: quiz.submission.is_graded ? 'primary.dark' : 
+                                            quiz.submission.is_pending_manual_grade ? 'warning.dark' : 'info.dark',
                                           color: 'white'
-                                        } : {}
+                                        }
                                       }}
                                     />
                                   )}

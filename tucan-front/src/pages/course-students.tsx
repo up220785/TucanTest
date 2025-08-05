@@ -27,6 +27,7 @@ import {
   Person as PersonIcon,
   Grade as GradeIcon,
   CalendarToday as CalendarIcon,
+  Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -144,6 +145,14 @@ const CourseStudents: React.FC = () => {
     });
   };
 
+  const handleBackNavigation = () => {
+    navigate(-1);
+  };
+
+  const handleHomeNavigation = () => {
+    navigate('/homepage');
+  };
+
   const formatDateTime = (dateString: string) => {
     return new Date(dateString).toLocaleString('en-US', {
       year: 'numeric',
@@ -186,13 +195,22 @@ const CourseStudents: React.FC = () => {
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
         </Alert>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/my-courses')}
-        >
-          Back to My Courses
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            onClick={handleBackNavigation}
+          >
+            Back
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<HomeIcon />}
+            onClick={handleHomeNavigation}
+          >
+            Home
+          </Button>
+        </Box>
       </Container>
     );
   }
@@ -211,12 +229,12 @@ const CourseStudents: React.FC = () => {
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <IconButton 
-            onClick={() => navigate('/my-courses')}
+            onClick={handleBackNavigation}
             sx={{ mr: 1 }}
           >
             <ArrowBackIcon />
           </IconButton>
-          <Box>
+          <Box sx={{ flexGrow: 1 }}>
             <Typography variant="h4" component="h1">
               <PeopleIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
               Course Students
@@ -225,6 +243,12 @@ const CourseStudents: React.FC = () => {
               {course.name}
             </Typography>
           </Box>
+          <IconButton 
+            onClick={handleHomeNavigation}
+            sx={{ ml: 1 }}
+          >
+            <HomeIcon />
+          </IconButton>
         </Box>
       </Box>
 

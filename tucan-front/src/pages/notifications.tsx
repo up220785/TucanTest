@@ -26,6 +26,8 @@ import {
   Close as RejectIcon,
   AccessTime as TimeIcon,
   Person as PersonIcon,
+  ArrowBack as ArrowBackIcon,
+  Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
@@ -205,11 +207,16 @@ const NotificationsPage: React.FC = () => {
 
       if (response.ok) {
         const result = await response.json();
-        alert(result.message);
         
-        // Refresh notifications
-        fetchNotifications();
+        // Close the invitation dialog immediately
         setSelectedInvitation(null);
+        
+        // Show success message using Material-UI instead of alert
+        // You could implement a snackbar here, but for now we'll use a simple approach
+        // The dialog closing provides immediate feedback that the action was successful
+        
+        // Note: We're not refreshing notifications to avoid page reload
+        // The user can manually refresh if needed, or navigate away and back
       } else {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to respond to invitation');
@@ -261,6 +268,14 @@ const NotificationsPage: React.FC = () => {
     }
   };
 
+  const handleBackNavigation = () => {
+    navigate(-1);
+  };
+
+  const handleHomeNavigation = () => {
+    navigate('/homepage');
+  };
+
   if (loading) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -278,10 +293,30 @@ const NotificationsPage: React.FC = () => {
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          <NotificationsIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
-          Notifications
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            onClick={handleBackNavigation}
+            size="medium"
+          >
+            Back
+          </Button>
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography variant="h4" component="h1" gutterBottom>
+              <NotificationsIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
+              Notifications
+            </Typography>
+          </Box>
+          <Button
+            variant="outlined"
+            startIcon={<HomeIcon />}
+            onClick={handleHomeNavigation}
+            size="medium"
+          >
+            Home
+          </Button>
+        </Box>
         <Typography variant="subtitle1" color="text.secondary">
           Stay updated with course invitations and important announcements
         </Typography>

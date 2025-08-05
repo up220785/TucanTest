@@ -37,6 +37,7 @@ import {
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
   Assignment as AssignmentIcon,
+  Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -116,8 +117,15 @@ const QuizSubmissions: React.FC = () => {
   const [gradingScore, setGradingScore] = useState<string>('');
   const [gradingComment, setGradingComment] = useState<string>('');
   const [isGrading, setIsGrading] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
+    // Get user role from localStorage
+    const user = JSON.parse(localStorage.getItem('tucan_user') || '{}');
+    if (user && user.role) {
+      setUserRole(user.role);
+    }
+    
     if (quizId) {
       fetchQuizDetails();
       fetchSubmissions();
@@ -285,6 +293,14 @@ const QuizSubmissions: React.FC = () => {
     };
   };
 
+  const handleBackNavigation = () => {
+    navigate(-1);
+  };
+
+  const handleHomeNavigation = () => {
+    navigate('/homepage');
+  };
+
   if (loading) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -314,12 +330,12 @@ const QuizSubmissions: React.FC = () => {
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <IconButton 
-            onClick={() => navigate(-1)}
+            onClick={handleBackNavigation}
             sx={{ mr: 1 }}
           >
             <ArrowBackIcon />
           </IconButton>
-          <Box>
+          <Box sx={{ flexGrow: 1 }}>
             <Typography variant="h4" component="h1">
               <QuizIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
               Quiz Submissions
@@ -328,6 +344,12 @@ const QuizSubmissions: React.FC = () => {
               {quiz.title} - {quiz.course_name}
             </Typography>
           </Box>
+          <IconButton 
+            onClick={handleHomeNavigation}
+            sx={{ ml: 1 }}
+          >
+            <HomeIcon />
+          </IconButton>
         </Box>
       </Box>
 
@@ -465,13 +487,26 @@ const QuizSubmissions: React.FC = () => {
                      `Started: ${formatDate(submission.started_at)}`}
                   </TableCell>
                   <TableCell align="center">
-                    <IconButton
-                      size="small"
-                      onClick={() => handleViewSubmission(submission)}
-                      disabled={!submission.is_completed}
-                    >
-                      <VisibilityIcon />
-                    </IconButton>
+                    {userRole === 'teacher' ? (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<GradeIcon />}
+                        onClick={() => handleViewSubmission(submission)}
+                        disabled={!submission.is_completed}
+                        sx={{ fontSize: '0.75rem', px: 1 }}
+                      >
+                        Regrade
+                      </Button>
+                    ) : (
+                      <IconButton
+                        size="small"
+                        onClick={() => handleViewSubmission(submission)}
+                        disabled={!submission.is_completed}
+                      >
+                        <VisibilityIcon />
+                      </IconButton>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
