@@ -1,187 +1,264 @@
 @import url('https://fonts.googleapis.com/css2?family=Rammetto+One&display=swap');
 
 body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Rammetto One', sans-serif;
-    overflow: hidden;
+  margin: 0;
+  padding: 0;
+  font-family: 'Rammetto One', sans-serif;
+  overflow: hidden;
 }
 
 .background {
-    position: fixed;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    background-color: #30638E;
-    padding-top: 40px;
+  background-image:
+    url('../assets/fondonubes.png'),
+    linear-gradient(270deg, #3a86ff 0%, #ffffff 50%, #ff006e 100%);
+  background-repeat: repeat-x, no-repeat;
+  background-size: auto 100%, 400% 100%;
+  background-position: 0 50%, 0 0;
+  animation:
+    loopRight 20s linear infinite,
+    slideBg   12s linear infinite;
+}
+@keyframes loopRight {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: 100%;
+  }
 }
 
-/* Efecto de sombra en el formulario */
-.form-container {
-    background: #EA5C00;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
-    position: relative;
-    z-index: 10;
-    font-family: 'Rammetto One', sans-serif;
-    margin-top: 20px;
-}
-
-/* Cuadros en todo el fondo */
 .grid-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
 }
+
 .box {
-    width: 40px;
-    height: 40px;
-    margin: 2px;
-    background-color: transparent; /* Ahora los cuadros inician transparentes */
-    transition: background-color 0.1s ease-in-out, opacity 0.5s ease-out;
+  width: 40px;
+  height: 40px;
+  margin: 2px;
+  background-color: transparent;
+  transition: background-color 0.1s ease-in-out, opacity 0.5s ease-out;
 }
+
+/* Main horizontal layout */
+.main-layout-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  padding: 40px;
+  z-index: 20;
+}
+
+.left-title-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 40%;
+
+  transform: translate(70px, 50px);  /* (x, y) */
+  transition: transform 0.2s ease;    /* opcional para animar */
+}
+.left-title-logo img {
+  width: 360px !important;
+  height: 360px !important;
+  max-width: none !important;
+  max-height: none !important;
+  flex-shrink: 0;
+  margin-top: 10px;  /* ajusta este valor: 10px, 15px… según lo “poquito” que quieras */
+}
+
+/* Form container */
+.form-container {
+  width: 40%;
+  min-width: 300px;
+  background: #FF8F33; /* Naranja más claro */
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 10;
+  font-family: 'Rammetto One', sans-serif;
+  margin-top: 20px;
+}
+
+/* Form title typography */
+.form-container .rainbow-text {
+  font-family: 'Rammetto One', cursive !important;
+  color: #FFFFFF !important;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Default rainbow-text (if used elsewhere) */
 .rainbow-text {
-    text-align: center;
-    font-weight: bold;
-    font-size: 2.5rem;
-    color: black;
-    font-family: 'Rammetto One', sans-serif !important;
-    margin-bottom: 20px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 2.5rem;
+  color: black;
+  font-family: 'Rammetto One', sans-serif !important;
+  margin-bottom: 20px;
 }
 
-/* More specific targeting for MUI Typography */
-.form-container .MuiTypography-h3 {
-    font-family: 'Rammetto One', sans-serif !important;
-    color: black !important;
-}
-
+/* MUI Typography overrides inside form */
+.form-container .MuiTypography-h3,
 .form-container h1,
 .form-container .MuiTypography-root {
-    font-family: 'Rammetto One', sans-serif !important;
+  font-family: 'Rammetto One', sans-serif !important;
 }
 
-/* Input field styling */
+/* Input fields */
 .login-input {
-    background-color: #FFCF49 !important;
-    border-radius: 8px !important;
+  background-color: #FFFFFF !important;
+  border-radius: 8px !important;
 }
 
 .login-input .MuiInputBase-input {
-    color: #F49524 !important;
-    font-family: 'Rammetto One', sans-serif !important;
+  color: #F49524 !important;
+  font-family: 'Rammetto One', sans-serif !important;
 }
 
 .login-input .MuiInputLabel-root {
-    color: #F49524 !important;
-    font-family: 'Rammetto One', sans-serif !important;
+  color: #F49524 !important;
+  font-family: 'Rammetto One', sans-serif !important;
 }
 
 .login-input .MuiOutlinedInput-root {
-    border-radius: 8px !important;
+  border-radius: 8px !important;
 }
 
-.login-input .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
-    border-color: #30638E !important;
+.login-input .MuiOutlinedInput-notchedOutline {
+  border-color: #30638E !important;
 }
 
-.login-input .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
-    border-color: #30638E !important;
-}
-
+.login-input .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline,
 .login-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
-    border-color: #30638E !important;
+  border-color: #30638E !important;
 }
 
-/* Button styling */
+/* Buttons */
 .login-button {
-    background-color: #FFCF49 !important;
-    color: black !important;
-    font-family: 'Rammetto One', sans-serif !important;
-    font-weight: bold !important;
-    border-radius: 8px !important;
-    text-transform: none !important;
+  background-color: #FFCF49 !important;
+  color: black !important;
+  font-family: 'Rammetto One', sans-serif !important;
+  font-weight: bold !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
 }
 
 .login-button:hover {
-    background-color: #e6b844 !important;
+  background-color: #e6b844 !important;
 }
 
-/* Text styling */
+/* Second button (Register) override */
+.login-button:nth-of-type(2) {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+  border: none !important;
+}
+
+.login-button:nth-of-type(2):hover {
+  background-color: #222 !important;
+  color: #FFFFFF !important;
+}
+
+/* Form error text */
 .login-text {
-    color: black !important;
-    font-family: 'Rammetto One', sans-serif !important;
+  color: black !important;
+  font-family: 'Rammetto One', sans-serif !important;
 }
 
-/* Alert/Success message styling */
+/* Alerts */
 .MuiAlert-root {
-    background-color: #FFCF49 !important;
-    color: black !important;
-    border-radius: 8px !important;
-    border: 2px solid #30638E !important;
-    font-family: 'Rammetto One', sans-serif !important;
+  background-color: #FFCF49 !important;
+  color: black !important;
+  border-radius: 8px !important;
+  border: 2px solid #30638E !important;
+  font-family: 'Rammetto One', sans-serif !important;
 }
 
 .MuiAlert-message {
-    color: black !important;
-    font-family: 'Rammetto One', sans-serif !important;
-    font-weight: bold !important;
+  color: #FFFFFF !important;
+  font-family: 'Rammetto One', sans-serif !important;
+  font-weight: bold !important;
 }
 
 .MuiAlert-icon {
-    color: #30638E !important;
+  color: #30638E !important;
 }
 
-/* Success message container styling */
 .form-container .MuiAlert-root {
-    background-color: #FFCF49 !important;
-    color: black !important;
-    border-radius: 8px !important;
-    border: 2px solid #30638E !important;
-    font-family: 'Rammetto One', sans-serif !important;
-    margin-bottom: 16px !important;
+  margin-bottom: 16px !important;
 }
 
-/* Page title styling */
+/* Page title & logo */
 .page-title {
-    color: white !important;
-    font-family: 'Rammetto One', sans-serif !important;
-    font-size: 5.5rem !important;
-    font-weight: bold !important;
-    text-align: center !important;
-    margin-bottom: 10px !important;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5) !important;
-    position: relative !important;
-    z-index: 15 !important;
+  color: white !important;
+  font-family: 'Rammetto One', sans-serif !important;
+  font-size: 5.5rem !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  margin-bottom: 10px !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5) !important;
+  position: relative !important;
+  z-index: 15 !important;
 }
 
-/* Logo styling */
 .page-logo {
-    display: block !important;
-    margin: 0 auto 20px auto !important;
-    width: 80px !important;
-    height: 80px !important;
-    position: relative !important;
-    z-index: 15 !important;
-    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3)) !important;
+  width: 180px !important;
+  height: 180px !important;
+  display: block !important;
+  margin: 0 auto 20px auto !important;
+  position: relative !important;
+  z-index: 15 !important;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3)) !important;
 }
 
-/* Container for title and logo */
 .title-logo-container {
-    position: relative !important;
-    z-index: 15 !important;
-    margin-bottom: 20px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    margin-top: 0 !important;
+  position: relative !important;
+  z-index: 15 !important;
+  margin-bottom: 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  margin-top: 0 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .main-layout-container {
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .left-title-logo,
+  .form-container {
+    width: 90%;
+  }
+
+  .page-title {
+    font-size: 3rem !important;
+    text-align: center !important;
+  }
+}
+.pulse-logo {
+  width: 240px !important;
+  height: 240px !important;
+  animation: beat 1s ease-in-out infinite;
+  transform-origin: center center;
+}
+
+/* @keyframes que definimos antes */
+@keyframes beat {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.1); }
 }

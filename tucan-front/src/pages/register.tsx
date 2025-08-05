@@ -9,9 +9,11 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  Alert,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import "../styles/register.css";
+import TucanLogo from "../assets/logo2.png";
 
 const Register: React.FC = () => {
   const [name, setName] = useState<string>("");
@@ -35,7 +37,6 @@ const Register: React.FC = () => {
       return;
     }
 
-    // Frontend validation to match backend requirements
     if (password.length < 8) {
       setError("La contraseña debe tener al menos 8 caracteres.");
       return;
@@ -52,25 +53,28 @@ const Register: React.FC = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim().toLowerCase(),
-          password,
-          role: role === "Alumno" ? "student" : "teacher",
-        }),
-      });
+      const response = await fetch(
+        "http://localhost:5000/api/auth/register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: name.trim(),
+            email: email.trim().toLowerCase(),
+            password,
+            role: role === "Alumno" ? "student" : "teacher",
+          }),
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {
-        // Registration successful - redirect to login page
-        navigate("/login", { 
-          state: { 
-            message: "¡Registro exitoso! Por favor, inicia sesión con tus credenciales.",
-            email: email.trim().toLowerCase() 
-          } 
+        navigate("/login", {
+          state: {
+            message:
+              "¡Registro exitoso! Por favor, inicia sesión con tus credenciales.",
+            email: email.trim().toLowerCase(),
+          },
         });
       } else {
         setError(data.message || data.error || "Error en el registro.");
@@ -90,7 +94,6 @@ const Register: React.FC = () => {
           Math.pow(event.clientX - (rect.left + rect.width / 2), 2) +
             Math.pow(event.clientY - (rect.top + rect.height / 2), 2)
         );
-
         let intensity = Math.max(0, 1 - distance / 100);
         let color =
           intensity > 0.7
@@ -107,7 +110,8 @@ const Register: React.FC = () => {
     };
 
     document.addEventListener("mousemove", handleMouseMove);
-    return () => document.removeEventListener("mousemove", handleMouseMove);
+    return () =>
+      document.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
   useEffect(() => {
@@ -123,159 +127,164 @@ const Register: React.FC = () => {
         ))}
       </Grid>
 
-      {/* Page Title and Logo */}
-      <Box className="title-logo-container">
-        <Typography
-          variant="h1"
-          className="page-title"
-          sx={{
-            fontFamily: "'Rammetto One', sans-serif !important",
-            color: "white !important",
-          }}
-        >
-          TucanTest
-        </Typography>
-        <img 
-          src="/tucan-logo.svg" 
-          alt="TucanTest Logo" 
-          className="page-logo"
-          onError={(e) => {
-            console.log('Image failed to load:', e);
-            // Fallback to a simple text logo if image fails
-            e.currentTarget.style.display = 'none';
-          }}
-        />
-        {/* Fallback text logo if image fails */}
-        <Box 
-          className="text-logo-fallback"
-          sx={{
-            width: '80px',
-            height: '80px',
-            backgroundColor: '#EA5C00',
-            borderRadius: '50%',
-            display: 'none',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            fontFamily: "'Rammetto One', sans-serif",
-            fontSize: '12px',
-            fontWeight: 'bold',
-            textAlign: 'center',
-            margin: '0 auto 20px auto',
-            position: 'relative',
-            zIndex: 15,
-            filter: 'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))',
-          }}
-        >
-          TUCAN
-        </Box>
-      </Box>
+      <Box className="main-layout-container">
+        <Box className="left-title-logo">
 
-      <Container maxWidth="sm" className="form-container">
-        <Typography
-          variant="h3"
-          component="h1"
-          gutterBottom
-          className="rainbow-text"
-          sx={{
-            fontFamily: "'Rammetto One', sans-serif !important",
-            color: "black !important",
-          }}
-        >
-          Registrarte
-        </Typography>
 
-        {error && (
-          <Typography variant="body1" color="error" className="register-text">
-            {error}
-          </Typography>
-        )}
-
-        <form onSubmit={handleRegister}>
-          <TextField
-            label="Nombre Completo"
-            type="text"
-            fullWidth
-            margin="normal"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="register-input"
-          />
-          <TextField
-            label="Correo Electrónico"
-            type="email"
-            fullWidth
-            margin="normal"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="register-input"
-          />
-          <TextField
-            label="Contraseña"
-            type="password"
-            fullWidth
-            margin="normal"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="register-input"
-          />
-          <TextField
-            label="Confirmar Contraseña"
-            type="password"
-            fullWidth
-            margin="normal"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="register-input"
+          <img
+            src={TucanLogo}
+            alt="TucanTest Logo"
+            className="page-logo pulse-logo"
+            onError={(e) => {
+              console.log("Image failed to load:", e);
+              e.currentTarget.style.display = "none";
+            }}
           />
 
-          <Typography variant="h6" sx={{ mt: 2 }} className="register-text">
-            ¿Eres Alumno o Docente?
-          </Typography>
-          <RadioGroup
-            row
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="register-radio"
-          >
-            <FormControlLabel value="Alumno" control={<Radio />} label="Alumno" />
-            <FormControlLabel value="Docente" control={<Radio />} label="Docente" />
-          </RadioGroup>
-
-          <Button
-            type="submit"
-            variant="contained"
-            fullWidth
-            className="register-button"
+          <Box
+            className="text-logo-fallback"
             sx={{
-              mt: 2,
-              py: 1.5,
+              width: "80px",
+              height: "80px",
+              backgroundColor: "#EA5C00",
+              borderRadius: "50%",
+              display: "none",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "white",
+              fontFamily: "'Rammetto One', sans-serif",
+              fontSize: "12px",
+              fontWeight: "bold",
+              textAlign: "center",
+              margin: "0 auto 20px auto",
+              position: "relative",
+              zIndex: 15,
+              filter:
+                "drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))",
+            }}
+          >
+            TUCAN
+          </Box>
+        </Box>
+
+        <Container maxWidth="sm" className="form-container">
+          <Typography
+            variant="h3"
+            component="h1"
+            gutterBottom
+            className="rainbow-text"
+            sx={{
+              fontFamily: "'Rammetto One', sans-serif !important",
+              color: "black !important",
             }}
           >
             Registrarte
-          </Button>
+          </Typography>
 
-          <Button
-            variant="outlined"
-            fullWidth
-            className="register-button"
-            sx={{
-              borderColor: "#30638E !important",
-              color: "#30638E !important",
-              backgroundColor: "transparent !important",
-              "&:hover": { 
-                backgroundColor: "#30638E !important", 
-                color: "#FFF !important" 
-              },
-              mt: 2,
-              py: 1.5,
-            }}
-            onClick={() => navigate("/login")}
-          >
-            Volver al Login
-          </Button>
-        </form>
-      </Container>
+          {error && (
+            <Typography
+              variant="body1"
+              color="error"
+              className="register-text"
+            >
+              {error}
+            </Typography>
+          )}
+
+          <form onSubmit={handleRegister}>
+            <TextField
+              label="Nombre Completo"
+              type="text"
+              fullWidth
+              margin="normal"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="register-input"
+            />
+            <TextField
+              label="Correo Electrónico"
+              type="email"
+              fullWidth
+              margin="normal"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="register-input"
+            />
+            <TextField
+              label="Contraseña"
+              type="password"
+              fullWidth
+              margin="normal"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="register-input"
+            />
+            <TextField
+              label="Confirmar Contraseña"
+              type="password"
+              fullWidth
+              margin="normal"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="register-input"
+            />
+
+            <Typography
+              variant="h6"
+              sx={{ mt: 2 }}
+              className="register-text"
+            >
+              ¿Eres Alumno o Docente?
+            </Typography>
+            <RadioGroup
+              row
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="register-radio"
+            >
+              <FormControlLabel
+                value="Alumno"
+                control={<Radio />}
+                label="Alumno"
+              />
+              <FormControlLabel
+                value="Docente"
+                control={<Radio />}
+                label="Docente"
+              />
+            </RadioGroup>
+
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              className="register-button"
+              sx={{
+                mt: 2,
+                py: 1.5,
+              }}
+            >
+              Registrarte
+            </Button>
+
+            <Button
+  variant="outlined"
+  fullWidth
+  className="register-button"
+  onClick={() => navigate("/login")}
+  sx={{
+    borderColor: "#30638E !important",
+    color: "#30638E !important",
+    backgroundColor: "transparent !important",
+    mt: 2,
+    py: 1.5,
+  }}
+>
+  Volver al Login
+</Button>
+          </form>
+        </Container>
+      </Box>
     </Box>
   );
 };

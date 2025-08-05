@@ -19,19 +19,6 @@ body {
     padding-top: 40px;
 }
 
-/* Efecto de sombra en el formulario */
-.form-container {
-    background: #EA5C00;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
-    position: relative;
-    z-index: 10;
-    font-family: 'Rammetto One', sans-serif;
-    margin-top: 20px;
-}
-
-/* Cuadros en todo el fondo */
 .grid-background {
     position: absolute;
     top: 0;
@@ -43,13 +30,33 @@ body {
     justify-content: space-around;
     align-items: center;
 }
+
 .box {
     width: 40px;
     height: 40px;
     margin: 2px;
-    background-color: transparent; /* Ahora los cuadros inician transparentes */
+    background-color: transparent;
     transition: background-color 0.1s ease-in-out, opacity 0.5s ease-out;
 }
+
+.form-container {
+    background: #EA5C00;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 10;
+    font-family: 'Rammetto One', sans-serif;
+    margin-top: 20px;
+}
+
+.form-container .rainbow-text {
+    font-family: 'Rammetto One', cursive !important;
+    color: #FFFFFF !important;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
 .rainbow-text {
     text-align: center;
     font-weight: bold;
@@ -59,18 +66,12 @@ body {
     margin-bottom: 20px;
 }
 
-/* More specific targeting for MUI Typography */
-.form-container .MuiTypography-h3 {
-    font-family: 'Rammetto One', sans-serif !important;
-    color: black !important;
-}
-
+.form-container .MuiTypography-h3,
 .form-container h1,
 .form-container .MuiTypography-root {
     font-family: 'Rammetto One', sans-serif !important;
 }
 
-/* Input field styling */
 .register-input {
     background-color: #FFCF49 !important;
     border-radius: 8px !important;
@@ -102,7 +103,6 @@ body {
     border-color: #30638E !important;
 }
 
-/* Button styling */
 .register-button {
     background-color: #FFCF49 !important;
     color: black !important;
@@ -116,13 +116,11 @@ body {
     background-color: #e6b844 !important;
 }
 
-/* Text styling */
 .register-text {
     color: black !important;
     font-family: 'Rammetto One', sans-serif !important;
 }
 
-/* Alert/Success message styling */
 .MuiAlert-root {
     background-color: #FFCF49 !important;
     color: black !important;
@@ -141,7 +139,6 @@ body {
     color: #30638E !important;
 }
 
-/* Success message container styling */
 .form-container .MuiAlert-root {
     background-color: #FFCF49 !important;
     color: black !important;
@@ -151,7 +148,6 @@ body {
     margin-bottom: 16px !important;
 }
 
-/* Radio button styling */
 .register-radio .MuiFormControlLabel-label {
     color: black !important;
     font-family: 'Rammetto One', sans-serif !important;
@@ -165,7 +161,6 @@ body {
     color: #30638E !important;
 }
 
-/* Page title styling */
 .page-title {
     color: white !important;
     font-family: 'Rammetto One', sans-serif !important;
@@ -178,7 +173,6 @@ body {
     z-index: 15 !important;
 }
 
-/* Logo styling */
 .page-logo {
     display: block !important;
     margin: 0 auto 20px auto !important;
@@ -189,7 +183,6 @@ body {
     filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3)) !important;
 }
 
-/* Container for title and logo */
 .title-logo-container {
     position: relative !important;
     z-index: 15 !important;
@@ -198,4 +191,27 @@ body {
     flex-direction: column !important;
     align-items: center !important;
     margin-top: 0 !important;
+}
+/* Fondo blanco para el form */
+.form-container {
+  background: #FF8F33 !important;
+}
+
+/* Botón “Volver al Login”: fondo negro y texto blanco */
+.register-button:nth-of-type(2) {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+}
+/* Campos de entrada con fondo blanco */
+.register-input .MuiOutlinedInput-root {
+  background-color: #FFFFFF !important;
+}
+
+.register-input .MuiOutlinedInput-input {
+  background-color: transparent !important; /* para que el interior del input herede el blanco del root */
+}
+
+/* Si usas InputBase en lugar de OutlinedInput */
+.register-input .MuiInputBase-root {
+  background-color: #FFFFFF !important;
 }
