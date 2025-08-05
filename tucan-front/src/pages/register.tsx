@@ -11,6 +11,7 @@ import {
   Radio,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import "../styles/register.css";
 
 const Register: React.FC = () => {
   const [name, setName] = useState<string>("");
@@ -122,18 +123,70 @@ const Register: React.FC = () => {
         ))}
       </Grid>
 
+      {/* Page Title and Logo */}
+      <Box className="title-logo-container">
+        <Typography
+          variant="h1"
+          className="page-title"
+          sx={{
+            fontFamily: "'Rammetto One', sans-serif !important",
+            color: "white !important",
+          }}
+        >
+          TucanTest
+        </Typography>
+        <img 
+          src="/tucan-logo.svg" 
+          alt="TucanTest Logo" 
+          className="page-logo"
+          onError={(e) => {
+            console.log('Image failed to load:', e);
+            // Fallback to a simple text logo if image fails
+            e.currentTarget.style.display = 'none';
+          }}
+        />
+        {/* Fallback text logo if image fails */}
+        <Box 
+          className="text-logo-fallback"
+          sx={{
+            width: '80px',
+            height: '80px',
+            backgroundColor: '#EA5C00',
+            borderRadius: '50%',
+            display: 'none',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontFamily: "'Rammetto One', sans-serif",
+            fontSize: '12px',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            margin: '0 auto 20px auto',
+            position: 'relative',
+            zIndex: 15,
+            filter: 'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))',
+          }}
+        >
+          TUCAN
+        </Box>
+      </Box>
+
       <Container maxWidth="sm" className="form-container">
         <Typography
           variant="h3"
           component="h1"
           gutterBottom
           className="rainbow-text"
+          sx={{
+            fontFamily: "'Rammetto One', sans-serif !important",
+            color: "black !important",
+          }}
         >
           Registrarte
         </Typography>
 
         {error && (
-          <Typography variant="body1" color="error">
+          <Typography variant="body1" color="error" className="register-text">
             {error}
           </Typography>
         )}
@@ -146,7 +199,7 @@ const Register: React.FC = () => {
             margin="normal"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+            className="register-input"
           />
           <TextField
             label="Correo Electrónico"
@@ -155,7 +208,7 @@ const Register: React.FC = () => {
             margin="normal"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+            className="register-input"
           />
           <TextField
             label="Contraseña"
@@ -164,7 +217,7 @@ const Register: React.FC = () => {
             margin="normal"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+            className="register-input"
           />
           <TextField
             label="Confirmar Contraseña"
@@ -173,16 +226,17 @@ const Register: React.FC = () => {
             margin="normal"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+            className="register-input"
           />
 
-          <Typography variant="h6" sx={{ mt: 2 }}>
+          <Typography variant="h6" sx={{ mt: 2 }} className="register-text">
             ¿Eres Alumno o Docente?
           </Typography>
           <RadioGroup
             row
             value={role}
             onChange={(e) => setRole(e.target.value)}
+            className="register-radio"
           >
             <FormControlLabel value="Alumno" control={<Radio />} label="Alumno" />
             <FormControlLabel value="Docente" control={<Radio />} label="Docente" />
@@ -192,13 +246,10 @@ const Register: React.FC = () => {
             type="submit"
             variant="contained"
             fullWidth
+            className="register-button"
             sx={{
-              backgroundColor: "#ffcf49",
-              color: "#000",
-              "&:hover": { backgroundColor: "#e6b844" },
               mt: 2,
               py: 1.5,
-              fontWeight: "bold",
             }}
           >
             Registrarte
@@ -207,13 +258,17 @@ const Register: React.FC = () => {
           <Button
             variant="outlined"
             fullWidth
+            className="register-button"
             sx={{
-              borderColor: "#30638E",
-              color: "#30638E",
-              "&:hover": { backgroundColor: "#30638E", color: "#FFF" },
+              borderColor: "#30638E !important",
+              color: "#30638E !important",
+              backgroundColor: "transparent !important",
+              "&:hover": { 
+                backgroundColor: "#30638E !important", 
+                color: "#FFF !important" 
+              },
               mt: 2,
               py: 1.5,
-              fontWeight: "bold",
             }}
             onClick={() => navigate("/login")}
           >

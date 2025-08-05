@@ -9,7 +9,22 @@ import {
   CircularProgress,
   Alert,
   Badge,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Menu,
+  MenuItem,
+  Divider,
 } from "@mui/material";
+import {
+  AccountCircle as AccountCircleIcon,
+  School as SchoolIcon,
+  Search as SearchIcon,
+  Notifications as NotificationsIcon,
+  MenuBook as MenuBookIcon,
+  Assessment as AssessmentIcon,
+  ExitToApp as ExitToAppIcon,
+} from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import "../styles/homepage.css";
 
@@ -34,6 +49,7 @@ const HomePage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -183,6 +199,24 @@ const HomePage: React.FC = () => {
     });
   };
 
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleProfileClick = () => {
+    handleMenuClose();
+    navigate("/profile");
+  };
+
+  const handleLogoutClick = () => {
+    handleMenuClose();
+    handleLogout();
+  };
+
   return (
     <Box sx={{ 
       minHeight: '100vh', 
@@ -211,119 +245,93 @@ const HomePage: React.FC = () => {
         },
       },
     }}>
-      <Box className={`homepage ${role}`}>
-      <aside className="sidebar">
-        <Typography className="sidebar-title">¡Bienvenido!</Typography>
-        <Typography variant="body2" sx={{ mb: 2, color: "#666" }}>
-          {userName}
-        </Typography>
-        
-        <Typography 
-          className="sidebar-item" 
-          onClick={() => navigate("/profile")}
-          sx={{ 
-            cursor: "pointer", 
-            "&:hover": { 
-              backgroundColor: "#f0f0f0", 
-              borderRadius: "4px",
-              padding: "4px 8px",
-              margin: "0 -8px"
-            } 
-          }}
-        >
-          Ver Mi Perfil
-        </Typography>
-        
-        {role === "teacher" && (
-          <Typography 
-            className="sidebar-item" 
-            onClick={() => navigate("/my-courses")}
-            sx={{ 
-              cursor: "pointer", 
-              "&:hover": { 
-                backgroundColor: "#f0f0f0", 
-                borderRadius: "4px",
-                padding: "4px 8px",
-                margin: "0 -8px"
-              } 
-            }}
-          >
-            Mis Cursos
+      {/* Header with Navigation */}
+      <AppBar position="sticky" sx={{ backgroundColor: '#30638E', zIndex: 1100 }}>
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
+            TucanTest
           </Typography>
-        )}
+          
+          {/* Navigation Options based on role */}
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            {role === "teacher" && (
+              <>
+                <Button 
+                  color="inherit" 
+                  startIcon={<SchoolIcon />}
+                  onClick={() => navigate("/my-courses")}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Mis Cursos
+                </Button>
+                <Button 
+                  color="inherit" 
+                  startIcon={<AssessmentIcon />}
+                  onClick={() => navigate("/teacher/statistics")}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Estadísticas
+                </Button>
+              </>
+            )}
 
-        {role === "student" && (
-          <>
-            <Typography 
-              className="sidebar-item" 
-              onClick={() => navigate("/explore-courses")}
-              sx={{ 
-                cursor: "pointer", 
-                "&:hover": { 
-                  backgroundColor: "#f0f0f0", 
-                  borderRadius: "4px",
-                  padding: "4px 8px",
-                  margin: "0 -8px"
-                } 
-              }}
-            >
-              Explorar Cursos
-            </Typography>
-            <Typography 
-              className="sidebar-item" 
-              onClick={() => navigate("/notifications")}
-              sx={{ 
-                cursor: "pointer", 
-                display: "flex",
-                alignItems: "center",
-                "&:hover": { 
-                  backgroundColor: "#f0f0f0", 
-                  borderRadius: "4px",
-                  padding: "4px 8px",
-                  margin: "0 -8px"
-                } 
-              }}
-            >
-              <Badge 
-                badgeContent={unreadNotifications} 
-                color="error"
-                sx={{ 
-                  '& .MuiBadge-badge': {
-                    right: -3,
-                    top: 3,
-                  }
-                }}
-              >
-                Notificaciones
-              </Badge>
-            </Typography>
-          </>
-        )}
-        
-        <Box sx={{ mt: "auto", pt: 2 }}>
-          <Button
-            variant="outlined"
-            fullWidth
-            onClick={handleLogout}
-            sx={{
-              borderColor: "#d32f2f",
-              color: "#d32f2f",
-              "&:hover": { 
-                backgroundColor: "#d32f2f", 
-                color: "#fff" 
-              },
-              fontWeight: "bold",
-            }}
-          >
-            Cerrar Sesión
-          </Button>
-        </Box>
-      </aside>
+            {role === "student" && (
+              <>
+                <Button 
+                  color="inherit" 
+                  startIcon={<SearchIcon />}
+                  onClick={() => navigate("/explore-courses")}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Explorar Cursos
+                </Button>
+                <IconButton
+                  color="inherit"
+                  onClick={() => navigate("/notifications")}
+                  sx={{ ml: 1 }}
+                >
+                  <Badge badgeContent={unreadNotifications} color="error">
+                    <NotificationsIcon />
+                  </Badge>
+                </IconButton>
+              </>
+            )}
 
-      <main className="content">
-        <Typography className="welcome">
-          Bienvenido {role === "teacher" ? "Docente" : "Estudiante"}
-        </Typography>
+            {/* Profile Menu */}
+            <IconButton
+              color="inherit"
+              onClick={handleMenuOpen}
+              sx={{ ml: 2 }}
+            >
+              <AccountCircleIcon />
+            </IconButton>
+          </Box>
+        </Toolbar>
+      </AppBar>
+
+      {/* Profile Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        sx={{ mt: 1 }}
+      >
+        <MenuItem onClick={handleProfileClick}>
+          <AccountCircleIcon sx={{ mr: 1 }} />
+          Ver mi Perfil
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={handleLogoutClick} sx={{ color: 'error.main' }}>
+          <ExitToAppIcon sx={{ mr: 1 }} />
+          Cerrar Sesión
+        </MenuItem>
+      </Menu>
+
+      <Box className={`homepage ${role}`}>
+        <main className="content" style={{ width: '100%', padding: '40px' }}>
+          <Typography className="welcome">
+            Bienvenido {role === "teacher" ? "Docente" : "Estudiante"}, {userName}
+          </Typography>
 
         {role === "teacher" && (
           <Box className="teacher-actions">
