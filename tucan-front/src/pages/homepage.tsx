@@ -26,6 +26,7 @@ import {
   ExitToApp as ExitToAppIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import SearchBar from "../components/SearchBar";
 import "../styles/homepage.css";
 
 interface Course {
@@ -45,6 +46,7 @@ interface Course {
 const HomePage: React.FC = () => {
   const [role, setRole] = useState<"student" | "teacher" | null>(null);
   const [userName, setUserName] = useState<string>("");
+  const [userId, setUserId] = useState<number | undefined>(undefined);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,6 +62,7 @@ const HomePage: React.FC = () => {
         if (user && user.role) {
           setRole(user.role === "student" ? "student" : "teacher");
           setUserName(user.name || "Usuario");
+          setUserId(user.id);
           
           // Fetch unread notifications count for all users
           fetchUnreadNotifications(user.id);
@@ -248,9 +251,14 @@ const HomePage: React.FC = () => {
       {/* Header with Navigation */}
       <AppBar position="sticky" sx={{ backgroundColor: '#30638E', zIndex: 1100 }}>
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
+          <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', mr: 3 }}>
             TucanTest
           </Typography>
+          
+          {/* Search Bar */}
+          <Box sx={{ flexGrow: 1, maxWidth: 400, mr: 2 }}>
+            <SearchBar userRole={role} userId={userId} />
+          </Box>
           
           {/* Navigation Options based on role */}
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
