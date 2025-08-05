@@ -30,6 +30,7 @@ import {
   Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import Layout from '../components/Layout';
 
 interface Notification {
   id: number;
@@ -322,33 +323,7 @@ const NotificationsPage: React.FC = () => {
   }
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh', 
-      height: '100vh',
-      overflowY: 'auto',
-      overflowX: 'hidden',
-      backgroundColor: '#f5f5f5',
-      pb: 4,
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      '&::-webkit-scrollbar': {
-        width: '8px',
-      },
-      '&::-webkit-scrollbar-track': {
-        backgroundColor: '#f1f1f1',
-        borderRadius: '4px',
-      },
-      '&::-webkit-scrollbar-thumb': {
-        backgroundColor: '#c1c1c1',
-        borderRadius: '4px',
-        '&:hover': {
-          backgroundColor: '#a8a8a8',
-        },
-      },
-    }}>
+    <Layout title="Notificaciones">
       <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
@@ -358,13 +333,14 @@ const NotificationsPage: React.FC = () => {
             startIcon={<ArrowBackIcon />}
             onClick={handleBackNavigation}
             size="medium"
+            sx={{ fontFamily: 'Rammetto One, sans-serif' }}
           >
-            Back
+            Atrás
           </Button>
           <Box sx={{ flexGrow: 1 }}>
-            <Typography variant="h4" component="h1" gutterBottom>
+            <Typography variant="h4" component="h1" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
               <NotificationsIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
-              Notifications
+              Notificaciones
             </Typography>
           </Box>
           <Button
@@ -372,11 +348,12 @@ const NotificationsPage: React.FC = () => {
             startIcon={<HomeIcon />}
             onClick={handleHomeNavigation}
             size="medium"
+            sx={{ fontFamily: 'Rammetto One, sans-serif' }}
           >
-            Home
+            Inicio
           </Button>
         </Box>
-        <Typography variant="subtitle1" color="text.secondary">
+        <Typography variant="subtitle1" color="text.secondary" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
           Stay updated with course invitations and important announcements
         </Typography>
       </Box>
@@ -646,7 +623,7 @@ const NotificationsPage: React.FC = () => {
         </DialogActions>
       </Dialog>
       </Container>
-    </Box>
+    </Layout>
   );
 };
 

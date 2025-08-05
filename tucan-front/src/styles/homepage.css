@@ -1,8 +1,9 @@
 /* homepage.css */
+@import url('https://fonts.googleapis.com/css2?family=Rammetto+One&display=swap');
 
 .homepage {
   min-height: 100vh;
-  font-family: "Segoe UI", sans-serif;
+  font-family: 'Rammetto One', sans-serif;
   background-color: #f6f9fc;
 }
 
@@ -18,6 +19,7 @@
   font-weight: bold;
   margin-bottom: 30px;
   color: #30638e;
+  font-family: 'Rammetto One', sans-serif;
 }
 
 /* Form Cards */
@@ -31,23 +33,27 @@
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  font-family: 'Rammetto One', sans-serif;
 }
 
 .form-name {
   font-weight: bold;
   font-size: 1.1rem;
   margin-bottom: 10px;
+  font-family: 'Rammetto One', sans-serif;
 }
 
 .form-grade {
   font-size: 0.95rem;
   color: #333;
   margin-bottom: 6px;
+  font-family: 'Rammetto One', sans-serif;
 }
 
 .form-status {
   font-size: 0.9rem;
   color: #666;
+  font-family: 'Rammetto One', sans-serif;
 }
 
 /* Teacher-only styles */
@@ -59,6 +65,7 @@
   padding: 10px 20px;
   margin-bottom: 30px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  font-family: 'Rammetto One', sans-serif;
 }
 
 .teacher .create-form-button:hover {
@@ -68,4 +75,29 @@
 /* Student-only styles */
 .student .form-card {
   border-left: 5px solid #30638e;
+}
+
+/* Override Material-UI component fonts */
+.homepage .MuiTypography-root {
+  font-family: 'Rammetto One', sans-serif !important;
+}
+
+.homepage .MuiButton-root {
+  font-family: 'Rammetto One', sans-serif !important;
+}
+
+.homepage .MuiCard-root {
+  font-family: 'Rammetto One', sans-serif !important;
+}
+
+.homepage .MuiCardContent-root {
+  font-family: 'Rammetto One', sans-serif !important;
+}
+
+.homepage .MuiChip-root {
+  font-family: 'Rammetto One', sans-serif !important;
+}
+
+.homepage .MuiAlert-root {
+  font-family: 'Rammetto One', sans-serif !important;
 }

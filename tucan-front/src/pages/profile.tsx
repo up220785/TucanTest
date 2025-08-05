@@ -14,6 +14,7 @@ import {
   Home as HomeIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import Layout from "../components/Layout";
 import "../styles/profile.css";
 
 interface UserProfile {
@@ -228,25 +229,34 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="md" sx={{ mt: 2, mb: 2, height: "100vh", overflow: "auto" }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBackIcon />}
-            onClick={handleBackNavigation}
-            sx={{ borderColor: "#30638E", color: "#30638E" }}
-          >
-            Atrás
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<HomeIcon />}
-            onClick={handleHomeNavigation}
-            sx={{ borderColor: "#30638E", color: "#30638E" }}
-          >
-            Inicio
-          </Button>
+    <Layout title="Mi Perfil">
+      <Container maxWidth="md" sx={{ mt: 2, mb: 2 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              onClick={handleBackNavigation}
+              sx={{ 
+                borderColor: "#30638E", 
+                color: "#30638E",
+                fontFamily: 'Rammetto One, sans-serif'
+              }}
+            >
+              Atrás
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<HomeIcon />}
+              onClick={handleHomeNavigation}
+              sx={{ 
+                borderColor: "#30638E", 
+                color: "#30638E",
+                fontFamily: 'Rammetto One, sans-serif'
+              }}
+            >
+              Inicio
+            </Button>
         </Box>
         <Typography variant="h4" component="h1">
           Mi Perfil
@@ -398,7 +408,8 @@ const Profile: React.FC = () => {
           )}
         </Box>
       </Paper>
-    </Container>
+      </Container>
+    </Layout>
   );
 };
 

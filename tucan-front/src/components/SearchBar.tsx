@@ -57,6 +57,11 @@ const SearchBar: React.FC<SearchBarProps> = ({ userRole, userId }) => {
   const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
+  // Get appropriate colors based on user role
+  const getHeaderColor = () => {
+    return userRole === 'teacher' ? '#EA5C00' : '#30638E';
+  };
+
   // Define all searchable items based on user role
   const getSearchableItems = (): SearchItem[] => {
     const commonItems: SearchItem[] = [
@@ -271,12 +276,13 @@ const SearchBar: React.FC<SearchBarProps> = ({ userRole, userId }) => {
   };
 
   const getCategoryColor = (category: string) => {
+    const headerColor = getHeaderColor();
     switch (category) {
-      case 'navigation': return '#30638E';
+      case 'navigation': return headerColor;
       case 'course': return '#EA5C00';
       case 'quiz': return '#FFCF49';
       case 'feature': return '#F49524';
-      default: return '#30638E';
+      default: return headerColor;
     }
   };
 

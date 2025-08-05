@@ -249,9 +249,16 @@ const HomePage: React.FC = () => {
       },
     }}>
       {/* Header with Navigation */}
-      <AppBar position="sticky" sx={{ backgroundColor: '#30638E', zIndex: 1100 }}>
+      <AppBar position="sticky" sx={{ 
+        backgroundColor: role === 'teacher' ? '#EA5C00' : '#30638E', 
+        zIndex: 1100 
+      }}>
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', mr: 3 }}>
+          <Typography variant="h6" component="div" sx={{ 
+            fontWeight: 'bold', 
+            mr: 3,
+            fontFamily: 'Rammetto One, sans-serif'
+          }}>
             TucanTest
           </Typography>
           
@@ -268,7 +275,10 @@ const HomePage: React.FC = () => {
                   color="inherit" 
                   startIcon={<SchoolIcon />}
                   onClick={() => navigate("/my-courses")}
-                  sx={{ textTransform: 'none' }}
+                  sx={{ 
+                    textTransform: 'none',
+                    fontFamily: 'Rammetto One, sans-serif'
+                  }}
                 >
                   Mis Cursos
                 </Button>
@@ -276,7 +286,10 @@ const HomePage: React.FC = () => {
                   color="inherit" 
                   startIcon={<AssessmentIcon />}
                   onClick={() => navigate("/teacher/statistics")}
-                  sx={{ textTransform: 'none' }}
+                  sx={{ 
+                    textTransform: 'none',
+                    fontFamily: 'Rammetto One, sans-serif'
+                  }}
                 >
                   Estadísticas
                 </Button>
@@ -289,7 +302,10 @@ const HomePage: React.FC = () => {
                   color="inherit" 
                   startIcon={<SearchIcon />}
                   onClick={() => navigate("/explore-courses")}
-                  sx={{ textTransform: 'none' }}
+                  sx={{ 
+                    textTransform: 'none',
+                    fontFamily: 'Rammetto One, sans-serif'
+                  }}
                 >
                   Explorar Cursos
                 </Button>
@@ -324,12 +340,15 @@ const HomePage: React.FC = () => {
         onClose={handleMenuClose}
         sx={{ mt: 1 }}
       >
-        <MenuItem onClick={handleProfileClick}>
+        <MenuItem onClick={handleProfileClick} sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
           <AccountCircleIcon sx={{ mr: 1 }} />
           Ver mi Perfil
         </MenuItem>
         <Divider />
-        <MenuItem onClick={handleLogoutClick} sx={{ color: 'error.main' }}>
+        <MenuItem onClick={handleLogoutClick} sx={{ 
+          color: 'error.main',
+          fontFamily: 'Rammetto One, sans-serif'
+        }}>
           <ExitToAppIcon sx={{ mr: 1 }} />
           Cerrar Sesión
         </MenuItem>
@@ -337,7 +356,7 @@ const HomePage: React.FC = () => {
 
       <Box className={`homepage ${role}`}>
         <main className="content" style={{ width: '100%', padding: '40px' }}>
-          <Typography className="welcome">
+          <Typography className="welcome" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
             Bienvenido {role === "teacher" ? "Docente" : "Estudiante"}, {userName}
           </Typography>
 
@@ -346,6 +365,7 @@ const HomePage: React.FC = () => {
             <Button 
               className="create-form-button"
               onClick={() => navigate("/my-courses")}
+              sx={{ fontFamily: 'Rammetto One, sans-serif' }}
             >
               Gestionar Cursos
             </Button>
@@ -357,6 +377,7 @@ const HomePage: React.FC = () => {
             <Button 
               className="create-form-button"
               onClick={() => navigate("/explore-courses")}
+              sx={{ fontFamily: 'Rammetto One, sans-serif' }}
             >
               Explorar Cursos
             </Button>
@@ -364,14 +385,24 @@ const HomePage: React.FC = () => {
         )}
 
         {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
+          <Alert severity="error" sx={{ 
+            mb: 3,
+            fontFamily: 'Rammetto One, sans-serif',
+            '& .MuiAlert-message': {
+              fontFamily: 'Rammetto One, sans-serif'
+            }
+          }}>
             {error}
           </Alert>
         )}
 
         {role === "teacher" && (
           <Box sx={{ mb: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ 
+              mb: 2, 
+              fontWeight: 600,
+              fontFamily: 'Rammetto One, sans-serif'
+            }}>
               Mis Cursos Publicados
             </Typography>
             
@@ -381,12 +412,15 @@ const HomePage: React.FC = () => {
               </Box>
             ) : courses.length === 0 ? (
               <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
-                <Typography variant="body1">
+                <Typography variant="body1" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
                   No tienes cursos publicados aún
                 </Typography>
                 <Button 
                   variant="outlined" 
-                  sx={{ mt: 2 }}
+                  sx={{ 
+                    mt: 2,
+                    fontFamily: 'Rammetto One, sans-serif'
+                  }}
                   onClick={() => navigate("/my-courses")}
                 >
                   Crear tu primer curso
@@ -416,29 +450,41 @@ const HomePage: React.FC = () => {
                     onClick={() => navigate(`/courses/${course.id}/view`)}
                   >
                     <CardContent>
-                      <Typography variant="h6" className="form-name" sx={{ mb: 1 }}>
+                      <Typography variant="h6" className="form-name" sx={{ 
+                        mb: 1,
+                        fontFamily: 'Rammetto One, sans-serif'
+                      }}>
                         {course.name}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ 
+                        mb: 2,
+                        fontFamily: 'Rammetto One, sans-serif'
+                      }}>
                         {course.description || 'Sin descripción'}
                       </Typography>
                       <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                         <Chip 
                           label="Publicado" 
                           color="success" 
-                          size="small" 
+                          size="small"
+                          sx={{ fontFamily: 'Rammetto One, sans-serif' }}
                         />
                         <Chip 
                           label={course.is_public ? 'Público' : 'Privado'} 
                           color={course.is_public ? 'primary' : 'secondary'} 
-                          size="small" 
+                          size="small"
+                          sx={{ fontFamily: 'Rammetto One, sans-serif' }}
                         />
                       </Box>
-                      <Typography className="form-grade" variant="body2">
+                      <Typography className="form-grade" variant="body2" sx={{
+                        fontFamily: 'Rammetto One, sans-serif'
+                      }}>
                         {course.enrolled_count} estudiante{course.enrolled_count !== 1 ? 's' : ''} matriculado{course.enrolled_count !== 1 ? 's' : ''}
                         {course.max_capacity && ` / ${course.max_capacity}`}
                       </Typography>
-                      <Typography className="form-status" variant="body2">
+                      <Typography className="form-status" variant="body2" sx={{
+                        fontFamily: 'Rammetto One, sans-serif'
+                      }}>
                         {course.quiz_count} quiz{course.quiz_count !== 1 ? 'zes' : ''} disponible{course.quiz_count !== 1 ? 's' : ''}
                       </Typography>
                     </CardContent>
@@ -452,6 +498,7 @@ const HomePage: React.FC = () => {
                 <Button 
                   variant="outlined" 
                   onClick={() => navigate("/my-courses")}
+                  sx={{ fontFamily: 'Rammetto One, sans-serif' }}
                 >
                   Ver todos mis cursos
                 </Button>
@@ -462,7 +509,11 @@ const HomePage: React.FC = () => {
 
         {role === "student" && (
           <Box sx={{ mb: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ 
+              mb: 2, 
+              fontWeight: 600,
+              fontFamily: 'Rammetto One, sans-serif'
+            }}>
               Mis Cursos Matriculados
             </Typography>
             
@@ -472,12 +523,15 @@ const HomePage: React.FC = () => {
               </Box>
             ) : courses.length === 0 ? (
               <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
-                <Typography variant="body1">
+                <Typography variant="body1" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
                   No estás matriculado en ningún curso aún
                 </Typography>
                 <Button 
                   variant="outlined" 
-                  sx={{ mt: 2 }}
+                  sx={{ 
+                    mt: 2,
+                    fontFamily: 'Rammetto One, sans-serif'
+                  }}
                   onClick={() => navigate("/explore-courses")}
                 >
                   Explorar cursos disponibles
@@ -507,14 +561,23 @@ const HomePage: React.FC = () => {
                     onClick={() => navigate(`/courses/${course.id}/view`)}
                   >
                     <CardContent>
-                      <Typography variant="h6" className="form-name" sx={{ mb: 1 }}>
+                      <Typography variant="h6" className="form-name" sx={{ 
+                        mb: 1,
+                        fontFamily: 'Rammetto One, sans-serif'
+                      }}>
                         {course.name}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ 
+                        mb: 2,
+                        fontFamily: 'Rammetto One, sans-serif'
+                      }}>
                         {course.description || 'Sin descripción'}
                       </Typography>
                       {course.teacher_name && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ 
+                          mb: 1,
+                          fontFamily: 'Rammetto One, sans-serif'
+                        }}>
                           Profesor: {course.teacher_name}
                         </Typography>
                       )}
@@ -522,18 +585,24 @@ const HomePage: React.FC = () => {
                         <Chip 
                           label="Matriculado" 
                           color="success" 
-                          size="small" 
+                          size="small"
+                          sx={{ fontFamily: 'Rammetto One, sans-serif' }}
                         />
                         <Chip 
                           label={course.is_public ? 'Público' : 'Privado'} 
                           color={course.is_public ? 'primary' : 'secondary'} 
-                          size="small" 
+                          size="small"
+                          sx={{ fontFamily: 'Rammetto One, sans-serif' }}
                         />
                       </Box>
-                      <Typography className="form-grade" variant="body2">
+                      <Typography className="form-grade" variant="body2" sx={{
+                        fontFamily: 'Rammetto One, sans-serif'
+                      }}>
                         {course.enrolled_count} estudiante{course.enrolled_count !== 1 ? 's' : ''} matriculado{course.enrolled_count !== 1 ? 's' : ''}
                       </Typography>
-                      <Typography className="form-status" variant="body2">
+                      <Typography className="form-status" variant="body2" sx={{
+                        fontFamily: 'Rammetto One, sans-serif'
+                      }}>
                         {course.quiz_count} quiz{course.quiz_count !== 1 ? 'zes' : ''} disponible{course.quiz_count !== 1 ? 's' : ''}
                       </Typography>
                     </CardContent>
@@ -547,6 +616,7 @@ const HomePage: React.FC = () => {
                 <Button 
                   variant="outlined" 
                   onClick={() => navigate("/explore-courses")}
+                  sx={{ fontFamily: 'Rammetto One, sans-serif' }}
                 >
                   Explorar más cursos
                 </Button>

@@ -28,6 +28,7 @@ import {
   Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import Layout from '../components/Layout';
 import '../styles/explore-courses.css';
 
 interface Course {
@@ -221,35 +222,7 @@ const ExploreCourses: React.FC = () => {
   }
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh', 
-      height: '100vh',
-      overflowY: 'auto',
-      overflowX: 'hidden',
-      backgroundColor: '#f5f5f5',
-      pb: 4,
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      '&::-webkit-scrollbar': {
-        width: '8px',
-      },
-      '&::-webkit-scrollbar-track': {
-        backgroundColor: '#f1f1f1',
-        borderRadius: '4px',
-      },
-      '&::-webkit-scrollbar-thumb': {
-        backgroundColor: '#c1c1c1',
-        borderRadius: '4px',
-        '&:hover': {
-          backgroundColor: '#a8a8a8',
-        },
-      },
-    }}
-      className="explore-courses-container"
-    >
+    <Layout title="Explorar Cursos">
       <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 4 }}>
@@ -259,12 +232,13 @@ const ExploreCourses: React.FC = () => {
               startIcon={<ArrowBackIcon />}
               onClick={handleBackNavigation}
               size="medium"
+              sx={{ fontFamily: 'Rammetto One, sans-serif' }}
             >
-              Back
+              Atrás
             </Button>
             <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h4" component="h1" gutterBottom>
-                Explore Courses
+              <Typography variant="h4" component="h1" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                Explorar Cursos
               </Typography>
             </Box>
             <Button
@@ -463,12 +437,10 @@ const ExploreCourses: React.FC = () => {
                   </Button>
                 </CardActions>
               </Card>
-          ))}
-        </Box>
-      )}
-      </Container>
-    </Box>
+        ))}
+      </Box>
+    )}
+    </Container>
+    </Layout>
   );
-};
-
-export default ExploreCourses;
+};export default ExploreCourses;
