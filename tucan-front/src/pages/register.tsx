@@ -144,8 +144,8 @@ const Register: React.FC = () => {
           <Box
             className="text-logo-fallback"
             sx={{
-              width: "80px",
-              height: "80px",
+              width: "60px",
+              height: "60px",
               backgroundColor: "#EA5C00",
               borderRadius: "50%",
               display: "none",
@@ -153,10 +153,10 @@ const Register: React.FC = () => {
               justifyContent: "center",
               color: "white",
               fontFamily: "'Rammetto One', sans-serif",
-              fontSize: "12px",
+              fontSize: "10px",
               fontWeight: "bold",
               textAlign: "center",
-              margin: "0 auto 20px auto",
+              margin: "0 auto 15px auto",
               position: "relative",
               zIndex: 15,
               filter:
@@ -167,9 +167,9 @@ const Register: React.FC = () => {
           </Box>
         </Box>
 
-        <Container maxWidth="sm" className="form-container">
+        <Container maxWidth="xs" className="form-container">
           <Typography
-            variant="h3"
+            variant="h4"
             component="h1"
             gutterBottom
             className="rainbow-text"
@@ -196,42 +196,46 @@ const Register: React.FC = () => {
               label="Nombre Completo"
               type="text"
               fullWidth
-              margin="normal"
+              margin="dense"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="register-input"
+              size="small"
             />
             <TextField
               label="Correo Electrónico"
               type="email"
               fullWidth
-              margin="normal"
+              margin="dense"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="register-input"
+              size="small"
             />
             <TextField
               label="Contraseña"
               type="password"
               fullWidth
-              margin="normal"
+              margin="dense"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="register-input"
+              size="small"
             />
             <TextField
               label="Confirmar Contraseña"
               type="password"
               fullWidth
-              margin="normal"
+              margin="dense"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="register-input"
+              size="small"
             />
 
             <Typography
-              variant="h6"
-              sx={{ mt: 2 }}
+              variant="body1"
+              sx={{ mt: 1.5, mb: 0.5 }}
               className="register-text"
             >
               ¿Eres Alumno o Docente?
@@ -259,27 +263,29 @@ const Register: React.FC = () => {
               variant="contained"
               fullWidth
               className="register-button"
+              size="medium"
               sx={{
-                mt: 2,
-                py: 1.5,
+                mt: 1.5,
+                py: 1,
               }}
             >
               Registrarte
             </Button>
 
             <Button
-  variant="outlined"
-  fullWidth
-  className="register-button"
-  onClick={() => navigate("/login")}
-  sx={{
-    borderColor: "#30638E !important",
-    color: "#30638E !important",
-    backgroundColor: "transparent !important",
-    mt: 2,
-    py: 1.5,
-  }}
->
+              variant="outlined"
+              fullWidth
+              className="register-button"
+              size="medium"
+              onClick={() => navigate("/login")}
+              sx={{
+                borderColor: "#30638E !important",
+                color: "#30638E !important",
+                backgroundColor: "transparent !important",
+                mt: 1,
+                py: 1,
+              }}
+            >
   Volver al Login
 </Button>
           </form>

@@ -17,6 +17,7 @@ import {
   ListItemIcon,
   Divider,
   Stack,
+  IconButton,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -30,6 +31,7 @@ import {
   Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
+import Layout from '../components/Layout';
 
 interface Course {
   id: number;
@@ -185,143 +187,117 @@ const ViewCourse: React.FC = () => {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <LinearProgress />
-        <Typography variant="h6" sx={{ mt: 2, textAlign: 'center' }}>
-          Loading course details...
-        </Typography>
-      </Container>
+      <Box sx={{ 
+        minHeight: '100vh',
+        backgroundColor: '#f5f5f5',
+      }}>
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Box sx={{ width: '100%' }}>
+            <LinearProgress />
+          </Box>
+          <Typography variant="h6" sx={{ mt: 2, textAlign: 'center', fontFamily: 'Rammetto One, sans-serif' }}>
+            Cargando detalles del curso...
+          </Typography>
+        </Container>
+      </Box>
     );
   }
 
   if (error) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBackIcon />}
-            onClick={handleBackNavigation}
-          >
-            Back
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<HomeIcon />}
-            onClick={handleHomeNavigation}
-          >
-            Home
-          </Button>
-        </Box>
-      </Container>
+      <Box sx={{ 
+        minHeight: '100vh',
+        backgroundColor: '#f5f5f5',
+      }}>
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <IconButton onClick={handleBackNavigation} sx={{ mr: 2 }}>
+              <ArrowBackIcon />
+            </IconButton>
+            <Typography variant="h4" component="h1" sx={{ flexGrow: 1, fontFamily: 'Rammetto One, sans-serif' }}>
+              Ver Curso
+            </Typography>
+            <IconButton onClick={handleHomeNavigation} sx={{ ml: 2 }}>
+              <HomeIcon />
+            </IconButton>
+          </Box>
+          <Alert severity="error">{error}</Alert>
+        </Container>
+      </Box>
     );
   }
 
   if (!course) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Alert severity="error">Course not found</Alert>
-      </Container>
+      <Box sx={{ 
+        minHeight: '100vh',
+        backgroundColor: '#f5f5f5',
+      }}>
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Alert severity="warning">Curso no encontrado</Alert>
+        </Container>
+      </Box>
     );
   }
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh', 
-      height: '100vh',
-      overflowY: 'auto',
-      overflowX: 'hidden',
-      backgroundColor: '#f5f5f5',
-      pb: 4,
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      '&::-webkit-scrollbar': {
-        width: '8px',
-      },
-      '&::-webkit-scrollbar-track': {
-        backgroundColor: '#f1f1f1',
-        borderRadius: '4px',
-      },
-      '&::-webkit-scrollbar-thumb': {
-        backgroundColor: '#c1c1c1',
-        borderRadius: '4px',
-        '&:hover': {
-          backgroundColor: '#a8a8a8',
-        },
-      },
-    }}>
-            <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+    <Layout title="Ver Curso">
+      <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
         {/* Header */}
-        <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBackIcon />}
-              onClick={handleBackNavigation}
-            >
-              Back
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<HomeIcon />}
-              onClick={handleHomeNavigation}
-            >
-              Home
-            </Button>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+          <IconButton onClick={handleBackNavigation} sx={{ mr: 2 }}>
+            <ArrowBackIcon />
+          </IconButton>
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography variant="h4" component="h1" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+              {course.name}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+              <Chip 
+                label={course.is_published ? 'Publicado' : 'Borrador'} 
+                color={course.is_published ? 'success' : 'warning'} 
+              />
+              <Chip 
+                label={course.is_public ? 'Público' : 'Privado'} 
+                color={course.is_public ? 'primary' : 'secondary'} 
+              />
+            </Box>
           </Box>
-        
-        <Typography variant="h4" component="h1" gutterBottom>
-          {course.name}
-        </Typography>
-        
-        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-          <Chip 
-            label={course.is_published ? 'Published' : 'Draft'} 
-            color={course.is_published ? 'success' : 'warning'} 
-          />
-          <Chip 
-            label={course.is_public ? 'Public' : 'Private'} 
-            color={course.is_public ? 'primary' : 'secondary'} 
-          />
+          <IconButton onClick={handleHomeNavigation} sx={{ ml: 2 }}>
+            <HomeIcon />
+          </IconButton>
         </Box>
-      </Box>
 
       <Grid container spacing={3} sx={{ mt: 0 }}>
         {/* Course Information */}
         <Grid size={{ xs: 12, md: 8 }}>
           <Card sx={{ mb: 3 }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
                 <SchoolIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Course Information
+                Información del Curso
               </Typography>
               <Divider sx={{ mb: 2 }} />
               
-              <Typography variant="body1" paragraph>
-                <strong>Description:</strong>
+              <Typography variant="body1" paragraph sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                <strong>Descripción:</strong>
               </Typography>
               <Typography variant="body2" paragraph sx={{ pl: 2 }}>
-                {course.description || 'No description provided'}
+                {course.description || 'Sin descripción proporcionada'}
               </Typography>
               
               {course.email && (
                 <Typography variant="body2" sx={{ mb: 1 }}>
-                  <strong>Contact Email:</strong> {course.email}
+                  <strong>Email de Contacto:</strong> {course.email}
                 </Typography>
               )}
               
               <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>Created:</strong> {formatDate(course.created_at)}
+                <strong>Creado:</strong> {formatDate(course.created_at)}
               </Typography>
               
               <Typography variant="body2">
-                <strong>Capacity:</strong> {course.max_capacity ? `${course.enrolled_count}/${course.max_capacity} students` : 'Unlimited'}
+                <strong>Capacidad:</strong> {course.max_capacity ? `${course.enrolled_count}/${course.max_capacity} estudiantes` : 'Ilimitado'}
               </Typography>
             </CardContent>
           </Card>
@@ -330,9 +306,9 @@ const ViewCourse: React.FC = () => {
           {userRole === 'student' && (
             <Card sx={{ mb: 3 }}>
               <CardContent>
-                <Typography variant="h6" gutterBottom>
+                <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
                   <BarChartIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                  My Progress
+                  Mi Progreso
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
                 
@@ -365,8 +341,8 @@ const ViewCourse: React.FC = () => {
                       {/* Overall Score */}
                       <Box sx={{ mb: 2 }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                          <Typography variant="body1" fontWeight="medium">
-                            Overall Course Score
+                          <Typography variant="body1" fontWeight="medium" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                            Puntuación General del Curso
                           </Typography>
                           <Chip
                             label={`${overallPercentage.toFixed(1)}%`}
@@ -381,12 +357,12 @@ const ViewCourse: React.FC = () => {
                             {totalEarned}
                           </Typography>
                           <Typography variant="h6" component="span" color="text.secondary">
-                            / {totalPossible} points
+                            / {totalPossible} puntos
                           </Typography>
                         </Box>
                         
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                          Across {publishedQuizzes.length} published quiz{publishedQuizzes.length !== 1 ? 'es' : ''}
+                          En {publishedQuizzes.length} quiz{publishedQuizzes.length !== 1 ? 'zes' : ''} publicado{publishedQuizzes.length !== 1 ? 's' : ''}
                         </Typography>
                         
                         {/* Progress Bar */}
@@ -411,7 +387,7 @@ const ViewCourse: React.FC = () => {
                       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
                         <Box sx={{ flex: 1 }}>
                           <Typography variant="body2" color="text.secondary" gutterBottom>
-                            Graded Quizzes
+                            Quizzes Calificados
                           </Typography>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Typography variant="h6" color="primary">
@@ -432,28 +408,28 @@ const ViewCourse: React.FC = () => {
                         
                         <Box sx={{ flex: 1 }}>
                           <Typography variant="body2" color="text.secondary" gutterBottom>
-                            Pending Grading
+                            Pendientes de Calificación
                           </Typography>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Typography variant="h6" color="warning.main">
                               {publishedQuizzes.filter(quiz => quiz.submission && !quiz.submission.is_graded).length}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              quiz{publishedQuizzes.filter(quiz => quiz.submission && !quiz.submission.is_graded).length !== 1 ? 'es' : ''}
+                              quiz{publishedQuizzes.filter(quiz => quiz.submission && !quiz.submission.is_graded).length !== 1 ? 'zes' : ''}
                             </Typography>
                           </Box>
                         </Box>
                         
                         <Box sx={{ flex: 1 }}>
                           <Typography variant="body2" color="text.secondary" gutterBottom>
-                            Not Attempted
+                            Sin Intentar
                           </Typography>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Typography variant="h6" color="error.main">
                               {publishedQuizzes.filter(quiz => !quiz.submission).length}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              quiz{publishedQuizzes.filter(quiz => !quiz.submission).length !== 1 ? 'es' : ''}
+                              quiz{publishedQuizzes.filter(quiz => !quiz.submission).length !== 1 ? 'zes' : ''}
                             </Typography>
                           </Box>
                         </Box>
@@ -462,18 +438,18 @@ const ViewCourse: React.FC = () => {
                       {publishedQuizzes.length === 0 ? (
                         <Box sx={{ textAlign: 'center', py: 2 }}>
                           <Typography variant="body2" color="text.secondary">
-                            No published quizzes yet
+                            Aún no hay quizzes publicados
                           </Typography>
                         </Box>
                       ) : (
                         <Box sx={{ mt: 1, p: 1.5, backgroundColor: 'grey.50', borderRadius: 1 }}>
                           <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', fontSize: '0.875rem' }}>
-                            {overallPercentage >= 90 ? "🎉 Excellent work! Keep it up!" :
-                             overallPercentage >= 80 ? "👍 Great job! You're doing well!" :
-                             overallPercentage >= 70 ? "📈 Good progress! Keep studying!" :
-                             overallPercentage >= 60 ? "💪 You're on track! Don't give up!" :
-                             gradedSubmissions.length === 0 ? "🚀 Ready to start your quiz journey?" :
-                             "📚 Keep working hard - you've got this!"}
+                            {overallPercentage >= 90 ? "🎉 ¡Excelente trabajo! ¡Sigue así!" :
+                             overallPercentage >= 80 ? "👍 ¡Buen trabajo! ¡Lo estás haciendo bien!" :
+                             overallPercentage >= 70 ? "📈 ¡Buen progreso! ¡Sigue estudiando!" :
+                             overallPercentage >= 60 ? "💪 ¡Vas por buen camino! ¡No te rindas!" :
+                             gradedSubmissions.length === 0 ? "🚀 ¿Listo para comenzar tu aventura de quizzes?" :
+                             "📚 ¡Sigue trabajando duro - lo tienes!"}
                           </Typography>
                         </Box>
                       )}
@@ -487,9 +463,9 @@ const ViewCourse: React.FC = () => {
           {/* Published Quizzes */}
           <Card>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
                 <QuizIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                {userRole === 'teacher' ? 'All Quizzes' : 'Available Quizzes'} ({(course.quizzes || []).filter(quiz => userRole === 'teacher' || quiz.is_published).length})
+                {userRole === 'teacher' ? 'Todos los Quizzes' : 'Quizzes Disponibles'} ({(course.quizzes || []).filter(quiz => userRole === 'teacher' || quiz.is_published).length})
               </Typography>
               <Divider sx={{ mb: 2 }} />
               
@@ -502,22 +478,25 @@ const ViewCourse: React.FC = () => {
                 {(!course.quizzes || course.quizzes.filter(quiz => userRole === 'teacher' || quiz.is_published).length === 0) ? (
                   <Paper sx={{ p: 3, textAlign: 'center', backgroundColor: '#f5f5f5' }}>
                     <AssignmentIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
-                    <Typography variant="h6" color="text.secondary" gutterBottom>
-                      {userRole === 'teacher' ? 'No Quizzes Created' : 'No Published Quizzes'}
+                    <Typography variant="h6" color="text.secondary" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                      {userRole === 'teacher' ? 'Sin Quizzes Creados' : 'Sin Quizzes Publicados'}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       {userRole === 'teacher' 
-                        ? 'Create and publish quizzes to see them here'
-                        : 'Check back later for new quizzes'
+                        ? 'Crea y publica quizzes para verlos aquí'
+                        : 'Revisa más tarde para nuevos quizzes'
                       }
                     </Typography>
                     {userRole === 'teacher' && (
                       <Button 
                         variant="outlined" 
-                        sx={{ mt: 2 }}
+                        sx={{ 
+                          mt: 2,
+                          fontFamily: 'Rammetto One, sans-serif',
+                        }}
                         onClick={() => navigate(`/courses/${courseId}/quizzes`)}
                       >
-                        Manage Quizzes
+                        Gestionar Quizzes
                       </Button>
                     )}
                   </Paper>
@@ -565,15 +544,15 @@ const ViewCourse: React.FC = () => {
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                   {quiz.title}
                                   <Chip 
-                                    label={quiz.is_published ? 'Published' : 'Draft'} 
+                                    label={quiz.is_published ? 'Publicado' : 'Borrador'} 
                                     color={quiz.is_published ? 'success' : 'warning'} 
                                     size="small"
                                   />
                                   {userRole === 'student' && quiz.submission && (
                                     <Chip 
                                       label={
-                                        quiz.submission.is_graded ? 'Graded' : 
-                                        quiz.submission.is_pending_manual_grade ? 'Pending Grade' : 'Submitted'
+                                        quiz.submission.is_graded ? 'Calificado' : 
+                                        quiz.submission.is_pending_manual_grade ? 'Pendiente de Calificación' : 'Enviado'
                                       } 
                                       color={
                                         quiz.submission.is_graded ? 'primary' : 
@@ -597,7 +576,7 @@ const ViewCourse: React.FC = () => {
                                   )}
                                   {userRole === 'student' && !quiz.submission && quiz.is_published && (
                                     <Chip 
-                                      label="Not Attempted" 
+                                      label="Sin Intentar" 
                                       color="error" 
                                       size="small"
                                     />
@@ -608,13 +587,16 @@ const ViewCourse: React.FC = () => {
                                     variant="contained"
                                     size="small"
                                     color="primary"
-                                    sx={{ ml: 1 }}
+                                    sx={{ 
+                                      ml: 1,
+                                      fontFamily: 'Rammetto One, sans-serif',
+                                    }}
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       navigate(`/quiz/${quiz.id}/take`);
                                     }}
                                   >
-                                    Take Quiz
+                                    Tomar Quiz
                                   </Button>
                                 )}
                                 {userRole === 'teacher' && (
@@ -623,13 +605,16 @@ const ViewCourse: React.FC = () => {
                                     size="small"
                                     color="info"
                                     startIcon={<BarChartIcon />}
-                                    sx={{ ml: 1 }}
+                                    sx={{ 
+                                      ml: 1,
+                                      fontFamily: 'Rammetto One, sans-serif',
+                                    }}
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       navigate(`/quiz/${quiz.id}/statistics`);
                                     }}
                                   >
-                                    Statistics
+                                    Estadísticas
                                   </Button>
                                 )}
                               </Box>
@@ -637,16 +622,16 @@ const ViewCourse: React.FC = () => {
                             secondary={
                               <span>
                                 <Typography variant="body2" color="text.secondary" component="span" sx={{ display: 'block' }}>
-                                  {quiz.description || 'No description'}
+                                  {quiz.description || 'Sin descripción'}
                                 </Typography>
                                 <Typography variant="caption" color="text.secondary" component="span" sx={{ display: 'block' }}>
-                                  {quiz.total_points} points
-                                  {quiz.due_date && ` • Due: ${formatDateTime(quiz.due_date)}`}
+                                  {quiz.total_points} puntos
+                                  {quiz.due_date && ` • Vence: ${formatDateTime(quiz.due_date)}`}
                                   {userRole === 'student' && quiz.submission && quiz.submission.is_graded && (
-                                    ` • Score: ${quiz.submission.total_score || 0}/${quiz.total_points} (${Math.round(((quiz.submission.total_score || 0) / quiz.total_points) * 100)}%)`
+                                    ` • Puntuación: ${quiz.submission.total_score || 0}/${quiz.total_points} (${Math.round(((quiz.submission.total_score || 0) / quiz.total_points) * 100)}%)`
                                   )}
                                   {userRole === 'student' && quiz.submission && quiz.submission.submitted_at && (
-                                    ` • Submitted: ${formatDateTime(quiz.submission.submitted_at)}`
+                                    ` • Enviado: ${formatDateTime(quiz.submission.submitted_at)}`
                                   )}
                                 </Typography>
                               </span>
@@ -669,8 +654,8 @@ const ViewCourse: React.FC = () => {
             <>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Quick Actions
+                  <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                    Acciones Rápidas
                   </Typography>
                   <Divider sx={{ mb: 2 }} />
                   
@@ -680,8 +665,9 @@ const ViewCourse: React.FC = () => {
                       fullWidth
                       startIcon={<PeopleIcon />}
                       onClick={() => navigate(`/courses/${courseId}/students`)}
+                      sx={{ fontFamily: 'Rammetto One, sans-serif' }}
                     >
-                      View Students
+                      Ver Estudiantes
                     </Button>
                     
                     <Button
@@ -689,8 +675,9 @@ const ViewCourse: React.FC = () => {
                       fullWidth
                       startIcon={<QuizIcon />}
                       onClick={() => navigate(`/courses/${courseId}/quizzes`)}
+                      sx={{ fontFamily: 'Rammetto One, sans-serif' }}
                     >
-                      Manage Quizzes
+                      Gestionar Quizzes
                     </Button>
                     
                     <Button
@@ -698,8 +685,9 @@ const ViewCourse: React.FC = () => {
                       fullWidth
                       startIcon={<BarChartIcon />}
                       onClick={() => navigate(`/courses/${courseId}/statistics`)}
+                      sx={{ fontFamily: 'Rammetto One, sans-serif' }}
                     >
-                      Course Statistics
+                      Estadísticas del Curso
                     </Button>
                   </Box>
                 </CardContent>
@@ -708,43 +696,43 @@ const ViewCourse: React.FC = () => {
               {/* Course Stats */}
               <Card sx={{ mt: 2 }}>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Course Overview
+                  <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                    Resumen del Curso
                   </Typography>
                   <Divider sx={{ mb: 2 }} />
                   
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">Total Students:</Typography>
+                    <Typography variant="body2">Total de Estudiantes:</Typography>
                     <Typography variant="body2" fontWeight="bold">
                       {course.enrolled_count}
                     </Typography>
                   </Box>
                   
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">Total Quizzes:</Typography>
+                    <Typography variant="body2">Total de Quizzes:</Typography>
                     <Typography variant="body2" fontWeight="bold">
                       {(course.quizzes || []).length}
                     </Typography>
                   </Box>
                   
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">Published Quizzes:</Typography>
+                    <Typography variant="body2">Quizzes Publicados:</Typography>
                     <Typography variant="body2" fontWeight="bold">
                       {(course.quizzes || []).filter(quiz => quiz.is_published).length}
                     </Typography>
                   </Box>
                   
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">Total Points:</Typography>
+                    <Typography variant="body2">Total de Puntos:</Typography>
                     <Typography variant="body2" fontWeight="bold">
                       {(course.quizzes || []).reduce((sum, quiz) => sum + (quiz.total_points || 0), 0)}
                     </Typography>
                   </Box>
                   
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body2">Status:</Typography>
+                    <Typography variant="body2">Estado:</Typography>
                     <Chip 
-                      label={course.is_full ? 'Full' : 'Open'} 
+                      label={course.is_full ? 'Lleno' : 'Abierto'} 
                       color={course.is_full ? 'error' : 'success'} 
                       size="small"
                     />
@@ -757,8 +745,8 @@ const ViewCourse: React.FC = () => {
             <>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Quick Stats
+                  <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                    Estadísticas Rápidas
                   </Typography>
                   <Divider sx={{ mb: 2 }} />
                   
@@ -770,7 +758,7 @@ const ViewCourse: React.FC = () => {
                       return (
                         <Box sx={{ textAlign: 'center', py: 2 }}>
                           <Typography variant="body2" color="text.secondary">
-                            Complete some quizzes to see your stats here!
+                            ¡Completa algunos quizzes para ver tus estadísticas aquí!
                           </Typography>
                         </Box>
                       );
@@ -791,7 +779,7 @@ const ViewCourse: React.FC = () => {
                       <Stack spacing={1.5}>
                         <Box>
                           <Typography variant="body2" color="text.secondary" gutterBottom>
-                            Best Performance
+                            Mejor Rendimiento
                           </Typography>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Typography variant="body1" fontWeight="bold" color="success.main">
@@ -810,7 +798,7 @@ const ViewCourse: React.FC = () => {
                         
                         <Box>
                           <Typography variant="body2" color="text.secondary" gutterBottom>
-                            Average Score
+                            Puntuación Promedio
                           </Typography>
                           <Typography variant="body1" fontWeight="bold" color="primary">
                             {averageScore.toFixed(1)}%
@@ -819,7 +807,7 @@ const ViewCourse: React.FC = () => {
                         
                         <Box>
                           <Typography variant="body2" color="text.secondary" gutterBottom>
-                            Quizzes Completed
+                            Quizzes Completados
                           </Typography>
                           <Typography variant="body1" fontWeight="bold">
                             {gradedSubmissions.length} / {publishedQuizzes.length}
@@ -834,8 +822,8 @@ const ViewCourse: React.FC = () => {
               {/* Course Info for Students */}
               <Card sx={{ mt: 2 }}>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Course Info
+                  <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                    Información del Curso
                   </Typography>
                   <Divider sx={{ mb: 2 }} />
                   
@@ -848,21 +836,21 @@ const ViewCourse: React.FC = () => {
                     </Box>
                     
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Typography variant="body2" color="text.secondary">Students:</Typography>
+                      <Typography variant="body2" color="text.secondary">Estudiantes:</Typography>
                       <Typography variant="body2" fontWeight="bold">
                         {course.enrolled_count}
                       </Typography>
                     </Box>
                     
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Typography variant="body2" color="text.secondary">Total Quizzes:</Typography>
+                      <Typography variant="body2" color="text.secondary">Total de Quizzes:</Typography>
                       <Typography variant="body2" fontWeight="bold">
                         {(course.quizzes || []).filter(quiz => quiz.is_published).length}
                       </Typography>
                     </Box>
                     
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Typography variant="body2" color="text.secondary">Total Points:</Typography>
+                      <Typography variant="body2" color="text.secondary">Total de Puntos:</Typography>
                       <Typography variant="body2" fontWeight="bold">
                         {(course.quizzes || []).filter(quiz => quiz.is_published).reduce((sum, quiz) => sum + quiz.total_points, 0)}
                       </Typography>
@@ -873,10 +861,8 @@ const ViewCourse: React.FC = () => {
             </>
           )}
         </Grid>
-      </Grid>
+        </Grid>
       </Container>
-    </Box>
+    </Layout>
   );
-};
-
-export default ViewCourse;
+};export default ViewCourse;

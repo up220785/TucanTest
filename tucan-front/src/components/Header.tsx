@@ -189,6 +189,22 @@ const Header: React.FC<HeaderProps> = ({ title = "TucanTest", showSearchBar = tr
               >
                 Estadísticas
               </Button>
+              <IconButton
+                color="inherit"
+                onClick={() => navigate("/notifications")}
+                sx={{ 
+                  ml: 1,
+                  backgroundColor: isCurrentPage('/notifications') ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
+                }}
+              >
+                <Badge 
+                  badgeContent={unreadNotifications > 0 ? unreadNotifications : undefined} 
+                  color="error"
+                  showZero={false}
+                >
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
             </>
           )}
 
@@ -214,7 +230,11 @@ const Header: React.FC<HeaderProps> = ({ title = "TucanTest", showSearchBar = tr
                   backgroundColor: isCurrentPage('/notifications') ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
                 }}
               >
-                <Badge badgeContent={unreadNotifications} color="error">
+                <Badge 
+                  badgeContent={unreadNotifications > 0 ? unreadNotifications : undefined} 
+                  color="error"
+                  showZero={false}
+                >
                   <NotificationsIcon />
                 </Badge>
               </IconButton>

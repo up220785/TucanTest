@@ -12,11 +12,18 @@ import {
   Divider,
   CircularProgress,
   Alert,
-  Stack
+  Stack,
+  IconButton
 } from '@mui/material';
 import {
-  ArrowBack, CheckCircle, Cancel, Help, Home as HomeIcon
+  ArrowBack, 
+  CheckCircle, 
+  Cancel, 
+  Help, 
+  Home as HomeIcon,
+  Assessment as AssessmentIcon
 } from '@mui/icons-material';
+import Layout from '../components/Layout';
 
 interface Question {
   id: number;
@@ -140,41 +147,51 @@ const QuizResults: React.FC = () => {
 
   if (loading) {
     return (
-      <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <CircularProgress />
-      </Container>
+      <Layout title="Resultados del Quiz">
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+            <CircularProgress />
+          </Box>
+        </Container>
+      </Layout>
     );
   }
 
   if (error) {
     return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">{error}</Alert>
-        <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
-          <Button
-            variant="contained"
-            startIcon={<ArrowBack />}
-            onClick={handleBackNavigation}
-          >
-            Back
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<HomeIcon />}
-            onClick={handleHomeNavigation}
-          >
-            Home
-          </Button>
-        </Box>
-      </Container>
+      <Layout title="Resultados del Quiz">
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Alert severity="error">{error}</Alert>
+          <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+            <Button
+              variant="contained"
+              startIcon={<ArrowBack />}
+              onClick={handleBackNavigation}
+              sx={{ fontFamily: 'Rammetto One, sans-serif' }}
+            >
+              Volver
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<HomeIcon />}
+              onClick={handleHomeNavigation}
+              sx={{ fontFamily: 'Rammetto One, sans-serif' }}
+            >
+              Inicio
+            </Button>
+          </Box>
+        </Container>
+      </Layout>
     );
   }
 
   if (!resultsData) {
     return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="warning">No quiz results found</Alert>
-      </Container>
+      <Layout title="Resultados del Quiz">
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Alert severity="warning">No se encontraron resultados para este quiz.</Alert>
+        </Container>
+      </Layout>
     );
   }
 
@@ -187,68 +204,32 @@ const QuizResults: React.FC = () => {
   const scorePercentage = maxPossibleScore > 0 ? Math.round((displayScore / maxPossibleScore) * 100) : 0;
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh', 
-      height: '100vh',
-      overflowY: 'auto',
-      overflowX: 'hidden',
-      backgroundColor: '#f5f5f5',
-      pb: 4,
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      '&::-webkit-scrollbar': {
-        width: '8px',
-      },
-      '&::-webkit-scrollbar-track': {
-        backgroundColor: '#f1f1f1',
-        borderRadius: '4px',
-      },
-      '&::-webkit-scrollbar-thumb': {
-        backgroundColor: '#c1c1c1',
-        borderRadius: '4px',
-        '&:hover': {
-          backgroundColor: '#a8a8a8',
-        },
-      },
-    }}>
+    <Layout title="Resultados del Quiz">
       <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
         {/* Header */}
-        <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBack />}
-              onClick={handleBackNavigation}
-            >
-              Back
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<HomeIcon />}
-              onClick={handleHomeNavigation}
-            >
-              Home
-            </Button>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+          <IconButton onClick={handleBackNavigation} sx={{ mr: 2 }}>
+            <ArrowBack />
+          </IconButton>
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography variant="h4" component="h1" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+              Resultados del Quiz: {quiz.title}
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+              Curso: {quiz.course_name}
+            </Typography>
           </Box>
-        
-        <Typography variant="h4" component="h1" gutterBottom>
-          Quiz Results: {quiz.title}
-        </Typography>
-        
-        <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-          Course: {quiz.course_name}
-        </Typography>
-      </Box>
+          <IconButton onClick={handleHomeNavigation} sx={{ ml: 2 }}>
+            <HomeIcon />
+          </IconButton>
+        </Box>
 
       {/* Score Summary */}
       <Paper elevation={3} sx={{ p: { xs: 2, md: 3 }, mb: 3, bgcolor: 'background.paper' }}>
         {grading_status.requires_manual_grading && (
           <Alert severity="info" sx={{ mb: 2 }}>
-            <Typography variant="body2">
-              This quiz contains text questions that require manual grading. Your final score is pending teacher review.
+            <Typography variant="body2" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+              Este quiz contiene preguntas de texto que requieren calificación manual. Tu puntuación final está pendiente de revisión del profesor.
             </Typography>
           </Alert>
         )}
@@ -256,29 +237,29 @@ const QuizResults: React.FC = () => {
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: 'flex-start' }}>
           <Box sx={{ flex: 1 }}>
             <Stack spacing={2}>
-              <Typography variant="h6">
-                {grading_status.requires_manual_grading ? 'Partial Score (Auto-Graded)' : 'Your Score'}
+              <Typography variant="h6" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                {grading_status.requires_manual_grading ? 'Puntuación Parcial (Auto-Calificada)' : 'Tu Puntuación'}
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-                <Typography variant="h3" component="span">
+                <Typography variant="h3" component="span" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
                   {displayScore}
                 </Typography>
-                <Typography variant="h5" component="span" color="text.secondary">
+                <Typography variant="h5" component="span" color="text.secondary" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
                   / {grading_status.requires_manual_grading ? maxPossibleScore : quiz.total_points}
                 </Typography>
                 {grading_status.requires_manual_grading ? (
                   <Chip
-                    label="Pending Grade"
+                    label="Calificación Pendiente"
                     color="warning"
                     size="medium"
-                    sx={{ fontSize: '1rem', fontWeight: 'bold' }}
+                    sx={{ fontSize: '1rem', fontWeight: 'bold', fontFamily: 'Rammetto One, sans-serif' }}
                   />
                 ) : (
                   <Chip
                     label={`${scorePercentage}%`}
                     color={getScoreColor(displayScore, quiz.total_points)}
                     size="medium"
-                    sx={{ fontSize: '1rem', fontWeight: 'bold' }}
+                    sx={{ fontSize: '1rem', fontWeight: 'bold', fontFamily: 'Rammetto One, sans-serif' }}
                   />
                 )}
               </Box>
@@ -287,15 +268,15 @@ const QuizResults: React.FC = () => {
           
           <Box sx={{ flex: 1 }}>
             <Stack spacing={1}>
-              <Typography variant="body2" color="text.secondary">
-                <strong>Submitted:</strong> {formatDate(submission.submitted_at)}
+              <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                <strong>Entregado:</strong> {formatDate(submission.submitted_at)}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                <strong>Graded:</strong> {submission.is_graded ? formatDate(submission.graded_at) : 'Pending'}
+              <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                <strong>Calificado:</strong> {submission.is_graded ? formatDate(submission.graded_at) : 'Pendiente'}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                <strong>Questions Correct:</strong> {submission.answers.filter(a => a.is_correct).length} / {questions.filter(q => q.question_type !== 'text').length}
-                {grading_status.has_text_questions && ' (excluding text questions)'}
+              <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                <strong>Preguntas Correctas:</strong> {submission.answers.filter(a => a.is_correct).length} / {questions.filter(q => q.question_type !== 'text').length}
+                {grading_status.has_text_questions && ' (excluyendo preguntas de texto)'}
               </Typography>
             </Stack>
           </Box>
@@ -303,8 +284,8 @@ const QuizResults: React.FC = () => {
       </Paper>
 
       {/* Question Details */}
-      <Typography variant="h5" component="h2" gutterBottom sx={{ mb: 2 }}>
-        Question Review ({questions.length} questions)
+      <Typography variant="h5" component="h2" gutterBottom sx={{ mb: 2, fontFamily: 'Rammetto One, sans-serif' }}>
+        Revisión de Preguntas ({questions.length} preguntas)
       </Typography>
 
       <Box sx={{ 
@@ -331,8 +312,8 @@ const QuizResults: React.FC = () => {
               <CardContent sx={{ p: { xs: 2, md: 3 } }}>
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 2, flexWrap: 'wrap' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 'fit-content' }}>
-                    <Typography variant="h6" component="span">
-                      Q{index + 1}
+                    <Typography variant="h6" component="span" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                      P{index + 1}
                     </Typography>
                     {isCorrect ? (
                       <CheckCircle color="success" />
@@ -341,19 +322,21 @@ const QuizResults: React.FC = () => {
                     )}
                   </Box>
                   <Chip
-                    label={isCorrect ? 'Correct' : 'Incorrect'}
+                    label={isCorrect ? 'Correcta' : 'Incorrecta'}
                     color={isCorrect ? 'success' : 'error'}
                     size="small"
+                    sx={{ fontFamily: 'Rammetto One, sans-serif' }}
                   />
                   <Chip
-                    label={`${pointsEarned}/${question.points} points`}
+                    label={`${pointsEarned}/${question.points} puntos`}
                     color={pointsEarned === question.points ? 'success' : pointsEarned > 0 ? 'warning' : 'error'}
                     variant="outlined"
                     size="small"
+                    sx={{ fontFamily: 'Rammetto One, sans-serif' }}
                   />
                 </Box>
 
-                <Typography variant="body1" sx={{ mb: 2, fontWeight: 'medium', lineHeight: 1.6 }}>
+                <Typography variant="body1" sx={{ mb: 2, fontWeight: 'medium', lineHeight: 1.6, fontFamily: 'Rammetto One, sans-serif' }}>
                   {question.text}
                 </Typography>
 
@@ -403,10 +386,10 @@ const QuizResults: React.FC = () => {
                         </Typography>
                         <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
                           {isUserAnswer && (
-                            <Chip label="Your Answer" size="small" variant="outlined" />
+                            <Chip label="Tu Respuesta" size="small" variant="outlined" sx={{ fontFamily: 'Rammetto One, sans-serif' }} />
                           )}
                           {isCorrectAnswer && (
-                            <Chip label="Correct Answer" size="small" color="success" variant="outlined" />
+                            <Chip label="Respuesta Correcta" size="small" color="success" variant="outlined" sx={{ fontFamily: 'Rammetto One, sans-serif' }} />
                           )}
                         </Box>
                       </Box>
@@ -461,10 +444,10 @@ const QuizResults: React.FC = () => {
                         </Typography>
                         <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
                           {isUserAnswer && (
-                            <Chip label="Your Answer" size="small" variant="outlined" />
+                            <Chip label="Tu Respuesta" size="small" variant="outlined" sx={{ fontFamily: 'Rammetto One, sans-serif' }} />
                           )}
                           {isCorrectAnswer && (
-                            <Chip label="Correct Answer" size="small" color="success" variant="outlined" />
+                            <Chip label="Respuesta Correcta" size="small" color="success" variant="outlined" sx={{ fontFamily: 'Rammetto One, sans-serif' }} />
                           )}
                         </Box>
                       </Box>
@@ -485,20 +468,22 @@ const QuizResults: React.FC = () => {
           size="large"
           onClick={handleBackNavigation}
           startIcon={<ArrowBack />}
+          sx={{ fontFamily: 'Rammetto One, sans-serif' }}
         >
-          Back
+          Volver
         </Button>
         <Button
           variant="outlined"
           size="large"
           onClick={handleHomeNavigation}
           startIcon={<HomeIcon />}
+          sx={{ fontFamily: 'Rammetto One, sans-serif' }}
         >
-          Home
+          Inicio
         </Button>
       </Box>
       </Container>
-    </Box>
+    </Layout>
   );
 };
 

@@ -41,6 +41,7 @@ import {
   Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
+import Layout from '../components/Layout';
 
 interface Course {
   id: number;
@@ -217,39 +218,39 @@ const CreateQuiz: React.FC = () => {
     const errors: string[] = [];
     
     if (!quiz.title.trim()) {
-      errors.push('Quiz title is required');
+      errors.push('El título del quiz es requerido');
     }
     
     if (!quiz.description.trim()) {
-      errors.push('Quiz description is required');
+      errors.push('La descripción del quiz es requerida');
     }
     
     if (quiz.questions.length === 0) {
-      errors.push('At least one question is required');
+      errors.push('Se requiere al menos una pregunta');
     }
     
     quiz.questions.forEach((question, qIndex) => {
       if (!question.text.trim()) {
-        errors.push(`Question ${qIndex + 1}: Question text is required`);
+        errors.push(`Pregunta ${qIndex + 1}: El texto de la pregunta es requerido`);
       }
       
       if (question.points <= 0) {
-        errors.push(`Question ${qIndex + 1}: Points must be greater than 0`);
+        errors.push(`Pregunta ${qIndex + 1}: Los puntos deben ser mayor a 0`);
       }
       
       if (question.question_type === 'multiple_choice') {
         if (question.options.length < 2) {
-          errors.push(`Question ${qIndex + 1}: At least 2 options are required for multiple choice`);
+          errors.push(`Pregunta ${qIndex + 1}: Se requieren al menos 2 opciones para opción múltiple`);
         }
         
         const correctOptions = question.options.filter(opt => opt.is_correct);
         if (correctOptions.length !== 1) {
-          errors.push(`Question ${qIndex + 1}: Exactly one correct option is required`);
+          errors.push(`Pregunta ${qIndex + 1}: Se requiere exactamente una opción correcta`);
         }
         
         question.options.forEach((option, oIndex) => {
           if (!option.text.trim()) {
-            errors.push(`Question ${qIndex + 1}, Option ${oIndex + 1}: Option text is required`);
+            errors.push(`Pregunta ${qIndex + 1}, Opción ${oIndex + 1}: El texto de la opción es requerido`);
           }
         });
       }
@@ -294,9 +295,9 @@ const CreateQuiz: React.FC = () => {
         const result = await response.json();
         setSaveSuccess(true);
         if (shouldPublish) {
-          alert('Quiz created and published successfully!');
+          alert('¡Quiz creado y publicado exitosamente!');
         } else {
-          alert('Quiz saved as draft successfully!');
+          alert('¡Quiz guardado como borrador exitosamente!');
         }
         // Go back to previous location if available
         const prevLocation = localStorage.getItem('tucan_prev_location');
@@ -339,49 +340,34 @@ const CreateQuiz: React.FC = () => {
 
   if (!course) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Typography variant="h6">Loading course...</Typography>
-      </Container>
+      <Layout title="Crear Quiz">
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Typography variant="h6" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>Cargando curso...</Typography>
+        </Container>
+      </Layout>
     );
   }
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh', 
-      maxHeight: '100vh', 
-      overflow: 'auto',
-      pb: 4
-    }}>
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Layout title="Crear Quiz">
+      <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
         {/* Header */}
-        <Box sx={{ mb: 4 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Box sx={{ display: 'flex', gap: 1, mr: 2 }}>
-              <Button
-                variant="outlined"
-                startIcon={<ArrowBackIcon />}
-                onClick={handleBackNavigation}
-              >
-                Back
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<HomeIcon />}
-                onClick={handleHomeNavigation}
-              >
-                Home
-              </Button>
-            </Box>
-            <Box>
-              <Typography variant="h4" component="h1" gutterBottom>
-                <QuizIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
-                Create Quiz
-              </Typography>
-              <Typography variant="subtitle1" color="text.secondary">
-                Course: {course.name}
-              </Typography>
-            </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+          <IconButton onClick={handleBackNavigation} sx={{ mr: 2 }}>
+            <ArrowBackIcon />
+          </IconButton>
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography variant="h4" component="h1" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+              <QuizIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
+              Crear Quiz
+            </Typography>
+            <Typography variant="subtitle1" color="text.secondary" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+              {course.name}
+            </Typography>
           </Box>
+          <IconButton onClick={handleHomeNavigation} sx={{ ml: 2 }}>
+            <HomeIcon />
+          </IconButton>
         </Box>
 
         {/* Error Alert */}
@@ -394,45 +380,45 @@ const CreateQuiz: React.FC = () => {
         {/* Success Alert */}
         {saveSuccess && (
           <Alert severity="success" sx={{ mb: 3 }}>
-            Quiz saved successfully!
+            ¡Quiz guardado exitosamente!
           </Alert>
         )}
 
         {/* Quiz Basic Info */}
         <Card sx={{ mb: 3 }}>
           <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Quiz Information
+            <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+              Información del Quiz
             </Typography>
             
             <Box sx={{ display: 'grid', gap: 2 }}>
               <TextField
-                label="Quiz Title"
+                label="Título del Quiz"
                 value={quiz.title}
                 onChange={(e) => setQuiz(prev => ({ ...prev, title: e.target.value }))}
                 fullWidth
                 required
-                placeholder="e.g., Python Basics Quiz"
+                placeholder="ej., Quiz de Fundamentos de Python"
               />
               
               <TextField
-                label="Description"
+                label="Descripción"
                 value={quiz.description}
                 onChange={(e) => setQuiz(prev => ({ ...prev, description: e.target.value }))}
                 fullWidth
                 multiline
                 rows={3}
                 required
-                placeholder="Brief description of what this quiz covers..."
+                placeholder="Breve descripción de lo que cubre este quiz..."
               />
               
               <TextField
-                label="Due Date and Time (Optional)"
+                label="Fecha y Hora de Vencimiento (Opcional)"
                 type="datetime-local"
                 value={quiz.due_date || ''}
                 onChange={(e) => setQuiz(prev => ({ ...prev, due_date: e.target.value }))}
                 fullWidth
-                helperText="Leave empty for no due date"
+                helperText="Dejar vacío para sin fecha límite"
                 InputLabelProps={{
                   shrink: true,
                 }}
@@ -440,10 +426,10 @@ const CreateQuiz: React.FC = () => {
               
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Total Questions: {quiz.questions.length}
+                  Total de Preguntas: {quiz.questions.length}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Total Points: {getTotalPoints()}
+                  Total de Puntos: {getTotalPoints()}
                 </Typography>
               </Box>
             </Box>
@@ -454,15 +440,22 @@ const CreateQuiz: React.FC = () => {
         <Card sx={{ mb: 3 }}>
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">
-                Questions ({quiz.questions.length})
+              <Typography variant="h6" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                Preguntas ({quiz.questions.length})
               </Typography>
               <Button
                 startIcon={<AddIcon />}
                 onClick={addQuestion}
-                variant="outlined"
+                variant="contained"
+                sx={{
+                  backgroundColor: '#EA5C00',
+                  '&:hover': {
+                    backgroundColor: '#c44e00',
+                  },
+                  fontFamily: 'Rammetto One, sans-serif',
+                }}
               >
-                Add Question
+                Agregar Pregunta
               </Button>
             </Box>
 
@@ -470,7 +463,7 @@ const CreateQuiz: React.FC = () => {
               <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
                 <QuizIcon sx={{ fontSize: 48, mb: 2 }} />
                 <Typography variant="body1">
-                  No questions added yet. Click "Add Question" to get started.
+                  Aún no se han agregado preguntas. Haz clic en "Agregar Pregunta" para comenzar.
                 </Typography>
               </Box>
             ) : (
@@ -528,20 +521,20 @@ const CreateQuiz: React.FC = () => {
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                               {/* Question Text */}
                               <TextField
-                                label="Question Text"
+                                label="Texto de la Pregunta"
                                 value={question.text}
                                 onChange={(e) => updateQuestion(questionIndex, 'text', e.target.value)}
                                 fullWidth
                                 multiline
                                 rows={2}
                                 required
-                                placeholder="Enter your question here..."
+                                placeholder="Ingresa tu pregunta aquí..."
                               />
                               
                               {/* Question Type and Points */}
                               <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                                 <FormControl component="fieldset">
-                                  <FormLabel component="legend">Question Type</FormLabel>
+                                  <FormLabel component="legend">Tipo de Pregunta</FormLabel>
                                   <RadioGroup
                                     row
                                     value={question.question_type}
@@ -550,18 +543,18 @@ const CreateQuiz: React.FC = () => {
                                     <FormControlLabel 
                                       value="multiple_choice" 
                                       control={<Radio />} 
-                                      label="Multiple Choice" 
+                                      label="Opción Múltiple" 
                                     />
                                     <FormControlLabel 
                                       value="text" 
                                       control={<Radio />} 
-                                      label="Text Answer" 
+                                      label="Respuesta de Texto" 
                                     />
                                   </RadioGroup>
                                 </FormControl>
                                 
                                 <TextField
-                                  label="Points"
+                                  label="Puntos"
                                   type="number"
                                   value={question.points}
                                   onChange={(e) => updateQuestion(questionIndex, 'points', parseInt(e.target.value) || 1)}
@@ -575,15 +568,23 @@ const CreateQuiz: React.FC = () => {
                                 <Box>
                                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                                     <Typography variant="subtitle2">
-                                      Answer Options (select the correct one)
+                                      Opciones de Respuesta (selecciona la correcta)
                                     </Typography>
                                     <Button
                                       size="small"
                                       startIcon={<AddIcon />}
                                       onClick={() => addOption(questionIndex)}
                                       variant="outlined"
+                                      sx={{
+                                        backgroundColor: '#EA5C00',
+                                        color: 'white',
+                                        '&:hover': {
+                                          backgroundColor: '#c44e00',
+                                        },
+                                        border: 'none',
+                                      }}
                                     >
-                                      Add Option
+                                      Agregar Opción
                                     </Button>
                                   </Box>
                                   
@@ -595,12 +596,12 @@ const CreateQuiz: React.FC = () => {
                                         size="small"
                                       />
                                       <TextField
-                                        label={`Option ${optionIndex + 1}`}
+                                        label={`Opción ${optionIndex + 1}`}
                                         value={option.text}
                                         onChange={(e) => updateOption(questionIndex, optionIndex, 'text', e.target.value)}
                                         fullWidth
                                         size="small"
-                                        placeholder="Enter option text..."
+                                        placeholder="Ingresa el texto de la opción..."
                                       />
                                       {question.options.length > 2 && (
                                         <IconButton
@@ -619,7 +620,7 @@ const CreateQuiz: React.FC = () => {
                               {/* Text Answer Info */}
                               {question.question_type === 'text' && (
                                 <Alert severity="info">
-                                  Text questions require manual grading by the teacher.
+                                  Las preguntas de texto requieren calificación manual por el profesor.
                                 </Alert>
                               )}
                             </Box>
@@ -652,31 +653,54 @@ const CreateQuiz: React.FC = () => {
             onClick={() => navigate(`/courses/${courseId}/quizzes`)}
             disabled={loading}
           >
-            Cancel
+            Cancelar
           </Button>
           <Button
             onClick={() => setPreviewDialogOpen(true)}
             startIcon={<PreviewIcon />}
             variant="outlined"
             disabled={quiz.questions.length === 0 || loading}
+            sx={{
+              borderColor: '#EA5C00',
+              color: '#EA5C00',
+              '&:hover': {
+                borderColor: '#c44e00',
+                backgroundColor: 'rgba(234, 92, 0, 0.1)',
+              },
+            }}
           >
-            Preview
+            Vista Previa
           </Button>
           <Button
             onClick={() => saveQuiz(false)}
             startIcon={<SaveIcon />}
             variant="outlined"
             disabled={loading}
+            sx={{
+              borderColor: '#EA5C00',
+              color: '#EA5C00',
+              '&:hover': {
+                borderColor: '#c44e00',
+                backgroundColor: 'rgba(234, 92, 0, 0.1)',
+              },
+            }}
           >
-            Save as Draft
+            Guardar como Borrador
           </Button>
           <Button
             onClick={() => saveQuiz(true)}
             startIcon={<PublishIcon />}
             variant="contained"
             disabled={loading}
+            sx={{
+              backgroundColor: '#EA5C00',
+              color: 'white',
+              '&:hover': {
+                backgroundColor: '#c44e00',
+              },
+            }}
           >
-            Save & Publish
+            Guardar y Publicar
           </Button>
         </Box>
 
@@ -687,7 +711,7 @@ const CreateQuiz: React.FC = () => {
           maxWidth="md"
           fullWidth
         >
-          <DialogTitle>Quiz Preview</DialogTitle>
+          <DialogTitle>Vista Previa del Quiz</DialogTitle>
           <DialogContent>
             <Typography variant="h6" gutterBottom>{quiz.title}</Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
@@ -714,7 +738,7 @@ const CreateQuiz: React.FC = () => {
                 ) : (
                   <Box sx={{ ml: 2 }}>
                     <Typography variant="body2" color="text.secondary">
-                      [Text answer - manual grading required]
+                      [Respuesta de texto - requiere calificación manual]
                     </Typography>
                   </Box>
                 )}
@@ -722,11 +746,11 @@ const CreateQuiz: React.FC = () => {
             ))}
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setPreviewDialogOpen(false)}>Close</Button>
+            <Button onClick={() => setPreviewDialogOpen(false)}>Cerrar</Button>
           </DialogActions>
         </Dialog>
       </Container>
-    </Box>
+    </Layout>
   );
 };
 

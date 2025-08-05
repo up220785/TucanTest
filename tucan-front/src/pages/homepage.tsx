@@ -293,6 +293,19 @@ const HomePage: React.FC = () => {
                 >
                   Estadísticas
                 </Button>
+                <IconButton
+                  color="inherit"
+                  onClick={() => navigate("/notifications")}
+                  sx={{ ml: 1 }}
+                >
+                  <Badge 
+                    badgeContent={unreadNotifications > 0 ? unreadNotifications : undefined} 
+                    color="error"
+                    showZero={false}
+                  >
+                    <NotificationsIcon />
+                  </Badge>
+                </IconButton>
               </>
             )}
 
@@ -314,7 +327,11 @@ const HomePage: React.FC = () => {
                   onClick={() => navigate("/notifications")}
                   sx={{ ml: 1 }}
                 >
-                  <Badge badgeContent={unreadNotifications} color="error">
+                  <Badge 
+                    badgeContent={unreadNotifications > 0 ? unreadNotifications : undefined} 
+                    color="error"
+                    showZero={false}
+                  >
                     <NotificationsIcon />
                   </Badge>
                 </IconButton>

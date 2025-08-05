@@ -40,6 +40,7 @@ import {
   Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
+import Layout from '../components/Layout';
 
 interface Quiz {
   id: number;
@@ -303,81 +304,52 @@ const QuizSubmissions: React.FC = () => {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Box sx={{ width: '100%' }}>
-          <LinearProgress />
-        </Box>
-        <Typography variant="h6" sx={{ mt: 2, textAlign: 'center' }}>
-          Loading quiz submissions...
-        </Typography>
-      </Container>
+      <Layout title="Entregas del Quiz">
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Box sx={{ width: '100%' }}>
+            <LinearProgress />
+          </Box>
+          <Typography variant="h6" sx={{ mt: 2, textAlign: 'center', fontFamily: 'Rammetto One, sans-serif' }}>
+            Cargando entregas del quiz...
+          </Typography>
+        </Container>
+      </Layout>
     );
   }
 
   if (!quiz) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Alert severity="error">Quiz not found</Alert>
-      </Container>
+      <Layout title="Entregas del Quiz">
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Alert severity="error">Quiz no encontrado</Alert>
+        </Container>
+      </Layout>
     );
   }
 
   const stats = calculateStats();
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        height: '100vh',
-        overflowY: 'auto',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        '&::-webkit-scrollbar': {
-          width: '8px',
-        },
-        '&::-webkit-scrollbar-track': {
-          background: '#f1f1f1',
-          borderRadius: '4px',
-        },
-        '&::-webkit-scrollbar-thumb': {
-          background: '#c1c1c1',
-          borderRadius: '4px',
-        },
-        '&::-webkit-scrollbar-thumb:hover': {
-          background: '#a8a8a8',
-        },
-      }}
-    >
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <IconButton 
-            onClick={handleBackNavigation}
-            sx={{ mr: 1 }}
-          >
+    <Layout title="Entregas del Quiz">
+      <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+          <IconButton onClick={handleBackNavigation} sx={{ mr: 2 }}>
             <ArrowBackIcon />
           </IconButton>
           <Box sx={{ flexGrow: 1 }}>
-            <Typography variant="h4" component="h1">
+            <Typography variant="h4" component="h1" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
               <QuizIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
-              Quiz Submissions
+              Entregas del Quiz
             </Typography>
-            <Typography variant="subtitle1" color="text.secondary">
+            <Typography variant="subtitle1" color="text.secondary" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
               {quiz.title} - {quiz.course_name}
             </Typography>
           </Box>
-          <IconButton 
-            onClick={handleHomeNavigation}
-            sx={{ ml: 1 }}
-          >
+          <IconButton onClick={handleHomeNavigation} sx={{ ml: 2 }}>
             <HomeIcon />
           </IconButton>
         </Box>
-      </Box>
 
       {/* Error Alert */}
       {error && (
@@ -389,8 +361,8 @@ const QuizSubmissions: React.FC = () => {
       {/* Quiz Statistics */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Quiz Statistics
+          <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+            Estadísticas del Quiz
           </Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2 }}>
             <Box sx={{ textAlign: 'center' }}>
@@ -398,7 +370,7 @@ const QuizSubmissions: React.FC = () => {
                 {submissions.length}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Total Submissions
+                Total de Entregas
               </Typography>
             </Box>
             <Box sx={{ textAlign: 'center' }}>
@@ -406,7 +378,7 @@ const QuizSubmissions: React.FC = () => {
                 {stats.completion}%
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Completion Rate
+                Tasa de Finalización
               </Typography>
             </Box>
             <Box sx={{ textAlign: 'center' }}>
@@ -414,7 +386,7 @@ const QuizSubmissions: React.FC = () => {
                 {stats.average}%
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Average Score
+                Calificación Promedio
               </Typography>
             </Box>
             <Box sx={{ textAlign: 'center' }}>
@@ -422,7 +394,7 @@ const QuizSubmissions: React.FC = () => {
                 {stats.highest}%
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Highest Score
+                Calificación Más Alta
               </Typography>
             </Box>
           </Box>
@@ -434,11 +406,11 @@ const QuizSubmissions: React.FC = () => {
         <Card sx={{ textAlign: 'center', py: 6 }}>
           <CardContent>
             <AssignmentIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              No submissions yet
+            <Typography variant="h6" color="text.secondary" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+              No hay entregas aún
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Students haven't submitted any answers for this quiz yet.
+              Los estudiantes no han enviado respuestas para este quiz todavía.
             </Typography>
           </CardContent>
         </Card>
@@ -469,13 +441,13 @@ const QuizSubmissions: React.FC = () => {
             <Table stickyHeader>
               <TableHead>
               <TableRow>
-                <TableCell>Student</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell align="center">Status</TableCell>
-                <TableCell align="center">Score</TableCell>
-                <TableCell align="center">Percentage</TableCell>
-                <TableCell align="center">Submitted At</TableCell>
-                <TableCell align="center">Actions</TableCell>
+                <TableCell>Estudiante</TableCell>
+                <TableCell>Correo</TableCell>
+                <TableCell align="center">Estado</TableCell>
+                <TableCell align="center">Puntuación</TableCell>
+                <TableCell align="center">Porcentaje</TableCell>
+                <TableCell align="center">Entregado el</TableCell>
+                <TableCell align="center">Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -491,7 +463,7 @@ const QuizSubmissions: React.FC = () => {
                   <TableCell align="center">
                     <Chip
                       icon={submission.is_completed ? <CheckCircleIcon /> : <CancelIcon />}
-                      label={submission.is_completed ? 'Completed' : 'In Progress'}
+                      label={submission.is_completed ? 'Completado' : 'En Progreso'}
                       color={submission.is_completed ? 'success' : 'warning'}
                       size="small"
                     />
@@ -510,7 +482,7 @@ const QuizSubmissions: React.FC = () => {
                   </TableCell>
                   <TableCell align="center">
                     {submission.completed_at ? formatDate(submission.completed_at) : 
-                     `Started: ${formatDate(submission.started_at)}`}
+                     `Iniciado: ${formatDate(submission.started_at)}`}
                   </TableCell>
                   <TableCell align="center">
                     {userRole === 'teacher' ? (
@@ -520,9 +492,18 @@ const QuizSubmissions: React.FC = () => {
                         startIcon={<GradeIcon />}
                         onClick={() => handleViewSubmission(submission)}
                         disabled={!submission.is_completed}
-                        sx={{ fontSize: '0.75rem', px: 1 }}
+                        sx={{ 
+                          fontSize: '0.75rem', 
+                          px: 1,
+                          borderColor: '#EA5C00',
+                          color: '#EA5C00',
+                          '&:hover': {
+                            borderColor: '#c44e00',
+                            backgroundColor: 'rgba(234, 92, 0, 0.1)',
+                          },
+                        }}
                       >
-                        Regrade
+                        Recalificar
                       </Button>
                     ) : (
                       <IconButton
@@ -552,7 +533,7 @@ const QuizSubmissions: React.FC = () => {
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <GradeIcon />
-            Submission Details - {selectedSubmission?.student_name}
+            Detalles de la Entrega - {selectedSubmission?.student_name}
           </Box>
         </DialogTitle>
         <DialogContent
@@ -578,17 +559,17 @@ const QuizSubmissions: React.FC = () => {
           {selectedSubmission && (
             <Box>
               <Box sx={{ mb: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-                <Typography variant="h6" gutterBottom>
-                  Score: {selectedSubmission.total_score}/{selectedSubmission.max_possible_score} 
+                <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                  Puntuación: {selectedSubmission.total_score}/{selectedSubmission.max_possible_score} 
                   ({Math.round(selectedSubmission.percentage)}%)
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Submitted: {selectedSubmission.completed_at ? formatDate(selectedSubmission.completed_at) : 'Not completed'}
+                  Entregado: {selectedSubmission.completed_at ? formatDate(selectedSubmission.completed_at) : 'No completado'}
                 </Typography>
               </Box>
 
-              <Typography variant="h6" gutterBottom>
-                Answers:
+              <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                Respuestas:
               </Typography>
 
               {selectedSubmission.answers.map((answer, index) => (
@@ -596,7 +577,7 @@ const QuizSubmissions: React.FC = () => {
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
                       <Typography variant="subtitle1">
-                        Question {index + 1}
+                        Pregunta {index + 1}
                       </Typography>
                       <Chip
                         label={`${answer.score}/${answer.question_points} pts`}
@@ -614,7 +595,7 @@ const QuizSubmissions: React.FC = () => {
                       <Divider sx={{ my: 2 }} />
                       
                       <Typography variant="body2" color="text.secondary" gutterBottom>
-                        Student's Answer:
+                        Respuesta del Estudiante:
                       </Typography>
                       
                       {answer.question_type === 'multiple_choice' ? (
@@ -625,7 +606,7 @@ const QuizSubmissions: React.FC = () => {
                             <CancelIcon color="error" fontSize="small" />
                           )}
                           <Typography variant="body1">
-                            {answer.selected_option_text || 'No answer selected'}
+                            {answer.selected_option_text || 'No se seleccionó respuesta'}
                           </Typography>
                         </Box>
                       ) : (
@@ -637,18 +618,18 @@ const QuizSubmissions: React.FC = () => {
                             fontStyle: answer.text_answer ? 'normal' : 'italic',
                             mb: 2
                           }}>
-                            {answer.text_answer || 'No answer provided'}
+                            {answer.text_answer || 'No se proporcionó respuesta'}
                           </Typography>
                           
                           {/* Grading interface for text questions */}
                           {gradingAnswerId === answer.id ? (
                             <Box sx={{ p: 2, bgcolor: 'info.50', borderRadius: 1 }}>
                               <Typography variant="subtitle2" gutterBottom>
-                                Grade this answer:
+                                Calificar esta respuesta:
                               </Typography>
                               <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
                                 <TextField
-                                  label="Score"
+                                  label="Puntuación"
                                   type="number"
                                   value={gradingScore}
                                   onChange={(e) => setGradingScore(e.target.value)}
@@ -659,10 +640,10 @@ const QuizSubmissions: React.FC = () => {
                                   }}
                                   size="small"
                                   sx={{ width: 120 }}
-                                  helperText={`Max: ${answer.question_points}`}
+                                  helperText={`Máx: ${answer.question_points}`}
                                 />
                                 <TextField
-                                  label="Feedback (optional)"
+                                  label="Comentarios (opcional)"
                                   value={gradingComment}
                                   onChange={(e) => setGradingComment(e.target.value)}
                                   size="small"
@@ -681,8 +662,15 @@ const QuizSubmissions: React.FC = () => {
                                     parseFloat(gradingScore), 
                                     gradingComment
                                   )}
+                                  sx={{
+                                    backgroundColor: '#EA5C00',
+                                    color: 'white',
+                                    '&:hover': {
+                                      backgroundColor: '#c44e00',
+                                    },
+                                  }}
                                 >
-                                  {isGrading ? 'Saving...' : 'Save Grade'}
+                                  {isGrading ? 'Guardando...' : 'Guardar Calificación'}
                                 </Button>
                                 <Button
                                   variant="outlined"
@@ -690,7 +678,7 @@ const QuizSubmissions: React.FC = () => {
                                   onClick={cancelGrading}
                                   disabled={isGrading}
                                 >
-                                  Cancel
+                                  Cancelar
                                 </Button>
                               </Box>
                             </Box>
@@ -699,12 +687,12 @@ const QuizSubmissions: React.FC = () => {
                               <Box>
                                 {answer.grading_comment && (
                                   <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                                    Feedback: {answer.grading_comment}
+                                    Comentarios: {answer.grading_comment}
                                   </Typography>
                                 )}
                                 {answer.graded_at && (
                                   <Typography variant="caption" color="text.secondary">
-                                    Graded: {formatDate(answer.graded_at)}
+                                    Calificado: {formatDate(answer.graded_at)}
                                   </Typography>
                                 )}
                               </Box>
@@ -712,8 +700,16 @@ const QuizSubmissions: React.FC = () => {
                                 variant="outlined"
                                 size="small"
                                 onClick={() => startGrading(answer.id, answer.score, answer.grading_comment || '')}
+                                sx={{
+                                  borderColor: '#EA5C00',
+                                  color: '#EA5C00',
+                                  '&:hover': {
+                                    borderColor: '#c44e00',
+                                    backgroundColor: 'rgba(234, 92, 0, 0.1)',
+                                  },
+                                }}
                               >
-                                {answer.score !== null ? 'Regrade' : 'Grade'}
+                                {answer.score !== null ? 'Recalificar' : 'Calificar'}
                               </Button>
                             </Box>
                           )}
@@ -728,12 +724,12 @@ const QuizSubmissions: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDetailDialogOpen(false)}>
-            Close
+            Cerrar
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
-    </Box>
+      </Container>
+    </Layout>
   );
 };
 

@@ -19,6 +19,7 @@ import {
   IconButton,
   Tooltip,
   Button,
+  Grid,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -30,6 +31,7 @@ import {
   Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
+import Layout from '../components/Layout';
 
 interface Course {
   id: number;
@@ -172,180 +174,186 @@ const CourseStudents: React.FC = () => {
   };
 
   const getGradeLabel = (grade: number | null) => {
-    if (grade === null) return 'No grades';
+    if (grade === null) return 'Sin calificaciones';
     return `${grade.toFixed(1)}%`;
   };
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Box sx={{ width: '100%' }}>
-          <LinearProgress />
-        </Box>
-        <Typography variant="h6" sx={{ mt: 2, textAlign: 'center' }}>
-          Loading course students...
-        </Typography>
-      </Container>
+      <Box sx={{ 
+        minHeight: '100vh',
+        backgroundColor: '#f5f5f5',
+      }}>
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Box sx={{ width: '100%', mt: 4 }}>
+            <LinearProgress />
+          </Box>
+          <Typography variant="h6" sx={{ mt: 2, textAlign: 'center', fontFamily: 'Rammetto One, sans-serif' }}>
+            Loading course students...
+          </Typography>
+        </Container>
+      </Box>
     );
   }
 
   if (error) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBackIcon />}
-            onClick={handleBackNavigation}
-          >
-            Back
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<HomeIcon />}
-            onClick={handleHomeNavigation}
-          >
-            Home
-          </Button>
-        </Box>
-      </Container>
+      <Box sx={{ 
+        minHeight: '100vh',
+        backgroundColor: '#f5f5f5',
+      }}>
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              onClick={handleBackNavigation}
+              sx={{ 
+                fontFamily: 'Rammetto One, sans-serif',
+                color: '#30638E',
+                borderColor: '#30638E',
+                '&:hover': {
+                  backgroundColor: '#30638E',
+                  color: 'white',
+                },
+              }}
+            >
+              Back
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<HomeIcon />}
+              onClick={handleHomeNavigation}
+              sx={{ 
+                fontFamily: 'Rammetto One, sans-serif',
+                color: '#30638E',
+                borderColor: '#30638E',
+                '&:hover': {
+                  backgroundColor: '#30638E',
+                  color: 'white',
+                },
+              }}
+            >
+              Home
+            </Button>
+          </Box>
+        </Container>
+      </Box>
     );
   }
 
   if (!course) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Alert severity="error">Course data not found</Alert>
-      </Container>
+      <Box sx={{ 
+        minHeight: '100vh',
+        backgroundColor: '#f5f5f5',
+      }}>
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Alert severity="error">Course data not found</Alert>
+        </Container>
+      </Box>
     );
   }
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        height: '100vh',
-        overflowY: 'auto',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        '&::-webkit-scrollbar': {
-          width: '8px',
-        },
-        '&::-webkit-scrollbar-track': {
-          background: '#f1f1f1',
-          borderRadius: '4px',
-        },
-        '&::-webkit-scrollbar-thumb': {
-          background: '#c1c1c1',
-          borderRadius: '4px',
-        },
-        '&::-webkit-scrollbar-thumb:hover': {
-          background: '#a8a8a8',
-        },
-      }}
-    >
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <IconButton 
-            onClick={handleBackNavigation}
-            sx={{ mr: 1 }}
-          >
+    <Layout title="Estudiantes del Curso">
+      <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+          <IconButton onClick={handleBackNavigation} sx={{ mr: 2 }}>
             <ArrowBackIcon />
           </IconButton>
           <Box sx={{ flexGrow: 1 }}>
-            <Typography variant="h4" component="h1">
+            <Typography variant="h4" component="h1" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
               <PeopleIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
-              Course Students
+              Estudiantes del Curso
             </Typography>
-            <Typography variant="subtitle1" color="text.secondary">
+            <Typography variant="subtitle1" color="text.secondary" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
               {course.name}
             </Typography>
           </Box>
-          <IconButton 
-            onClick={handleHomeNavigation}
-            sx={{ ml: 1 }}
-          >
+          <IconButton onClick={handleHomeNavigation} sx={{ ml: 0 }}>
             <HomeIcon />
           </IconButton>
         </Box>
-      </Box>
 
-      {/* Course Overview */}
-      <Box sx={{ display: 'flex', gap: 3, mb: 4, flexWrap: 'wrap' }}>
-        <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <PeopleIcon color="primary" sx={{ mr: 2 }} />
-                <Box>
-                  <Typography color="text.secondary" gutterBottom>
-                    Total Students
-                  </Typography>
-                  <Typography variant="h4">
-                    {students.length}
-                  </Typography>
+        {/* Course Overview */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <PeopleIcon color="primary" sx={{ mr: 2, fontSize: 40 }} />
+                  <Box>
+                    <Typography color="text.secondary" variant="body2" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                      Total Estudiantes
+                    </Typography>
+                    <Typography variant="h4" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                      {students.length}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
-        
-        <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <GradeIcon color="success" sx={{ mr: 2 }} />
-                <Box>
-                  <Typography color="text.secondary" gutterBottom>
-                    Enrollment Capacity
-                  </Typography>
-                  <Typography variant="h4">
-                    {course.max_capacity ? `${students.length}/${course.max_capacity}` : 'Unlimited'}
-                  </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <GradeIcon color="success" sx={{ mr: 2, fontSize: 40 }} />
+                  <Box>
+                    <Typography color="text.secondary" variant="body2" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                      Capacidad de Inscripción
+                    </Typography>
+                    <Typography variant="h4" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                      {course.max_capacity ? `${students.length}/${course.max_capacity}` : 'Ilimitada'}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
+              </CardContent>
+            </Card>
+          </Grid>
 
-        <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Chip
-                  label={course.is_public ? 'Public Course' : 'Private Course'}
-                  color={course.is_public ? 'primary' : 'secondary'}
-                  icon={course.is_public ? <PeopleIcon /> : <PersonIcon />}
-                />
-              </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                {course.is_public ? 'Students can enroll directly' : 'Invitation required'}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Box>
-      </Box>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Box sx={{ mr: 2 }}>
+                    {course.is_public ? <PeopleIcon color="primary" sx={{ fontSize: 40 }} /> : <PersonIcon color="secondary" sx={{ fontSize: 40 }} />}
+                  </Box>
+                  <Box>
+                    <Typography color="text.secondary" variant="body2" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                      Tipo de Curso
+                    </Typography>
+                    <Typography variant="h6" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                      {course.is_public ? 'Público' : 'Privado'}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                      {course.is_public ? 'Inscripción directa' : 'Requiere invitación'}
+                    </Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
 
       {/* Students Table */}
       {students.length === 0 ? (
         <Card sx={{ textAlign: 'center', py: 8 }}>
           <CardContent>
             <PeopleIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-            <Typography variant="h6" gutterBottom>
-              No students enrolled yet
+            <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+              No hay estudiantes inscritos aún
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, fontFamily: 'Rammetto One, sans-serif' }}>
               {course.is_public 
-                ? 'Students can enroll directly from the course catalog'
-                : 'Use the "Invite Students" feature to add students to this private course'
+                ? 'Los estudiantes pueden inscribirse directamente desde el catálogo de cursos'
+                : 'Usa la función "Invitar Estudiantes" para agregar estudiantes a este curso privado'
               }
             </Typography>
             {!course.is_public && (
@@ -353,8 +361,15 @@ const CourseStudents: React.FC = () => {
                 variant="contained"
                 startIcon={<EmailIcon />}
                 onClick={() => navigate(`/my-courses`)}
+                sx={{
+                  backgroundColor: '#EA5C00',
+                  '&:hover': {
+                    backgroundColor: '#c44e00',
+                  },
+                  fontFamily: 'Rammetto One, sans-serif',
+                }}
               >
-                Go to My Courses to Invite Students
+                Ir a Mis Cursos para Invitar Estudiantes
               </Button>
             )}
           </CardContent>
@@ -362,8 +377,8 @@ const CourseStudents: React.FC = () => {
       ) : (
         <Card>
           <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Enrolled Students ({students.length})
+            <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+              Estudiantes Inscritos ({students.length})
             </Typography>
             
             <TableContainer 
@@ -393,11 +408,11 @@ const CourseStudents: React.FC = () => {
               <Table stickyHeader>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Student</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Email</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Enrolled Date</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Grade</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', fontFamily: 'Rammetto One, sans-serif' }}>Estudiante</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', fontFamily: 'Rammetto One, sans-serif' }}>Email</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', fontFamily: 'Rammetto One, sans-serif' }}>Estado</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', fontFamily: 'Rammetto One, sans-serif' }}>Fecha de Inscripción</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', fontFamily: 'Rammetto One, sans-serif' }}>Calificación</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -459,7 +474,7 @@ const CourseStudents: React.FC = () => {
         </Card>
       )}
     </Container>
-    </Box>
+    </Layout>
   );
 };
 

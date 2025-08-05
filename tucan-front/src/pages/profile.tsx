@@ -8,10 +8,12 @@ import {
   Paper,
   Alert,
   Chip,
+  IconButton,
 } from "@mui/material";
 import {
   ArrowBack as ArrowBackIcon,
   Home as HomeIcon,
+  Person as PersonIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -214,54 +216,42 @@ const Profile: React.FC = () => {
 
   if (loading) {
     return (
-      <Container maxWidth="md" sx={{ mt: 4 }}>
-        <Typography>Cargando perfil...</Typography>
-      </Container>
+      <Layout title="Mi Perfil">
+        <Container maxWidth="md" sx={{ pt: 4, pb: 4 }}>
+          <Typography sx={{ fontFamily: 'Rammetto One, sans-serif' }}>Cargando perfil...</Typography>
+        </Container>
+      </Layout>
     );
   }
 
   if (!user) {
     return (
-      <Container maxWidth="md" sx={{ mt: 4 }}>
-        <Typography>Error al cargar el perfil.</Typography>
-      </Container>
+      <Layout title="Mi Perfil">
+        <Container maxWidth="md" sx={{ pt: 4, pb: 4 }}>
+          <Typography sx={{ fontFamily: 'Rammetto One, sans-serif' }}>Error al cargar el perfil.</Typography>
+        </Container>
+      </Layout>
     );
   }
 
   return (
     <Layout title="Mi Perfil">
-      <Container maxWidth="md" sx={{ mt: 2, mb: 2 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBackIcon />}
-              onClick={handleBackNavigation}
-              sx={{ 
-                borderColor: "#30638E", 
-                color: "#30638E",
-                fontFamily: 'Rammetto One, sans-serif'
-              }}
-            >
-              Atrás
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<HomeIcon />}
-              onClick={handleHomeNavigation}
-              sx={{ 
-                borderColor: "#30638E", 
-                color: "#30638E",
-                fontFamily: 'Rammetto One, sans-serif'
-              }}
-            >
-              Inicio
-            </Button>
+      <Container maxWidth="md" sx={{ pt: 4, pb: 4 }}>
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+          <IconButton onClick={handleBackNavigation} sx={{ mr: 2 }}>
+            <ArrowBackIcon />
+          </IconButton>
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography variant="h4" component="h1" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+              <PersonIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
+              Mi Perfil
+            </Typography>
+          </Box>
+          <IconButton onClick={handleHomeNavigation} sx={{ ml: 2 }}>
+            <HomeIcon />
+          </IconButton>
         </Box>
-        <Typography variant="h4" component="h1">
-          Mi Perfil
-        </Typography>
-      </Box>
 
       <Paper elevation={3} sx={{ p: 3, maxHeight: "calc(100vh - 120px)", overflow: "auto" }}>
         {success && (
@@ -277,7 +267,7 @@ const Profile: React.FC = () => {
         )}
 
         <Box sx={{ mb: 2 }}>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
             Información Personal
           </Typography>
           
@@ -317,7 +307,7 @@ const Profile: React.FC = () => {
 
           {isEditing && (
             <Box sx={{ mt: 2, p: 2, backgroundColor: "#f8f9fa", borderRadius: 1 }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>
+              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold", fontFamily: 'Rammetto One, sans-serif' }}>
                 Cambiar Contraseña (Opcional)
               </Typography>
               
@@ -359,7 +349,7 @@ const Profile: React.FC = () => {
         </Box>
 
         <Box sx={{ mb: 2 }}>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
             Información de la Cuenta
           </Typography>
           
@@ -378,9 +368,10 @@ const Profile: React.FC = () => {
               variant="contained"
               onClick={handleEdit}
               sx={{
-                backgroundColor: "#ffcf49",
-                color: "#000",
-                "&:hover": { backgroundColor: "#e6b844" },
+                backgroundColor: "#EA5C00",
+                color: "white",
+                "&:hover": { backgroundColor: "#c44e00" },
+                fontFamily: 'Rammetto One, sans-serif'
               }}
             >
               Editar Perfil
@@ -390,7 +381,11 @@ const Profile: React.FC = () => {
               <Button
                 variant="outlined"
                 onClick={handleCancel}
-                sx={{ borderColor: "#666", color: "#666" }}
+                sx={{ 
+                  borderColor: "#666", 
+                  color: "#666",
+                  fontFamily: 'Rammetto One, sans-serif'
+                }}
               >
                 Cancelar
               </Button>
@@ -398,8 +393,10 @@ const Profile: React.FC = () => {
                 variant="contained"
                 onClick={handleSave}
                 sx={{
-                  backgroundColor: "#30638E",
-                  "&:hover": { backgroundColor: "#2a5a85" },
+                  backgroundColor: "#EA5C00",
+                  color: "white",
+                  "&:hover": { backgroundColor: "#c44e00" },
+                  fontFamily: 'Rammetto One, sans-serif'
                 }}
               >
                 Guardar Cambios

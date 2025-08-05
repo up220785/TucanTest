@@ -25,6 +25,7 @@ import {
   MenuItem,
   Divider,
   LinearProgress,
+  Grid,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -296,44 +297,37 @@ const MyCourses: React.FC = () => {
     <Layout title="Mis Cursos">
       <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
         {/* Header */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBackIcon />}
-              onClick={handleBackNavigation}
-              size="medium"
-            >
-              Back
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<HomeIcon />}
-              onClick={handleHomeNavigation}
-              size="medium"
-            >
-              Home
-            </Button>
-          </Box>
-          <Box>
-            <Typography variant="h4" component="h1" gutterBottom>
-              My Courses
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+          <IconButton onClick={handleBackNavigation} sx={{ mr: 2 }}>
+            <ArrowBackIcon />
+          </IconButton>
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography variant="h4" component="h1" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+              Mis Cursos
             </Typography>
-            <Typography variant="subtitle1" color="text.secondary">
-              Manage all your courses, track enrollment, and monitor performance
+            <Typography variant="subtitle1" color="text.secondary" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+              Gestiona todos tus cursos, rastrea inscripciones y monitorea rendimiento
             </Typography>
           </Box>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateDialogOpen(true)}
+            sx={{
+              backgroundColor: '#EA5C00',
+              '&:hover': {
+                backgroundColor: '#c44e00',
+              },
+              fontFamily: 'Rammetto One, sans-serif',
+              mr: 2,
+            }}
+          >
+            Crear Curso
+          </Button>
+          <IconButton onClick={handleHomeNavigation} sx={{ ml: 0 }}>
+            <HomeIcon />
+          </IconButton>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setCreateDialogOpen(true)}
-          size="large"
-        >
-          Create Course
-        </Button>
-      </Box>
 
       {/* Error Alert */}
       {error && (
@@ -342,98 +336,108 @@ const MyCourses: React.FC = () => {
         </Alert>
       )}
 
-      {/* Statistics Cards */}
-      <Box sx={{ display: 'flex', gap: 3, mb: 4, flexWrap: 'wrap' }}>
-        <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <SchoolIcon color="primary" sx={{ mr: 2 }} />
-                <Box>
-                  <Typography color="text.secondary" gutterBottom>
-                    Total Courses
-                  </Typography>
-                  <Typography variant="h4">
-                    {courses.length}
-                  </Typography>
+        {/* Statistics Cards */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <SchoolIcon color="primary" sx={{ mr: 2, fontSize: 40 }} />
+                  <Box>
+                    <Typography color="text.secondary" variant="body2" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                      Cursos Totales
+                    </Typography>
+                    <Typography variant="h4" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                      {courses.length}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
-        <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <PeopleIcon color="success" sx={{ mr: 2 }} />
-                <Box>
-                  <Typography color="text.secondary" gutterBottom>
-                    Total Students
-                  </Typography>
-                  <Typography variant="h4">
-                    {courses.reduce((sum, course) => sum + course.enrolled_count, 0)}
-                  </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <PeopleIcon color="success" sx={{ mr: 2, fontSize: 40 }} />
+                  <Box>
+                    <Typography color="text.secondary" variant="body2" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                      Estudiantes Totales
+                    </Typography>
+                    <Typography variant="h4" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                      {courses.reduce((sum, course) => sum + course.enrolled_count, 0)}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
-        <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <QuizIcon color="warning" sx={{ mr: 2 }} />
-                <Box>
-                  <Typography color="text.secondary" gutterBottom>
-                    Total Quizzes
-                  </Typography>
-                  <Typography variant="h4">
-                    {courses.reduce((sum, course) => sum + course.quiz_count, 0)}
-                  </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <QuizIcon color="warning" sx={{ mr: 2, fontSize: 40 }} />
+                  <Box>
+                    <Typography color="text.secondary" variant="body2" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                      Quizzes Totales
+                    </Typography>
+                    <Typography variant="h4" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                      {courses.reduce((sum, course) => sum + course.quiz_count, 0)}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
-        <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <VisibilityIcon color="info" sx={{ mr: 2 }} />
-                <Box>
-                  <Typography color="text.secondary" gutterBottom>
-                    Published
-                  </Typography>
-                  <Typography variant="h4">
-                    {courses.filter(course => course.is_published).length}
-                  </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <VisibilityIcon color="info" sx={{ mr: 2, fontSize: 40 }} />
+                  <Box>
+                    <Typography color="text.secondary" variant="body2" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                      Publicados
+                    </Typography>
+                    <Typography variant="h4" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                      {courses.filter(course => course.is_published).length}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
-      </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
 
-      {/* Courses Grid */}
-      {courses.length === 0 ? (
-        <Card sx={{ textAlign: 'center', py: 8 }}>
-          <CardContent>
-            <SchoolIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-            <Typography variant="h6" gutterBottom>
-              No courses yet
-            </Typography>
-            <Typography color="text.secondary" sx={{ mb: 3 }}>
-              Create your first course to start teaching and managing students
-            </Typography>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => setCreateDialogOpen(true)}
-            >
-              Create Your First Course
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Courses Grid */}
+        {courses.length === 0 ? (
+          <Card sx={{ textAlign: 'center', py: 8 }}>
+            <CardContent>
+              <SchoolIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+              <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                Aún no tienes cursos
+              </Typography>
+              <Typography color="text.secondary" sx={{ mb: 3, fontFamily: 'Rammetto One, sans-serif' }}>
+                Crea tu primer curso para comenzar a enseñar y gestionar estudiantes
+              </Typography>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setCreateDialogOpen(true)}
+                sx={{
+                  backgroundColor: '#EA5C00',
+                  '&:hover': {
+                    backgroundColor: '#c44e00',
+                  },
+                  fontFamily: 'Rammetto One, sans-serif',
+                }}
+              >
+                Crear Tu Primer Curso
+              </Button>
+            </CardContent>
+          </Card>
       ) : (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
           {courses.map((course) => (
@@ -455,37 +459,39 @@ const MyCourses: React.FC = () => {
                   <Typography
                     variant="body2"
                     color="text.secondary"
-                    sx={{ mb: 2, minHeight: '2.5em' }}
+                    sx={{ mb: 2, minHeight: '2.5em', fontFamily: 'Rammetto One, sans-serif' }}
                   >
-                    {course.description || 'No description provided'}
+                    {course.description || 'No hay descripción disponible'}
                   </Typography>
 
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
                     <Chip
-                      label={course.is_published ? 'Published' : 'Draft'}
+                      label={course.is_published ? 'Publicado' : 'Borrador'}
                       color={course.is_published ? 'success' : 'default'}
                       size="small"
                       icon={course.is_published ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                      sx={{ fontFamily: 'Rammetto One, sans-serif' }}
                     />
                     <Chip
-                      label={course.is_public ? 'Public' : 'Private'}
+                      label={course.is_public ? 'Público' : 'Privado'}
                       color={course.is_public ? 'primary' : 'secondary'}
                       size="small"
+                      sx={{ fontFamily: 'Rammetto One, sans-serif' }}
                     />
                   </Box>
 
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Students: {course.enrolled_count}
+                    <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                      Estudiantes: {course.enrolled_count}
                       {course.max_capacity && ` / ${course.max_capacity}`}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
                       Quizzes: {course.quiz_count}
                     </Typography>
                   </Box>
 
-                  <Typography variant="caption" color="text.secondary">
-                    Created: {formatDate(course.created_at)}
+                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+                    Creado: {formatDate(course.created_at)}
                   </Typography>
                 </CardContent>
 
@@ -494,13 +500,15 @@ const MyCourses: React.FC = () => {
                     size="small"
                     startIcon={<PeopleIcon />}
                     onClick={() => navigate(`/courses/${course.id}/students`)}
+                    sx={{ fontFamily: 'Rammetto One, sans-serif' }}
                   >
-                    Students
+                    Estudiantes
                   </Button>
                   <Button
                     size="small"
                     startIcon={<QuizIcon />}
                     onClick={() => navigate(`/courses/${course.id}/quizzes`)}
+                    sx={{ fontFamily: 'Rammetto One, sans-serif' }}
                   >
                     Quizzes
                   </Button>
@@ -508,8 +516,9 @@ const MyCourses: React.FC = () => {
                     size="small"
                     startIcon={<AnalyticsIcon />}
                     onClick={() => navigate('/teacher/statistics')}
+                    sx={{ fontFamily: 'Rammetto One, sans-serif' }}
                   >
-                    Stats
+                    Estadísticas
                   </Button>
                 </CardActions>
               </Card>
@@ -526,24 +535,26 @@ const MyCourses: React.FC = () => {
       >
         <MenuItem onClick={() => navigate(`/courses/${selectedCourse?.id}/edit`)}>
           <EditIcon sx={{ mr: 1 }} />
-          Edit Course
+          <Typography sx={{ fontFamily: 'Rammetto One, sans-serif' }}>Editar Curso</Typography>
         </MenuItem>
         <MenuItem onClick={() => navigate(`/courses/${selectedCourse?.id}/quizzes`)}>
           <QuizIcon sx={{ mr: 1 }} />
-          View Quizzes
+          <Typography sx={{ fontFamily: 'Rammetto One, sans-serif' }}>Ver Quizzes</Typography>
         </MenuItem>
         <MenuItem onClick={handleCreateQuiz}>
           <AddIcon sx={{ mr: 1 }} />
-          Create Quiz
+          <Typography sx={{ fontFamily: 'Rammetto One, sans-serif' }}>Crear Quiz</Typography>
         </MenuItem>
         <MenuItem onClick={() => selectedCourse && handleTogglePublished(selectedCourse)}>
           {selectedCourse?.is_published ? <VisibilityOffIcon sx={{ mr: 1 }} /> : <VisibilityIcon sx={{ mr: 1 }} />}
-          {selectedCourse?.is_published ? 'Unpublish' : 'Publish'}
+          <Typography sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+            {selectedCourse?.is_published ? 'Despublicar' : 'Publicar'}
+          </Typography>
         </MenuItem>
         {selectedCourse && !selectedCourse.is_public && (
           <MenuItem onClick={handleInviteStudents}>
             <EmailIcon sx={{ mr: 1 }} />
-            Invite Students
+            <Typography sx={{ fontFamily: 'Rammetto One, sans-serif' }}>Invitar Estudiantes</Typography>
           </MenuItem>
         )}
         <Divider />
@@ -552,67 +563,88 @@ const MyCourses: React.FC = () => {
           sx={{ color: 'error.main' }}
         >
           <DeleteIcon sx={{ mr: 1 }} />
-          Delete Course
+          <Typography sx={{ fontFamily: 'Rammetto One, sans-serif', color: 'error.main' }}>Eliminar Curso</Typography>
         </MenuItem>
       </Menu>
 
       {/* Create Course Dialog */}
       <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Create New Course</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'Rammetto One, sans-serif' }}>Crear Nuevo Curso</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin="dense"
-            label="Course Name"
+            label="Nombre del Curso"
             fullWidth
             variant="outlined"
             value={createCourseData.name}
             onChange={(e) => setCreateCourseData(prev => ({ ...prev, name: e.target.value }))}
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, '& .MuiInputLabel-root': { fontFamily: 'Rammetto One, sans-serif' } }}
           />
           
           <TextField
             margin="dense"
-            label="Description"
+            label="Descripción"
             fullWidth
             multiline
             rows={3}
             variant="outlined"
             value={createCourseData.description}
             onChange={(e) => setCreateCourseData(prev => ({ ...prev, description: e.target.value }))}
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, '& .MuiInputLabel-root': { fontFamily: 'Rammetto One, sans-serif' } }}
           />
 
           <FormControl component="fieldset" sx={{ mb: 2 }}>
-            <FormLabel component="legend">Course Visibility</FormLabel>
+            <FormLabel component="legend" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>Visibilidad del Curso</FormLabel>
             <RadioGroup
               value={createCourseData.is_public}
               onChange={(e) => setCreateCourseData(prev => ({ ...prev, is_public: e.target.value === 'true' }))}
             >
-              <FormControlLabel value={true} control={<Radio />} label="Public - Anyone can enroll" />
-              <FormControlLabel value={false} control={<Radio />} label="Private - Invitation only" />
+              <FormControlLabel 
+                value={true} 
+                control={<Radio />} 
+                label={<Typography sx={{ fontFamily: 'Rammetto One, sans-serif' }}>Público - Cualquiera puede inscribirse</Typography>} 
+              />
+              <FormControlLabel 
+                value={false} 
+                control={<Radio />} 
+                label={<Typography sx={{ fontFamily: 'Rammetto One, sans-serif' }}>Privado - Solo por invitación</Typography>} 
+              />
             </RadioGroup>
           </FormControl>
 
           <TextField
             margin="dense"
-            label="Maximum Capacity (optional)"
+            label="Capacidad Máxima (opcional)"
             type="number"
             fullWidth
             variant="outlined"
             value={createCourseData.max_capacity}
             onChange={(e) => setCreateCourseData(prev => ({ ...prev, max_capacity: e.target.value }))}
-            helperText="Leave empty for unlimited enrollment"
+            helperText="Deja vacío para inscripción ilimitada"
+            sx={{ '& .MuiInputLabel-root': { fontFamily: 'Rammetto One, sans-serif' }, '& .MuiFormHelperText-root': { fontFamily: 'Rammetto One, sans-serif' } }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
+          <Button 
+            onClick={() => setCreateDialogOpen(false)}
+            sx={{ fontFamily: 'Rammetto One, sans-serif' }}
+          >
+            Cancelar
+          </Button>
           <Button 
             onClick={handleCreateCourse}
             disabled={!createCourseData.name.trim()}
             variant="contained"
+            sx={{
+              backgroundColor: '#EA5C00',
+              '&:hover': {
+                backgroundColor: '#c44e00',
+              },
+              fontFamily: 'Rammetto One, sans-serif',
+            }}
           >
-            Create Course
+            Crear Curso
           </Button>
         </DialogActions>
       </Dialog>

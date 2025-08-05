@@ -20,6 +20,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  IconButton,
 } from '@mui/material';
 import {
   Quiz as QuizIcon,
@@ -30,6 +31,7 @@ import {
   Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
+import Layout from '../components/Layout';
 
 interface Question {
   id: number;
@@ -170,7 +172,7 @@ const TakeQuiz: React.FC = () => {
         // Mark quiz-related notifications as read
         await markQuizNotificationsAsRead();
         
-        alert('Quiz submitted successfully!');
+        alert('¡Cuestionario enviado exitosamente!');
         // Go back to previous location if available
         const prevLocation = localStorage.getItem('tucan_prev_location');
         if (prevLocation) {
@@ -249,82 +251,58 @@ const TakeQuiz: React.FC = () => {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Box sx={{ width: '100%' }}>
-          <LinearProgress />
-        </Box>
-        <Typography variant="h6" sx={{ mt: 2, textAlign: 'center' }}>
-          Loading quiz...
-        </Typography>
-      </Container>
+      <Box sx={{ 
+        minHeight: '100vh',
+        backgroundColor: '#f5f5f5',
+      }}>
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Box sx={{ width: '100%' }}>
+            <LinearProgress />
+          </Box>
+          <Typography variant="h6" sx={{ mt: 2, textAlign: 'center', fontFamily: 'Rammetto One, sans-serif' }}>
+            Cargando cuestionario...
+          </Typography>
+        </Container>
+      </Box>
     );
   }
 
   if (!quiz) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Alert severity="error">Quiz not found</Alert>
-      </Container>
+      <Box sx={{ 
+        minHeight: '100vh',
+        backgroundColor: '#f5f5f5',
+      }}>
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Alert severity="error">Cuestionario no encontrado</Alert>
+        </Container>
+      </Box>
     );
   }
 
   const currentQuestion = quiz.questions[currentQuestionIndex];
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        height: '100vh',
-        overflowY: 'auto',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        '&::-webkit-scrollbar': {
-          width: '8px',
-        },
-        '&::-webkit-scrollbar-track': {
-          background: '#f1f1f1',
-          borderRadius: '4px',
-        },
-        '&::-webkit-scrollbar-thumb': {
-          background: '#c1c1c1',
-          borderRadius: '4px',
-        },
-        '&::-webkit-scrollbar-thumb:hover': {
-          background: '#a8a8a8',
-        },
-      }}
-    >
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Layout title="Realizar Cuestionario">
+      <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
         {/* Header */}
-        <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Box sx={{ display: 'flex', gap: 1, mr: 2 }}>
-            <Button
-              startIcon={<ArrowBackIcon />}
-              onClick={handleBackNavigation}
-            >
-              Back
-            </Button>
-            <Button
-              startIcon={<HomeIcon />}
-              onClick={handleHomeNavigation}
-            >
-              Home
-            </Button>
-          </Box>
-          <Box>
-            <Typography variant="h4" component="h1">
-              <QuizIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
-              {quiz.title}
-            </Typography>
-            <Typography variant="subtitle1" color="text.secondary">
-              {quiz.course_name}
-            </Typography>
-          </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+          <IconButton onClick={handleBackNavigation} sx={{ mr: 2 }}>
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography variant="h4" component="h1" sx={{ flexGrow: 1, fontFamily: 'Rammetto One, sans-serif' }}>
+            <QuizIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
+            {quiz.title}
+          </Typography>
+          <IconButton onClick={handleHomeNavigation} sx={{ ml: 2 }}>
+            <HomeIcon />
+          </IconButton>
         </Box>
+
+        {/* Course info */}
+        <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3, fontFamily: 'Rammetto One, sans-serif' }}>
+          {quiz.course_name}
+        </Typography>
 
         {/* Quiz Info */}
         <Card sx={{ mb: 3 }}>
@@ -336,12 +314,12 @@ const TakeQuiz: React.FC = () => {
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
               <Chip
                 icon={<AssignmentIcon />}
-                label={`${quiz.question_count} questions`}
+                label={`${quiz.question_count} preguntas`}
                 variant="outlined"
               />
               <Chip
                 icon={<QuizIcon />}
-                label={`${quiz.total_points} points total`}
+                label={`${quiz.total_points} puntos total`}
                 variant="outlined"
               />
               <Chip
@@ -351,7 +329,7 @@ const TakeQuiz: React.FC = () => {
                 variant="outlined"
               />
               <Chip
-                label={`${getAnsweredCount()}/${quiz.question_count} answered`}
+                label={`${getAnsweredCount()}/${quiz.question_count} respondidas`}
                 color={isAllAnswered() ? 'success' : 'default'}
               />
             </Box>
@@ -364,9 +342,8 @@ const TakeQuiz: React.FC = () => {
             {error}
           </Alert>
         )}
-      </Box>
 
-      {/* Question Navigation */}
+        {/* Question Navigation */}
       <Box sx={{ mb: 3, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
         {quiz.questions.map((question, index) => {
           const answer = getAnswer(question.id);
@@ -393,22 +370,22 @@ const TakeQuiz: React.FC = () => {
       <Card sx={{ mb: 4 }}>
         <CardContent>
           <Box sx={{ mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Question {currentQuestionIndex + 1} of {quiz.questions.length}
+            <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+              Pregunta {currentQuestionIndex + 1} de {quiz.questions.length}
               <Chip 
-                label={`${currentQuestion.points} ${currentQuestion.points === 1 ? 'point' : 'points'}`}
+                label={`${currentQuestion.points} ${currentQuestion.points === 1 ? 'punto' : 'puntos'}`}
                 size="small"
                 sx={{ ml: 2 }}
               />
             </Typography>
-            <Typography variant="body1" sx={{ mb: 3 }}>
+            <Typography variant="body1" sx={{ mb: 3, fontFamily: 'Rammetto One, sans-serif' }}>
               {currentQuestion.text}
             </Typography>
           </Box>
 
           {currentQuestion.question_type === 'multiple_choice' ? (
             <FormControl component="fieldset" fullWidth>
-              <FormLabel component="legend">Select your answer:</FormLabel>
+              <FormLabel component="legend" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>Selecciona tu respuesta:</FormLabel>
               <RadioGroup
                 value={getAnswer(currentQuestion.id)?.selected_option_id || ''}
                 onChange={(e) => updateAnswer(currentQuestion.id, parseInt(e.target.value))}
@@ -435,7 +412,7 @@ const TakeQuiz: React.FC = () => {
                 rows={4}
                 value={getAnswer(currentQuestion.id)?.text_answer || ''}
                 onChange={(e) => updateAnswer(currentQuestion.id, undefined, e.target.value)}
-                placeholder="Type your answer here..."
+                placeholder="Escribe tu respuesta aquí..."
                 variant="outlined"
               />
             </Box>
@@ -449,15 +426,16 @@ const TakeQuiz: React.FC = () => {
           <Button
             disabled={currentQuestionIndex === 0}
             onClick={() => setCurrentQuestionIndex(prev => prev - 1)}
+            sx={{ fontFamily: 'Rammetto One, sans-serif' }}
           >
-            Previous
+            Anterior
           </Button>
           <Button
             disabled={currentQuestionIndex === quiz.questions.length - 1}
             onClick={() => setCurrentQuestionIndex(prev => prev + 1)}
-            sx={{ ml: 1 }}
+            sx={{ ml: 1, fontFamily: 'Rammetto One, sans-serif' }}
           >
-            Next
+            Siguiente
           </Button>
         </Box>
 
@@ -468,42 +446,44 @@ const TakeQuiz: React.FC = () => {
           onClick={() => setSubmitDialogOpen(true)}
           disabled={submitting}
           startIcon={<CheckIcon />}
+          sx={{ fontFamily: 'Rammetto One, sans-serif' }}
         >
-          Submit Quiz
+          Enviar Cuestionario
         </Button>
       </Box>
 
       {/* Submit Confirmation Dialog */}
       <Dialog open={submitDialogOpen} onClose={() => setSubmitDialogOpen(false)}>
-        <DialogTitle>Submit Quiz?</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'Rammetto One, sans-serif' }}>¿Enviar Cuestionario?</DialogTitle>
         <DialogContent>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            Are you sure you want to submit your quiz? You cannot change your answers after submission.
+          <Typography variant="body1" sx={{ mb: 2, fontFamily: 'Rammetto One, sans-serif' }}>
+            ¿Estás seguro de que quieres enviar tu cuestionario? No puedes cambiar tus respuestas después del envío.
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Progress: {getAnsweredCount()} of {quiz.question_count} questions answered
+          <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+            Progreso: {getAnsweredCount()} de {quiz.question_count} preguntas respondidas
             {!isAllAnswered() && (
               <Alert severity="warning" sx={{ mt: 2 }}>
-                You have not answered all questions. Unanswered questions will receive 0 points.
+                No has respondido todas las preguntas. Las preguntas sin responder recibirán 0 puntos.
               </Alert>
             )}
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setSubmitDialogOpen(false)}>
-            Cancel
+          <Button onClick={() => setSubmitDialogOpen(false)} sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+            Cancelar
           </Button>
           <Button
             onClick={handleSubmit}
             variant="contained"
             disabled={submitting}
+            sx={{ fontFamily: 'Rammetto One, sans-serif' }}
           >
-            {submitting ? 'Submitting...' : 'Submit Quiz'}
+            {submitting ? 'Enviando...' : 'Enviar Cuestionario'}
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
-    </Box>
+      </Container>
+    </Layout>
   );
 };
 

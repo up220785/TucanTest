@@ -29,8 +29,11 @@ import {
   Assignment as AssignmentIcon,
   EmojiEvents as TrophyIcon,
   Home as HomeIcon,
+  Download as DownloadIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 interface QuizStatistics {
   quiz_id: number;
@@ -197,6 +200,101 @@ const QuizStatistics: React.FC = () => {
 
   const handleHomeNavigation = () => {
     navigate('/homepage');
+  };
+
+  const generatePDF = () => {
+    if (!statistics) return;
+
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(20);
+    doc.text('Quiz Statistics Report', 20, 20);
+    
+    doc.setFontSize(12);
+    doc.text(`Quiz: ${statistics.quiz_title}`, 20, 35);
+    doc.text(`Course: ${statistics.course_name}`, 20, 45);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 55);
+    
+    // Overall Statistics
+    doc.setFontSize(14);
+    doc.text('Overview', 20, 75);
+    
+    const overviewData = [
+      ['Total Enrolled', statistics.total_enrolled.toString()],
+      ['Total Submissions', statistics.total_submissions.toString()],
+      ['Completion Rate', `${statistics.completion_rate.toFixed(1)}%`],
+      ['Average Score', `${statistics.overall_statistics.average_score.toFixed(1)}/${statistics.max_possible_score}`],
+      ['Average Percentage', `${statistics.overall_statistics.average_percentage.toFixed(1)}%`],
+      ['Highest Score', `${statistics.overall_statistics.highest_score}/${statistics.max_possible_score}`],
+      ['Lowest Score', `${statistics.overall_statistics.lowest_score}/${statistics.max_possible_score}`]
+    ];
+
+    autoTable(doc, {
+      startY: 85,
+      head: [['Metric', 'Value']],
+      body: overviewData,
+      theme: 'striped',
+      headStyles: { fillColor: [48, 99, 142] },
+      columnStyles: {
+        0: { cellWidth: 80 },
+        1: { cellWidth: 50 }
+      }
+    });
+
+    // Student Rankings
+    if (statistics.student_rankings && statistics.student_rankings.length > 0) {
+      doc.setFontSize(14);
+      doc.text('Student Rankings', 20, doc.lastAutoTable.finalY + 20);
+      
+      const rankingsData = statistics.student_rankings.map(student => [
+        student.rank.toString(),
+        student.student_name,
+        `${student.score}/${statistics.max_possible_score}`,
+        `${student.percentage.toFixed(1)}%`,
+        student.submitted_at ? new Date(student.submitted_at).toLocaleDateString() : 'Not submitted'
+      ]);
+
+      autoTable(doc, {
+        startY: doc.lastAutoTable.finalY + 30,
+        head: [['Rank', 'Student Name', 'Score', 'Percentage', 'Submitted']],
+        body: rankingsData,
+        theme: 'striped',
+        headStyles: { fillColor: [48, 99, 142] },
+        columnStyles: {
+          0: { cellWidth: 20 },
+          1: { cellWidth: 60 },
+          2: { cellWidth: 30 },
+          3: { cellWidth: 30 },
+          4: { cellWidth: 40 }
+        }
+      });
+    }
+
+    // Missing Submissions
+    if (statistics.missing_submissions && statistics.missing_submissions.length > 0) {
+      doc.setFontSize(14);
+      doc.text('Missing Submissions', 20, doc.lastAutoTable.finalY + 20);
+      
+      const missingData = statistics.missing_submissions.map(student => [
+        student.student_name,
+        student.student_email
+      ]);
+
+      autoTable(doc, {
+        startY: doc.lastAutoTable.finalY + 30,
+        head: [['Student Name', 'Email']],
+        body: missingData,
+        theme: 'striped',
+        headStyles: { fillColor: [234, 92, 0] },
+        columnStyles: {
+          0: { cellWidth: 80 },
+          1: { cellWidth: 100 }
+        }
+      });
+    }
+
+    doc.save(`quiz-statistics-${statistics.quiz_title.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`);
   };
 
   const formatDateTime = (dateString: string) => {
@@ -383,6 +481,19 @@ const QuizStatistics: React.FC = () => {
               onClick={handleHomeNavigation}
             >
               Home
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<DownloadIcon />}
+              onClick={generatePDF}
+              sx={{
+                backgroundColor: '#EA5C00',
+                '&:hover': {
+                  backgroundColor: '#c44e00',
+                },
+              }}
+            >
+              Descargar PDF
             </Button>
           </Box>
           

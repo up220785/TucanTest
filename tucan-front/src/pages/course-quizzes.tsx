@@ -31,6 +31,7 @@ import {
   Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
+import Layout from '../components/Layout';
 
 interface Course {
   id: number;
@@ -161,7 +162,7 @@ const CourseQuizzes: React.FC = () => {
   };
 
   const handleDeleteQuiz = async (quizId: number) => {
-    if (!confirm('Are you sure you want to delete this quiz? This action cannot be undone.')) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este quiz? Esta acción no se puede deshacer.')) {
       return;
     }
 
@@ -188,7 +189,7 @@ const CourseQuizzes: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('es-ES', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -206,8 +207,8 @@ const CourseQuizzes: React.FC = () => {
   };
 
   const formatDueDate = (dateString: string | null | undefined) => {
-    if (!dateString) return 'No due date';
-    return new Date(dateString).toLocaleDateString('en-US', {
+    if (!dateString) return 'Sin fecha límite';
+    return new Date(dateString).toLocaleDateString('es-ES', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -218,91 +219,74 @@ const CourseQuizzes: React.FC = () => {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Box sx={{ width: '100%' }}>
-          <LinearProgress />
-        </Box>
-        <Typography variant="h6" sx={{ mt: 2, textAlign: 'center' }}>
-          Loading quizzes...
-        </Typography>
-      </Container>
+      <Box sx={{ 
+        minHeight: '100vh',
+        backgroundColor: '#f5f5f5',
+      }}>
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Box sx={{ width: '100%' }}>
+            <LinearProgress />
+          </Box>
+          <Typography variant="h6" sx={{ mt: 2, textAlign: 'center', fontFamily: 'Rammetto One, sans-serif' }}>
+            Cargando quizzes...
+          </Typography>
+        </Container>
+      </Box>
     );
   }
 
   if (!course) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Alert severity="error">Course not found</Alert>
-      </Container>
+      <Box sx={{ 
+        minHeight: '100vh',
+        backgroundColor: '#f5f5f5',
+      }}>
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <Alert severity="error">Curso no encontrado</Alert>
+        </Container>
+      </Box>
     );
   }
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh', 
-      height: '100vh',
-      overflowY: 'auto',
-      overflowX: 'hidden',
-      backgroundColor: '#f5f5f5',
-      pb: 4,
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      '&::-webkit-scrollbar': {
-        width: '8px',
-      },
-      '&::-webkit-scrollbar-track': {
-        backgroundColor: '#f1f1f1',
-        borderRadius: '4px',
-      },
-      '&::-webkit-scrollbar-thumb': {
-        backgroundColor: '#c1c1c1',
-        borderRadius: '4px',
-        '&:hover': {
-          backgroundColor: '#a8a8a8',
-        },
-      },
-    }}>
+    <Layout title="Gestionar Quizzes">
       <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <IconButton 
-            onClick={handleBackNavigation}
-            sx={{ mr: 1 }}
-          >
-            <ArrowBackIcon />
-          </IconButton>
-          <Box sx={{ flexGrow: 1 }}>
-            <Typography variant="h4" component="h1">
-              <QuizIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
-              Course Quizzes
-            </Typography>
-            <Typography variant="subtitle1" color="text.secondary">
-              {course.name}
-            </Typography>
-          </Box>
-          <IconButton 
-            onClick={handleHomeNavigation}
-            sx={{ ml: 1 }}
-          >
-            <HomeIcon />
-          </IconButton>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+        <IconButton onClick={handleBackNavigation} sx={{ mr: 2 }}>
+          <ArrowBackIcon />
+        </IconButton>
+        <Box sx={{ flexGrow: 1 }}>
+          <Typography variant="h4" component="h1" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+            <QuizIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
+            Gestionar Quizzes del Curso
+          </Typography>
+          <Typography variant="subtitle1" color="text.secondary" sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+            {course.name}
+          </Typography>
         </Box>
-
-        {userRole === 'teacher' && (
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleCreateQuiz}
-            sx={{ mb: 2 }}
-          >
-            Create New Quiz
-          </Button>
-        )}
+        <IconButton onClick={handleHomeNavigation} sx={{ ml: 2 }}>
+          <HomeIcon />
+        </IconButton>
       </Box>
+
+      {userRole === 'teacher' && (
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={handleCreateQuiz}
+          sx={{ 
+            mb: 2,
+            backgroundColor: '#EA5C00',
+            '&:hover': {
+              backgroundColor: '#c44e00',
+            },
+            fontFamily: 'Rammetto One, sans-serif',
+          }}
+        >
+          Crear Nuevo Quiz
+        </Button>
+      )}
 
       {/* Error Alert */}
       {error && (
@@ -316,13 +300,13 @@ const CourseQuizzes: React.FC = () => {
         <Card sx={{ textAlign: 'center', py: 6 }}>
           <CardContent>
             <QuizIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              No quizzes available
+            <Typography variant="h6" color="text.secondary" gutterBottom sx={{ fontFamily: 'Rammetto One, sans-serif' }}>
+              No hay quizzes disponibles
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
               {userRole === 'teacher' 
-                ? 'Create your first quiz to get started!'
-                : 'No quizzes have been published for this course yet.'
+                ? '¡Crea tu primer quiz para comenzar!'
+                : 'Aún no se han publicado quizzes para este curso.'
               }
             </Typography>
             {userRole === 'teacher' && (
@@ -330,8 +314,15 @@ const CourseQuizzes: React.FC = () => {
                 variant="contained"
                 startIcon={<AddIcon />}
                 onClick={handleCreateQuiz}
+                sx={{
+                  backgroundColor: '#EA5C00',
+                  '&:hover': {
+                    backgroundColor: '#c44e00',
+                  },
+                  fontFamily: 'Rammetto One, sans-serif',
+                }}
               >
-                Create Quiz
+                Crear Quiz
               </Button>
             )}
           </CardContent>
@@ -391,7 +382,7 @@ const CourseQuizzes: React.FC = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Chip
                         icon={quiz.is_published ? <PublishIcon /> : <UnpublishedIcon />}
-                        label={quiz.is_published ? 'Published' : 'Draft'}
+                        label={quiz.is_published ? 'Publicado' : 'Borrador'}
                         size="small"
                         color={quiz.is_published ? 'success' : 'default'}
                         variant={quiz.is_published ? 'filled' : 'outlined'}
@@ -421,29 +412,29 @@ const CourseQuizzes: React.FC = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <AssignmentIcon fontSize="small" color="action" />
                       <Typography variant="body2">
-                        {quiz.question_count} {quiz.question_count === 1 ? 'question' : 'questions'}
+                        {quiz.question_count} {quiz.question_count === 1 ? 'pregunta' : 'preguntas'}
                       </Typography>
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <QuizIcon fontSize="small" color="action" />
                       <Typography variant="body2">
-                        {quiz.total_points} {quiz.total_points === 1 ? 'point' : 'points'}
+                        {quiz.total_points} {quiz.total_points === 1 ? 'punto' : 'puntos'}
                       </Typography>
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <ScheduleIcon fontSize="small" color="action" />
                       <Typography variant="body2">
-                        Due: {formatDueDate(quiz.due_date)}
+                        Vencimiento: {formatDueDate(quiz.due_date)}
                       </Typography>
                       {quiz.is_past_due && (
-                        <Chip label="Past Due" size="small" color="error" />
+                        <Chip label="Vencido" size="small" color="error" />
                       )}
                     </Box>
 
                     <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-                      Created: {formatDate(quiz.created_at)}
+                      Creado: {formatDate(quiz.created_at)}
                     </Typography>
                   </Box>
                 </CardContent>
@@ -454,16 +445,18 @@ const CourseQuizzes: React.FC = () => {
                     startIcon={<VisibilityIcon />}
                     onClick={() => handleViewQuiz(quiz.id)}
                     disabled={!quiz.is_published && userRole === 'student'}
+                    sx={{ fontFamily: 'Rammetto One, sans-serif' }}
                   >
-                    {userRole === 'teacher' ? 'View Submissions' : 'Take Quiz'}
+                    {userRole === 'teacher' ? 'Ver Entregas' : 'Tomar Quiz'}
                   </Button>
                   {userRole === 'teacher' && (
                     <Button
                       size="small"
                       startIcon={<BarChartIcon />}
                       onClick={() => handleStatsView(quiz.id)}
+                      sx={{ fontFamily: 'Rammetto One, sans-serif' }}
                     >
-                      Stats
+                      Estadísticas
                     </Button>
                   )}
                 </CardActions>
@@ -482,26 +475,26 @@ const CourseQuizzes: React.FC = () => {
       >
         <MenuItem onClick={() => selectedQuiz && handleViewQuiz(selectedQuiz.id)}>
           <VisibilityIcon sx={{ mr: 1 }} />
-          View Submissions
+          Ver Entregas
         </MenuItem>
         <MenuItem onClick={() => selectedQuiz && handleStatsView(selectedQuiz.id)}>
           <BarChartIcon sx={{ mr: 1 }} />
-          Statistics
+          Estadísticas
         </MenuItem>
         <MenuItem onClick={() => selectedQuiz && handleEditQuiz(selectedQuiz.id)}>
           <EditIcon sx={{ mr: 1 }} />
-          Edit Quiz
+          Editar Quiz
         </MenuItem>
         <MenuItem 
           onClick={() => selectedQuiz && handleDeleteQuiz(selectedQuiz.id)}
           sx={{ color: 'error.main' }}
         >
           <DeleteIcon sx={{ mr: 1 }} />
-          Delete Quiz
+          Eliminar Quiz
         </MenuItem>
       </Menu>
       </Container>
-    </Box>
+    </Layout>
   );
 };
 
