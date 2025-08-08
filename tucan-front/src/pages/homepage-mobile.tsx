@@ -177,7 +177,7 @@ const HomePage: React.FC = () => {
 
   return (
     <Layout title="TucanTest" showSearchBar={true}>
-      <Container maxWidth="lg" className="responsive-container mobile-scroll-container">
+      <Container maxWidth="lg" className="responsive-container">
         {/* Welcome Section */}
         <Box sx={{ mb: { xs: 2, sm: 3 } }}>
           <Typography 

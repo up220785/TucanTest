@@ -26,6 +26,8 @@ import {
   Divider,
   LinearProgress,
   Grid,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -43,9 +45,11 @@ import {
   Home as HomeIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { buildApiUrl } from '../config/api';
 import InviteStudentsDialog from '../components/InviteStudentsDialog';
 import Layout from '../components/Layout';
 import '../styles/my-courses.css';
+import '../styles/mobile-responsive.css';
 
 interface Course {
   id: number;
@@ -83,6 +87,8 @@ const MyCourses: React.FC = () => {
   });
 
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   useEffect(() => {
     fetchCourses();
@@ -112,7 +118,7 @@ const MyCourses: React.FC = () => {
       }
 
       // Use the dedicated teacher courses endpoint
-      const response = await fetch(`http://localhost:5000/api/course-users/teachers/${user.id}/courses`, {
+      const response = await fetch(buildApiUrl(`/api/course-users/teachers/${user.id}/courses`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -155,7 +161,7 @@ const MyCourses: React.FC = () => {
         }),
       };
 
-      const response = await fetch('http://localhost:5000/api/courses/', {
+      const response = await fetch(buildApiUrl('/api/courses/'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -212,7 +218,7 @@ const MyCourses: React.FC = () => {
     try {
       const token = localStorage.getItem('tucan_token');
       
-      const response = await fetch(`http://localhost:5000/api/courses/${course.id}`, {
+      const response = await fetch(buildApiUrl(`/api/courses/${course.id}`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -246,7 +252,7 @@ const MyCourses: React.FC = () => {
     try {
       const token = localStorage.getItem('tucan_token');
       
-      const response = await fetch(`http://localhost:5000/api/courses/${course.id}`, {
+      const response = await fetch(buildApiUrl(`/api/courses/${course.id}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

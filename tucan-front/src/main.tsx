@@ -5,6 +5,7 @@ import App from "./App";
 import { BrowserRouter } from "react-router-dom";
 import "./styles/login.css";     // Estilos globales si quieres
 import "./styles/register.css";
+import "./styles/mobile-responsive.css"; // Mobile scrolling optimizations
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

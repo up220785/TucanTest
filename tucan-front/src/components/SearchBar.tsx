@@ -29,6 +29,7 @@ import {
   Close as CloseIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { buildApiUrl } from '../config/api';
 import '../styles/search-bar.css';
 
 interface SearchItem {
@@ -172,7 +173,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ userRole, userId }) => {
 
       if (userRole === 'teacher') {
         // Fetch teacher's courses
-        const coursesResponse = await fetch(`http://localhost:5000/api/course-users/teachers/${userId}/courses`, {
+        const coursesResponse = await fetch(buildApiUrl(`/api/course-users/teachers/${userId}/courses`), {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -184,7 +185,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ userRole, userId }) => {
         }
       } else if (userRole === 'student') {
         // Fetch student's enrolled courses
-        const coursesResponse = await fetch(`http://localhost:5000/api/course-users/students/${userId}/courses`, {
+        const coursesResponse = await fetch(buildApiUrl(`/api/course-users/students/${userId}/courses`), {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',

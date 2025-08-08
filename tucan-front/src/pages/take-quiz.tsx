@@ -32,6 +32,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../components/Layout';
+import { buildApiUrl } from '../config/api';
 
 interface Question {
   id: number;
@@ -98,7 +99,7 @@ const TakeQuiz: React.FC = () => {
     try {
       const token = localStorage.getItem('tucan_token');
       
-      const response = await fetch(`http://localhost:5000/api/quizzes/${quizId}/details`, {
+      const response = await fetch(buildApiUrl(`/api/quizzes/${quizId}/details`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -159,7 +160,7 @@ const TakeQuiz: React.FC = () => {
         }))
       };
 
-      const response = await fetch(`http://localhost:5000/api/quizzes/${quizId}/submit`, {
+      const response = await fetch(buildApiUrl(`/api/quizzes/${quizId}/submit`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -199,7 +200,7 @@ const TakeQuiz: React.FC = () => {
       const token = localStorage.getItem('tucan_token');
       
       // Call backend endpoint to mark quiz notifications as read
-      await fetch(`http://localhost:5000/api/quizzes/${quizId}/mark-notifications-read`, {
+      await fetch(buildApiUrl(`/api/quizzes/${quizId}/mark-notifications-read`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

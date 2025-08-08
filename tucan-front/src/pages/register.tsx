@@ -12,6 +12,7 @@ import {
   Alert,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { buildApiUrl } from "../config/api";
 import "../styles/register.css";
 import TucanLogo from "../assets/logo2.png";
 
@@ -54,7 +55,7 @@ const Register: React.FC = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/auth/register",
+        buildApiUrl("/api/auth/register"),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

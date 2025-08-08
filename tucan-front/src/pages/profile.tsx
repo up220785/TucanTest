@@ -18,6 +18,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import "../styles/profile.css";
+import { buildApiUrl } from '../config/api';
 
 interface UserProfile {
   id: number;
@@ -146,7 +147,7 @@ const Profile: React.FC = () => {
         updateData.password = formData.newPassword;
       }
 
-      const response = await fetch(`http://localhost:5000/api/users/${user.id}`, {
+      const response = await fetch(buildApiUrl(`/api/users/${user.id}`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

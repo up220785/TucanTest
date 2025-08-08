@@ -10,6 +10,13 @@ import {
   MenuItem,
   Divider,
   Badge,
+  useTheme,
+  useMediaQuery,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import {
   AccountCircle as AccountCircleIcon,
@@ -19,8 +26,10 @@ import {
   Assessment as AssessmentIcon,
   ExitToApp as ExitToAppIcon,
   Home as HomeIcon,
+  Menu as MenuIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { buildApiUrl } from '../config/api';
 import SearchBar from './SearchBar';
 
 interface HeaderProps {
@@ -34,8 +43,11 @@ const Header: React.FC<HeaderProps> = ({ title = "TucanTest", showSearchBar = tr
   const [userId, setUserId] = useState<number | undefined>(undefined);
   const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   useEffect(() => {
     const userData = localStorage.getItem("tucan_user");
@@ -66,7 +78,7 @@ const Header: React.FC<HeaderProps> = ({ title = "TucanTest", showSearchBar = tr
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/notifications/users/${userId}/notifications`, {
+      const response = await fetch(buildApiUrl(`/api/notifications/users/${userId}/notifications`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -105,13 +117,19 @@ const Header: React.FC<HeaderProps> = ({ title = "TucanTest", showSearchBar = tr
     setAnchorEl(null);
   };
 
+  const handleMobileMenuToggle = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
   const handleProfileClick = () => {
     handleMenuClose();
+    setMobileMenuOpen(false);
     navigate("/profile");
   };
 
   const handleLogoutClick = () => {
     handleMenuClose();
+    setMobileMenuOpen(false);
     handleLogout();
   };
 
@@ -123,137 +141,182 @@ const Header: React.FC<HeaderProps> = ({ title = "TucanTest", showSearchBar = tr
     return location.pathname === path;
   };
 
+  const navigationItems = {
+    teacher: [
+      { label: 'Mis Cursos', icon: SchoolIcon, path: '/my-courses' },
+      { label: 'Estadísticas', icon: AssessmentIcon, path: '/teacher/statistics' },
+    ],
+    student: [
+      { label: 'Explorar Cursos', icon: SearchIcon, path: '/explore-courses' },
+    ],
+  };
+
   if (!role) {
     return null; // Don't show header if user is not logged in
   }
 
   return (
-    <AppBar position="sticky" sx={{ 
-      backgroundColor: getHeaderColor(), 
-      zIndex: 1100,
-      fontFamily: 'Rammetto One, sans-serif'
-    }}>
-      <Toolbar>
-        {/* Home/Title button */}
-        <IconButton
-          color="inherit"
-          onClick={() => navigate("/homepage")}
-          sx={{ mr: 2 }}
-        >
-          <HomeIcon />
-        </IconButton>
-        
-        <Typography variant="h6" component="div" sx={{ 
-          fontWeight: 'bold', 
-          mr: 3,
-          fontFamily: 'Rammetto One, sans-serif'
-        }}>
-          {title}
-        </Typography>
-        
-        {/* Search Bar */}
-        {showSearchBar && (
-          <Box sx={{ flexGrow: 1, maxWidth: 400, mr: 2 }}>
-            <SearchBar userRole={role} userId={userId} />
-          </Box>
-        )}
-        
-        {/* Spacer when no search bar */}
-        {!showSearchBar && <Box sx={{ flexGrow: 1 }} />}
-        
-        {/* Navigation Options based on role */}
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          {role === "teacher" && (
-            <>
-              <Button 
-                color="inherit" 
-                startIcon={<SchoolIcon />}
-                onClick={() => navigate("/my-courses")}
-                sx={{ 
-                  textTransform: 'none',
-                  fontFamily: 'Rammetto One, sans-serif',
-                  backgroundColor: isCurrentPage('/my-courses') ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
-                }}
-              >
-                Mis Cursos
-              </Button>
-              <Button 
-                color="inherit" 
-                startIcon={<AssessmentIcon />}
-                onClick={() => navigate("/teacher/statistics")}
-                sx={{ 
-                  textTransform: 'none',
-                  fontFamily: 'Rammetto One, sans-serif',
-                  backgroundColor: isCurrentPage('/teacher/statistics') ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
-                }}
-              >
-                Estadísticas
-              </Button>
-              <IconButton
-                color="inherit"
-                onClick={() => navigate("/notifications")}
-                sx={{ 
-                  ml: 1,
-                  backgroundColor: isCurrentPage('/notifications') ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
-                }}
-              >
-                <Badge 
-                  badgeContent={unreadNotifications > 0 ? unreadNotifications : undefined} 
-                  color="error"
-                  showZero={false}
-                >
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
-            </>
+    <>
+      <AppBar position="sticky" sx={{ 
+        backgroundColor: getHeaderColor(), 
+        zIndex: 1100,
+        fontFamily: 'Rammetto One, sans-serif'
+      }}>
+        <Toolbar sx={{ minHeight: { xs: 56, sm: 64 } }}>
+          {/* Mobile menu button */}
+          {isMobile && (
+            <IconButton
+              color="inherit"
+              onClick={handleMobileMenuToggle}
+              sx={{ mr: 1 }}
+            >
+              <MenuIcon />
+            </IconButton>
           )}
 
-          {role === "student" && (
-            <>
-              <Button 
-                color="inherit" 
-                startIcon={<SearchIcon />}
-                onClick={() => navigate("/explore-courses")}
-                sx={{ 
-                  textTransform: 'none',
-                  fontFamily: 'Rammetto One, sans-serif',
-                  backgroundColor: isCurrentPage('/explore-courses') ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
-                }}
-              >
-                Explorar Cursos
-              </Button>
-              <IconButton
-                color="inherit"
-                onClick={() => navigate("/notifications")}
-                sx={{ 
-                  ml: 1,
-                  backgroundColor: isCurrentPage('/notifications') ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
-                }}
-              >
-                <Badge 
-                  badgeContent={unreadNotifications > 0 ? unreadNotifications : undefined} 
-                  color="error"
-                  showZero={false}
-                >
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
-            </>
+          {/* Home/Title button */}
+          <IconButton
+            color="inherit"
+            onClick={() => navigate("/homepage")}
+            sx={{ mr: { xs: 1, sm: 2 } }}
+          >
+            <HomeIcon />
+          </IconButton>
+          
+          <Typography variant="h6" component="div" sx={{ 
+            fontWeight: 'bold', 
+            mr: { xs: 1, sm: 3 },
+            fontSize: { xs: '1rem', sm: '1.25rem' },
+            fontFamily: 'Rammetto One, sans-serif'
+          }}>
+            {isMobile ? 'TT' : title}
+          </Typography>
+          
+          {/* Search Bar - Hidden on mobile, shown in drawer */}
+          {showSearchBar && !isMobile && (
+            <Box sx={{ flexGrow: 1, maxWidth: 400, mr: 2 }}>
+              <SearchBar userRole={role} userId={userId} />
+            </Box>
           )}
+          
+          {/* Spacer */}
+          <Box sx={{ flexGrow: 1 }} />
+          
+          {/* Desktop Navigation */}
+          {!isMobile && (
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              {navigationItems[role].map((item) => (
+                <Button 
+                  key={item.path}
+                  color="inherit" 
+                  startIcon={<item.icon />}
+                  onClick={() => navigate(item.path)}
+                  sx={{ 
+                    textTransform: 'none',
+                    fontFamily: 'Rammetto One, sans-serif',
+                    backgroundColor: isCurrentPage(item.path) ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
+                  }}
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </Box>
+          )}
+
+          {/* Notifications */}
+          <IconButton
+            color="inherit"
+            onClick={() => navigate("/notifications")}
+            sx={{ 
+              ml: { xs: 1, sm: 2 },
+              backgroundColor: isCurrentPage('/notifications') ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
+            }}
+          >
+            <Badge 
+              badgeContent={unreadNotifications > 0 ? unreadNotifications : undefined} 
+              color="error"
+              showZero={false}
+            >
+              <NotificationsIcon />
+            </Badge>
+          </IconButton>
 
           {/* Profile Menu */}
           <IconButton
             color="inherit"
             onClick={handleMenuOpen}
             sx={{ 
-              ml: 2,
+              ml: { xs: 1, sm: 2 },
               backgroundColor: isCurrentPage('/profile') ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
             }}
           >
             <AccountCircleIcon />
           </IconButton>
+        </Toolbar>
+      </AppBar>
+
+      {/* Mobile Navigation Drawer */}
+      <Drawer
+        anchor="left"
+        open={mobileMenuOpen}
+        onClose={handleMobileMenuToggle}
+        sx={{
+          '& .MuiDrawer-paper': {
+            width: 250,
+            backgroundColor: getHeaderColor(),
+            color: 'white',
+          },
+        }}
+      >
+        <Box sx={{ pt: 2, pb: 2 }}>
+          <Typography variant="h6" sx={{ 
+            px: 2, 
+            mb: 2, 
+            fontFamily: 'Rammetto One, sans-serif',
+            color: 'white'
+          }}>
+            TucanTest
+          </Typography>
+          
+          {/* Search Bar in mobile drawer */}
+          {showSearchBar && (
+            <Box sx={{ px: 2, mb: 2 }}>
+              <SearchBar userRole={role} userId={userId} />
+            </Box>
+          )}
+
+          <List>
+            {navigationItems[role].map((item) => (
+              <ListItem 
+                key={item.path}
+                onClick={() => {
+                  navigate(item.path);
+                  setMobileMenuOpen(false);
+                }}
+                sx={{ 
+                  cursor: 'pointer',
+                  backgroundColor: isCurrentPage(item.path) ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ color: 'white' }}>
+                  <item.icon />
+                </ListItemIcon>
+                <ListItemText 
+                  primary={item.label} 
+                  sx={{ 
+                    '& .MuiTypography-root': {
+                      fontFamily: 'Rammetto One, sans-serif'
+                    }
+                  }}
+                />
+              </ListItem>
+            ))}
+          </List>
         </Box>
-      </Toolbar>
+      </Drawer>
 
       {/* Profile Menu */}
       <Menu
@@ -275,7 +338,7 @@ const Header: React.FC<HeaderProps> = ({ title = "TucanTest", showSearchBar = tr
           Cerrar Sesión
         </MenuItem>
       </Menu>
-    </AppBar>
+    </>
   );
 };
 

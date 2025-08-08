@@ -30,6 +30,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import '../styles/explore-courses.css';
+import { buildApiUrl } from '../config/api';
 
 interface Course {
   id: number;
@@ -100,7 +101,7 @@ const ExploreCourses: React.FC = () => {
       }
 
       // Fetch all public published courses
-      const response = await fetch('http://localhost:5000/api/courses/available', {
+      const response = await fetch(buildApiUrl('/api/courses/available'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -143,7 +144,7 @@ const ExploreCourses: React.FC = () => {
 
       const user = JSON.parse(userData);
       
-      const response = await fetch(`http://localhost:5000/api/courses/${courseId}/enroll`, {
+      const response = await fetch(buildApiUrl(`/api/courses/${courseId}/enroll`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

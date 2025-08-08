@@ -32,6 +32,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import '../styles/edit-course.css';
+import { buildApiUrl } from '../config/api';
 
 interface Course {
   id: number;
@@ -110,7 +111,7 @@ const EditCourse: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/courses/${courseId}`, {
+      const response = await fetch(buildApiUrl(`/api/courses/${courseId}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -183,7 +184,7 @@ const EditCourse: React.FC = () => {
         }),
       };
 
-      const response = await fetch(`http://localhost:5000/api/courses/${courseId}`, {
+      const response = await fetch(buildApiUrl(`/api/courses/${courseId}`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

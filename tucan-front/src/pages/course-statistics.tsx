@@ -36,6 +36,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { buildApiUrl } from '../config/api';
 
 interface CourseStatistics {
   course_id: number;
@@ -114,7 +115,7 @@ const CourseStatistics: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/courses/${courseId}/statistics`, {
+      const response = await fetch(buildApiUrl(`/api/courses/${courseId}/statistics`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

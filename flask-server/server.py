@@ -352,4 +352,9 @@ if __name__ == "__main__":
     # Optionally seed sample data (comment out if not needed)
     # seed_sample_data()
     
-    app.run(debug=True)
+    # Get configuration from environment
+    debug_mode = os.environ.get('FLASK_ENV') == 'development'
+    host = os.environ.get('FLASK_HOST', '0.0.0.0')  # Bind to all interfaces for Docker
+    port = int(os.environ.get('FLASK_PORT', 5000))
+    
+    app.run(host=host, port=port, debug=debug_mode)

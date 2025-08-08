@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # Flask Backend
+  backend:
+    build:
+      context: ./flask-server
+      dockerfile: Dockerfile
+    container_name: tucan_backend_dev
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./flask-server:/app
+      - ./flask-server/data:/app/data
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=server.py
+      - FLASK_DEBUG=1
+    networks:
+      - tucan_network
+    restart: unless-stopped
+
+  # React Frontend (Vite) - Development mode
+  frontend:
+    build:
+      context: ./tucan-front
+      dockerfile: Dockerfile.dev
+    container_name: tucan_frontend_dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./tucan-front:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:5000
+    depends_on:
+      - backend
+    networks:
+      - tucan_network
+    restart: unless-stopped
+
+networks:
+  tucan_network:
+    driver: bridge

@@ -41,6 +41,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../components/Layout';
+import { buildApiUrl } from '../config/api';
 
 interface Quiz {
   id: number;
@@ -137,7 +138,7 @@ const QuizSubmissions: React.FC = () => {
     try {
       const token = localStorage.getItem('tucan_token');
       
-      const response = await fetch(`http://localhost:5000/api/quizzes/${quizId}`, {
+      const response = await fetch(buildApiUrl(`/api/quizzes/${quizId}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -160,7 +161,7 @@ const QuizSubmissions: React.FC = () => {
       const token = localStorage.getItem('tucan_token');
       
       console.log(`Fetching submissions for quiz ${quizId}`);
-      const response = await fetch(`http://localhost:5000/api/quizzes/${quizId}/submissions`, {
+      const response = await fetch(buildApiUrl(`/api/quizzes/${quizId}/submissions`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -193,7 +194,7 @@ const QuizSubmissions: React.FC = () => {
       const token = localStorage.getItem('tucan_token');
       
       // Fetch detailed submission data with answers
-      const response = await fetch(`http://localhost:5000/api/quizzes/submissions/${submission.id}/details`, {
+      const response = await fetch(buildApiUrl(`/api/quizzes/submissions/${submission.id}/details`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -217,7 +218,7 @@ const QuizSubmissions: React.FC = () => {
       setIsGrading(true);
       const token = localStorage.getItem('tucan_token');
       
-      const response = await fetch(`http://localhost:5000/api/quizzes/answers/${answerId}/grade`, {
+      const response = await fetch(buildApiUrl(`/api/quizzes/answers/${answerId}/grade`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

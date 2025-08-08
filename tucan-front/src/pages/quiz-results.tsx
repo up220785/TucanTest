@@ -24,6 +24,7 @@ import {
   Assessment as AssessmentIcon
 } from '@mui/icons-material';
 import Layout from '../components/Layout';
+import { buildApiUrl } from '../config/api';
 
 interface Question {
   id: number;
@@ -91,7 +92,7 @@ const QuizResults: React.FC = () => {
           return;
         }
 
-        const response = await fetch(`http://localhost:5000/api/quiz/${quizId}/results`, {
+        const response = await fetch(buildApiUrl(`/api/quiz/${quizId}/results`), {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',

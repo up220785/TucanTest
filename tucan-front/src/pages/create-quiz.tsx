@@ -42,6 +42,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../components/Layout';
+import { buildApiUrl } from '../config/api';
 
 interface Course {
   id: number;
@@ -115,7 +116,7 @@ const CreateQuiz: React.FC = () => {
     try {
       const token = localStorage.getItem('tucan_token');
       
-      const response = await fetch(`http://localhost:5000/api/courses/${courseId}`, {
+      const response = await fetch(buildApiUrl(`/api/courses/${courseId}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -282,7 +283,7 @@ const CreateQuiz: React.FC = () => {
         }))
       };
 
-      const response = await fetch(`http://localhost:5000/api/quizzes/courses/${courseId}/quizzes`, {
+      const response = await fetch(buildApiUrl(`/api/quizzes/courses/${courseId}/quizzes`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

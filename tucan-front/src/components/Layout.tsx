@@ -17,27 +17,22 @@ const Layout: React.FC<LayoutProps> = ({
 }) => {
   return (
     <Box sx={{ 
-      minHeight: '100vh', 
-      height: '100vh',
-      overflowY: 'auto',
-      overflowX: 'hidden',
+      minHeight: '100vh',
       backgroundColor,
-      pb: 4,
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
+      display: 'flex',
+      flexDirection: 'column',
+      width: '100%',
+      // Mobile-friendly scrolling setup
+      WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
       '&::-webkit-scrollbar': {
-        width: '8px',
+        width: { xs: '2px', sm: '6px' }, // Very thin scrollbar on mobile
       },
       '&::-webkit-scrollbar-track': {
-        backgroundColor: '#f1f1f1',
-        borderRadius: '4px',
+        backgroundColor: 'transparent',
       },
       '&::-webkit-scrollbar-thumb': {
         backgroundColor: '#c1c1c1',
-        borderRadius: '4px',
+        borderRadius: '3px',
         '&:hover': {
           backgroundColor: '#a8a8a8',
         },
@@ -45,9 +40,22 @@ const Layout: React.FC<LayoutProps> = ({
     }}>
       <Header title={title} showSearchBar={showSearchBar} />
       <Box sx={{ 
-        pt: 2,
-        height: 'calc(100vh - 64px)', // Subtract header height
-        overflow: 'auto'
+        flex: 1,
+        pt: { xs: 1, sm: 2 },
+        px: { xs: 1, sm: 2 },
+        pb: { xs: 2, sm: 4 },
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        // Mobile scrolling optimizations
+        WebkitOverflowScrolling: 'touch',
+        scrollBehavior: 'smooth',
+        // Ensure proper touch scrolling
+        touchAction: 'pan-y',
+        // Height calculation for mobile viewport
+        minHeight: { 
+          xs: 'calc(100vh - 56px)', // Mobile header height
+          sm: 'calc(100vh - 64px)'  // Desktop header height
+        },
       }}>
         {children}
       </Box>

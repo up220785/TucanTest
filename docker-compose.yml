@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # Flask Backend
+  backend:
+    build:
+      context: ./flask-server
+      dockerfile: Dockerfile
+    container_name: tucan_backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./flask-server/data:/app/data
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=server.py
+    networks:
+      - tucan_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/auth/config-check"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # React Frontend (Vite)
+  frontend:
+    build:
+      context: ./tucan-front
+      dockerfile: Dockerfile
+    container_name: tucan_frontend
+    ports:
+      - "4173:4173"
+    depends_on:
+      - backend
+    networks:
+      - tucan_network
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=http://localhost:5000
+
+  # Nginx reverse proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: tucan_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - tucan_network
+    restart: unless-stopped
+
+networks:
+  tucan_network:
+    driver: bridge
+
+volumes:
+  db_data:
+    driver: local

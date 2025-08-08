@@ -31,6 +31,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+import { buildApiUrl } from '../config/api';
 
 interface Notification {
   id: number;
@@ -82,7 +83,7 @@ const NotificationsPage: React.FC = () => {
 
       const user = JSON.parse(userData);
       
-      const response = await fetch(`http://localhost:5000/api/notifications/users/${user.id}/notifications`, {
+      const response = await fetch(buildApiUrl(`/api/notifications/users/${user.id}/notifications`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -114,7 +115,7 @@ const NotificationsPage: React.FC = () => {
     try {
       const token = localStorage.getItem('tucan_token');
       
-      const response = await fetch(`http://localhost:5000/api/notifications/${notificationId}/read`, {
+      const response = await fetch(buildApiUrl(`/api/notifications/${notificationId}/read`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -152,7 +153,7 @@ const NotificationsPage: React.FC = () => {
       try {
         const token = localStorage.getItem('tucan_token');
         
-        const response = await fetch(`http://localhost:5000/api/invitations/${notification.related_id}`, {
+        const response = await fetch(buildApiUrl(`/api/invitations/${notification.related_id}`), {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -163,7 +164,7 @@ const NotificationsPage: React.FC = () => {
           const invitationData = await response.json();
           
           // Get course details
-          const courseResponse = await fetch(`http://localhost:5000/api/courses/${invitationData.course_id}`, {
+          const courseResponse = await fetch(buildApiUrl(`/api/courses/${invitationData.course_id}`), {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json',
@@ -198,7 +199,7 @@ const NotificationsPage: React.FC = () => {
       const token = localStorage.getItem('tucan_token');
       const endpoint = accept ? 'accept' : 'reject';
       
-      const response = await fetch(`http://localhost:5000/api/invitations/${selectedInvitation.id}/${endpoint}`, {
+      const response = await fetch(buildApiUrl(`/api/invitations/${selectedInvitation.id}/${endpoint}`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

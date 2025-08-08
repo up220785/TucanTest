@@ -32,6 +32,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../components/Layout';
+import { buildApiUrl } from '../config/api';
 
 interface Course {
   id: number;
@@ -81,7 +82,7 @@ const CourseQuizzes: React.FC = () => {
     try {
       const token = localStorage.getItem('tucan_token');
       
-      const response = await fetch(`http://localhost:5000/api/courses/${courseId}`, {
+      const response = await fetch(buildApiUrl(`/api/courses/${courseId}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -107,7 +108,7 @@ const CourseQuizzes: React.FC = () => {
       // For students, show only published quizzes
       const publishedOnlyParam = userRole === 'student' ? 'true' : 'false';
       
-      const response = await fetch(`http://localhost:5000/api/quizzes/courses/${courseId}/quizzes?published_only=${publishedOnlyParam}`, {
+      const response = await fetch(buildApiUrl(`/api/quizzes/courses/${courseId}/quizzes?published_only=${publishedOnlyParam}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -169,7 +170,7 @@ const CourseQuizzes: React.FC = () => {
     try {
       const token = localStorage.getItem('tucan_token');
       
-      const response = await fetch(`http://localhost:5000/api/quizzes/${quizId}`, {
+      const response = await fetch(buildApiUrl(`/api/quizzes/${quizId}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

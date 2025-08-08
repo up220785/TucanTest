@@ -32,6 +32,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../components/Layout';
+import { buildApiUrl } from '../config/api';
 
 interface Course {
   id: number;
@@ -97,13 +98,13 @@ const CourseStudents: React.FC = () => {
 
       // Fetch course details and students in parallel
       const [courseResponse, studentsResponse] = await Promise.all([
-        fetch(`http://localhost:5000/api/courses/${courseId}`, {
+        fetch(buildApiUrl(`/api/courses/${courseId}`), {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         }),
-        fetch(`http://localhost:5000/api/courses/${courseId}/students`, {
+        fetch(buildApiUrl(`/api/courses/${courseId}/students`), {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',

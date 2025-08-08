@@ -28,6 +28,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+import { buildApiUrl } from '../config/api';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -93,7 +94,7 @@ const TeacherStatistics: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/teachers/${user.id}/statistics`, {
+      const response = await fetch(buildApiUrl(`/api/teachers/${user.id}/statistics`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

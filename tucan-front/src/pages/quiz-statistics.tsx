@@ -34,6 +34,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { buildApiUrl } from '../config/api';
 
 interface QuizStatistics {
   quiz_id: number;
@@ -122,7 +123,7 @@ const QuizStatistics: React.FC = () => {
         return;
       }
 
-      const url = `http://localhost:5000/api/quizzes/${quizId}/statistics`;
+      const url = buildApiUrl(`/api/quizzes/${quizId}/statistics`);
       console.log('Making request to:', url);
 
       const response = await fetch(url, {
@@ -169,7 +170,7 @@ const QuizStatistics: React.FC = () => {
       
       if (!token) return;
 
-      const response = await fetch(`http://localhost:5000/api/quizzes/${quizId}`, {
+      const response = await fetch(buildApiUrl(`/api/quizzes/${quizId}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
